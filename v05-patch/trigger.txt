@@ -1,0 +1,1 @@
+Guerra Sem Fim v0.5: executar importação verificada e remover este arquivo na publicação final.
