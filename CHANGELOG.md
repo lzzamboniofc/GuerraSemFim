@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.0] — Comércio Avançado e Economia Viva · 14/10/2026
+
+- Trocas locais com atalhos maiores e botão de máximo calculado pelo estoque e espaço do depósito.
+- Entradas de formulários preservadas durante atualizações e troca de telas.
+- Mercadores por tribo, carga mista, viagem de ida e volta e rotas automáticas offline por aldeia.
+- Celebrações da Prefeitura concedem cultura adicional; fome pode provocar perdas militares.
+- Novos testes de integração e migração compatível com saves e caravanas anteriores.
+
+
 ## [1.0.1] — Recrutamento Máximo · 14/10/2026
 
 - Botão **Máx.** para cada tipo de tropa liberada no Exército/Quartel; calcula a quantidade pagável com os recursos atuais da aldeia e preenche o campo para confirmação.

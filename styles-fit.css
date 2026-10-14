@@ -133,3 +133,24 @@ html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
 .troop-cost-note{margin:-6px 0 10px 60px;overflow-wrap:anywhere;line-height:1.5}
 @media(min-width:921px){.troop-row{grid-template-columns:minmax(0,1.8fr) 76px minmax(140px,1fr) 105px;gap:9px}}
 @media(max-width:580px){.troop-row{grid-template-columns:minmax(0,1fr) minmax(150px,1.15fr)!important;gap:8px}.troop-row>.btn{min-width:0}.troop-cost-note{margin:0 0 12px 0}.troop-quantity .troop-max{min-width:45px;padding:7px}}
+
+/* v1.1 — comércio em painéis estáveis: controles não perdem valores em ações. */
+.market-panel .form-grid{margin-bottom:12px}
+.market-presets{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 14px}
+.market-presets .btn{min-width:63px;flex:0 0 auto}
+.market-preview{padding:11px 13px;background:#eef0dd;border:1px solid #c9d3b4;color:#315334;border-radius:9px;font:13px/1.45 Arial,sans-serif;overflow-wrap:anywhere}
+.market-preview.trade-preview-invalid{color:#8c4a39;border-color:#e0b6a1;background:#f8ece4}
+.merchant-cargo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:13px 0}
+.merchant-cargo .form-field{min-width:0}
+.merchant-cargo .form-input{width:100%;min-width:0;box-sizing:border-box}
+.route-list{display:grid;gap:10px;margin-top:15px}
+.route-item{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f8f3e5;padding:12px;border:1px solid #d7c6a5;border-radius:9px}
+.route-item>div:first-child{min-width:0;flex:1}
+.route-item strong,.route-item small{display:block;overflow-wrap:anywhere}
+.route-item small{font:11px/1.6 Arial,sans-serif;color:#786b55}
+.route-item .btn-row{flex:0 0 auto;margin:0}
+.legacy-caravan{margin-top:18px;border-top:1px solid #d5c4a4;padding-top:12px}
+.legacy-caravan summary{cursor:pointer;color:#566a48;font-weight:700}
+.legacy-caravan .form-grid{margin-top:10px}
+@media(max-width:780px){.merchant-cargo{grid-template-columns:repeat(2,minmax(0,1fr))}.route-item{flex-wrap:wrap}.route-item .btn-row{width:100%}}
+@media(max-width:480px){.market-presets .btn{min-width:0;flex:1 1 27%;padding:8px 4px;font-size:11px}.route-item .btn-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.merchant-cargo{gap:8px}}

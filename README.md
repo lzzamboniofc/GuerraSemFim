@@ -1,8 +1,18 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 1.0.1, conquista territorial e recrutamento máximo: estratégia medieval totalmente offline.**
+**Impérios & Conquistas — versão 1.1, economia e comércio avançados: estratégia medieval totalmente offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
+
+## 🚚 v1.1 — Comércio Avançado e Economia Viva
+
+- **Trocas locais maiores:** botões para 100, 500, 1.000, 5.000, 10.000, 50.000 e **Máximo possível**, com prévia de quanto será recebido e respeito à capacidade disponível nos depósitos.
+- **Formulários preservados:** Mercado, recrutamento, Mapa e comandos militares mantêm os valores preenchidos ao atualizar painéis ou ao retornar à tela, por aldeia durante a sessão.
+- **Mercadores por tribo:** Romanos transportam 500 recursos, Gauleses 750 e Teutões 1.000 por mercador. Mercado nível 1 libera 5 mercadores; mais 2 por nível até o máximo de 80.
+- **Carga mista e retorno:** mercadores podem entregar os quatro recursos simultaneamente e ficam ocupados até voltar à origem. O modo de caravana simples continua disponível.
+- **Rotas automáticas:** configure até 5 rotas por aldeia, com envios periódicos offline, opção de pausar e excluir. Respeitam recursos disponíveis, capacidade dos depósitos e mercadores livres.
+- **Cultura e fome:** celebrações da Prefeitura concedem 150 pontos de cultura; quando acaba o cereal e a produção é negativa, soldados podem morrer de fome.
+- **Salvamentos:** mantida a compatibilidade de saves anteriores, pesquisas, conquista de aldeias, filas extras e os modos visuais Original e Em grade.
 
 ## 🛡️ v1.0.1 — Treinar o máximo de tropas
 
