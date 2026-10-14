@@ -1,0 +1,27 @@
+/* Teste sem dependências: node tests/smoke.test.js */
+const fs=require('fs'), vm=require('vm'),assert=require('assert'),path=require('path');
+const root=path.resolve(__dirname,'..');
+const store=new Map();const context={window:{},console,Date,Math,JSON,localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)}};
+vm.createContext(context);
+for(const name of ['data','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',name+'.js'),'utf8'),context,{filename:name+'.js'});
+const E=context.window.GSF;
+let s=E.newGame({tribe:'romans',player:'Teste',speed:12});let v=E.active(s);
+assert.strictEqual(v.fields.length,18);assert.strictEqual(v.fields.filter(f=>f.type==='crop').length,6);
+assert.strictEqual(E.production(s,v).wood,240);assert.strictEqual(E.capacity(v,'wood'),1200);
+let result=E.startBuild(s,v,'field',0);assert(result.ok,'Campo deve iniciar upgrade');
+result=E.startBuild(s,v,'building','warehouse',1);assert(result.ok,'Romanos devem ter obra civil e campo simultâneos');
+result=E.startBuild(s,v,'field',1);assert(!result.ok,'Não pode haver duas obras de campo simultâneas');
+for(const q of v.buildQueue)q.endsAt=Date.now()-1;
+s.lastTick=Date.now()-5000;E.advance(s,Date.now());
+assert.strictEqual(v.fields[0].level,2);assert.strictEqual(v.buildings.warehouse,2);
+assert(E.questList(s).some(q=>q.id==='welcome'&&q.done));
+assert(E.claim(s,'welcome').ok);assert(!E.claim(s,'welcome').ok);
+assert(E.tileAt(s,2,0).kind==='enemy');
+assert(E.send(s,v,2,0,{legionary:10},'raid').ok);
+let m=s.movements[0];m.startedAt=Date.now()-20000;m.endsAt=Date.now()-10000;s.lastTick=Date.now()-15000;
+E.advance(s,Date.now());assert(s.reports.some(r=>r.title.includes('Vitória')||r.title.includes('Derrota')),'Batalha deve gerar relatório');
+assert(E.startAdventure(s).ok);s.hero.adventure.endsAt=Date.now()-1;s.lastTick=Date.now()-3000;E.advance(s,Date.now());assert.strictEqual(s.hero.adventures,1);
+const exported=E.exportSave(s);assert(E.importSave(exported).ok);assert(E.load());
+const originalSpeed=s.speed;s.speed=30;assert(E.production(s,v).wood>E.production({...s,speed:originalSpeed},v).wood);
+let g=E.newGame({tribe:'gauls'}),gv=E.active(g);assert(E.startBuild(g,gv,'field',0).ok);assert(!E.startBuild(g,gv,'building','warehouse',1).ok);
+console.log('✓ Novo mundo, produção, custo, Romanos, filas, batalha, herói, missões, salvamento, tribos e progressão');
