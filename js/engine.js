@@ -9,18 +9,55 @@ const sum = arr => arr.reduce((a,b)=>a+b,0);
 const random = (x,y,seed=17) => { let k = Math.imul(x+1009,73856093)^Math.imul(y+997,19349663)^Math.imul(seed,83492791); k = Math.imul(k ^ k >>> 16, 2246822507); return ((k^k>>>13)>>>0)/4294967295; };
 const id = st => 'e'+(st.nextId++);
 const round = n => Math.floor(n);
-function fieldMix() {return ['wood','wood','wood','wood','clay','clay','clay','clay','iron','iron','iron','iron','crop','crop','crop','crop','crop','crop'];}
-function village(st,name,x,y,starter=false) {
- const fields = fieldMix().map((type,i)=>({type,level:starter?1:0,id:i}));
+function fieldMix(profile='balanced') {
+ if(profile==='crop15')return ['wood','clay','iron',...Array(15).fill('crop')];
+ if(profile==='crop9')return [...Array(3).fill('wood'),...Array(3).fill('clay'),...Array(3).fill('iron'),...Array(9).fill('crop')];
+ return [...Array(4).fill('wood'),...Array(4).fill('clay'),...Array(4).fill('iron'),...Array(6).fill('crop')];
+}
+function tileProfile(t){if(!t||t.kind!=='empty')return 'balanced';const p=random(t.x+831,t.y-471,97);return p<.065?'crop15':p<.18?'crop9':'balanced';}
+function oasisResource(t){return t.oasisType||D.RES[Math.floor(random(t.x+93,t.y-61,31)*4)%4];}
+function oasisCount(st,v){return st.world.tiles.filter(t=>t.kind==='oasis'&&t.ownerVillageId===v.id).length;}
+function oasisLimit(v){const lv=buildLevel(v,'heroMansion');return lv>=20?3:lv>=10?2:lv>=1?1:0;}
+function captureOasis(st,v,x,y){
+ const t=st.world.tiles.find(t=>t.x===x&&t.y===y&&t.kind==='oasis');
+ if(!t)return {ok:false,error:'Selecione um oásis no mapa.'};
+ if(t.ownerVillageId)return {ok:false,error:'Este oásis já está ocupado.'};
+ if(Math.hypot(x-v.x,y-v.y)>3)return {ok:false,error:'O oásis precisa estar a no máximo três campos da aldeia.'};
+ if(!oasisLimit(v))return {ok:false,error:'Construa a Mansão do Herói para ocupar oásis.'};
+ if(oasisCount(st,v)>=oasisLimit(v))return {ok:false,error:'Limite de oásis desta aldeia atingido. Evolua a Mansão do Herói.'};
+ if(st.hero.hp<25)return {ok:false,error:'O herói precisa de pelo menos 25 de vida.'};
+ const warriors=troopDefs(st).filter(u=>!u.scout&&!u.siege).reduce((sum,u)=>sum+(v.troops[u.id]||0),0);
+ if(warriors<20)return {ok:false,error:'Deixe 20 soldados de infantaria ou cavalaria na aldeia.'};
+ const price=[250,250,250,250];if(!canPay(v,price))return {ok:false,error:'A ocupação exige 250 unidades de cada recurso.'};
+ pay(v,price);st.hero.hp-=15;t.ownerVillageId=v.id;t.oasisType=oasisResource(t);
+ log(st,`Oásis de ${D.RESOURCE[t.oasisType].name} conquistado por ${v.name} (${x}|${y}).`,'build');
+ report(st,'Oásis conquistado',`${v.name} conquistou um oásis em (${x}|${y}), obtendo +25% de produção de ${D.RESOURCE[t.oasisType].name.toLowerCase()}.`,'victory');
+ save(st);return {ok:true,resource:t.oasisType};
+}
+function releaseOasis(st,v,x,y){const t=st.world.tiles.find(t=>t.x===x&&t.y===y&&t.kind==='oasis'&&t.ownerVillageId===v.id);if(!t)return {ok:false,error:'Oásis não pertence à aldeia atual.'};delete t.ownerVillageId;log(st,`Oásis (${x}|${y}) foi abandonado.`,'build');save(st);return {ok:true};}
+function heroTargets(st){
+ const saved=st.hero.productionTargets;
+ if(Array.isArray(saved)&&saved.length&&saved.every(k=>D.RES.includes(k))&&new Set(saved).size===saved.length)return saved;
+ const focus=st.hero.productionFocus;return focus==='all'?[...D.RES]:D.RES.includes(focus)?[focus]:['wood'];
+}
+function heroFocus(st){const selected=heroTargets(st);return selected.length===4?'all':selected.length===1?selected[0]:'custom';}
+function heroBonus(st,k,v){if(v.id!==st.villages[0].id||!st.hero.resources)return 0;const targets=heroTargets(st);return targets.includes(k)?st.hero.resources*st.speed*8/targets.length:0;}
+function setHeroTargets(st,targets){
+ if(!Array.isArray(targets)||targets.length<1||targets.length>4||new Set(targets).size!==targets.length||!targets.every(k=>D.RES.includes(k)))return {ok:false,error:'Selecione de um a quatro recursos distintos.'};
+ st.hero.productionTargets=[...D.RES].filter(k=>targets.includes(k));st.hero.productionFocus=heroFocus(st);save(st);return {ok:true,targets:st.hero.productionTargets};
+}
+function setHeroFocus(st,focus){if(![...D.RES,'all'].includes(focus))return {ok:false,error:'Escolha um recurso válido ou todos.'};return setHeroTargets(st,focus==='all'?[...D.RES]:[focus]);}
+function village(st,name,x,y,starter=false,profile='balanced') {
+ const fields = fieldMix(profile).map((type,i)=>({type,level:starter?1:0,id:i}));
  const buildings = {main:starter?3:1,warehouse:1,granary:1,rally:1};
  const troops = {};
  if(starter) troops[D.TROOPS[st.tribe][0].id]=12;
- return {id:id(st),name,x,y,fields,buildings,resources:starter?{wood:1000,clay:1000,iron:1000,crop:1000}:{wood:650,clay:650,iron:650,crop:650},buildQueue:[],trainingQueue:[],troops,buildingSlots:{0:'main',1:'warehouse',2:'granary',3:'rally'},militaryTech:{},settlers:0,foundedAt:now()};
+ return {id:id(st),name,x,y,fieldProfile:profile,planQueue:[],fields,buildings,resources:starter?{wood:1000,clay:1000,iron:1000,crop:1000}:{wood:650,clay:650,iron:650,crop:650},buildQueue:[],trainingQueue:[],troops,buildingSlots:{0:'main',1:'warehouse',2:'granary',3:'rally'},militaryTech:{},settlers:0,foundedAt:now()};
 }
 function newGame(options={}) {
  const tribe = D.TRIBES[options.tribe]?options.tribe:'romans';
  const st={version:1,nextId:1,player:(options.player||'Comandante').trim().slice(0,25)||'Comandante',tribe,speed:clamp(Number(options.speed)||12,1,100),
-  villages:[],activeVillageId:null,preferences:{enemyAttacks:options.enemyAttacks!==false,extraBuildSlots:1},hero:{name:'Guardião',level:1,xp:0,hp:100,attack:4,resources:0,points:0,adventure:null,adventures:0,inventory:[],equipped:null},
+  villages:[],activeVillageId:null,preferences:{enemyAttacks:options.enemyAttacks!==false,extraBuildSlots:1},hero:{name:'Guardião',level:1,xp:0,hp:100,attack:4,resources:0,points:0,adventure:null,adventures:0,inventory:[],equipped:null,productionFocus:'wood',productionTargets:['wood']},
   world:{seed:37,tiles:[]},movements:[],reports:[],events:[],questsClaimed:[],tutorialDismissed:false,createdAt:now(),lastTick:now()};
  const home=village(st,(options.village||'Nova Esperança').trim().slice(0,28)||'Nova Esperança',0,0,true);
  st.villages=[home];st.activeVillageId=home.id;
@@ -53,7 +90,9 @@ function upkeep(st,v){return troopDefs(st).reduce((a,t)=>a+(v.troops[t.id]||0)*t
 function production(st,v){const base={wood:0,clay:0,iron:0,crop:0};v.fields.forEach(f=>{base[f.type]+=f.level?Math.round(5*Math.pow(1.68,f.level-1)):0;});
  const out={};const bonus={wood:'sawmill',clay:'brickyard',iron:'ironworks',crop:'mill'};
  D.RES.forEach(k=>{const item=HERO_ARTIFACTS[st.hero.equipped];const gearBonus=st.villages[0].id===v.id&&(item?.type===k||item?.type==='all')?item.bonus:0;out[k]=Math.floor(base[k]*(1+0.05*buildLevel(v,bonus[k])+gearBonus)*st.speed);});
- if(st.villages[0].id===v.id)out.wood+=st.hero.resources*st.speed*2;
+ const oases=st.world.tiles.filter(t=>t.kind==='oasis'&&t.ownerVillageId===v.id);
+ for(const t of oases){const key=oasisResource(t);out[key]+=Math.floor(base[key]*.25*st.speed);}
+ for(const key of D.RES)out[key]+=heroBonus(st,key,v);
  out.crop-=population(v)+upkeep(st,v);return out;
 }
 function canPay(v,price,count=1){return D.RES.every((k,i)=>v.resources[k]+0.000001>=price[i]*count);}
@@ -95,6 +134,32 @@ function startBuild(st,v,type,ref,slot){const c=canBuild(st,v,type,ref,slot);if(
 }
 function cancelBuild(st,v,idValue){const i=v.buildQueue.findIndex(q=>q.id===idValue);if(i<0)return {ok:false,error:'Obra não encontrada.'};const q=v.buildQueue[i];const key=q.type==='field'?v.fields[q.ref].type:q.ref;const refund=cost(q.type,key,q.level);D.RES.forEach((k,j)=>v.resources[k]=Math.min(capacity(v,k),v.resources[k]+Math.floor(refund[j]*0.75)));
  if(q.type==='building'&&buildLevel(v,q.ref)===0)delete v.buildingSlots[q.slot];v.buildQueue.splice(i,1);log(st,'Construção cancelada. 75% dos recursos foram devolvidos.','build');save(st);return {ok:true};}
+const MAX_BUILD_PLANS=40;
+function plans(v){return v.planQueue||(v.planQueue=[]);}
+function planBuild(st,v,type,ref,slot){
+ if(!['field','building'].includes(type))return {ok:false,error:'Tipo de construção inválido.'};
+ const queue=plans(v);if(queue.length>=MAX_BUILD_PLANS)return {ok:false,error:'Limite de 40 obras planejadas.'};
+ if(type==='field'&&(!Number.isSafeInteger(ref)||ref<0||ref>=18||v.fields[ref].level>=20))return {ok:false,error:'Campo indisponível.'};
+ if(type==='building'&&(!D.BUILDINGS[ref]||!Number.isSafeInteger(slot)||slot<0||slot>=20))return {ok:false,error:'Edifício ou terreno inválido.'};
+ if(type==='building'&&(v.buildingSlots[slot]&&v.buildingSlots[slot]!==ref||!v.buildingSlots[slot]&&Object.values(v.buildingSlots).includes(ref)))return {ok:false,error:'Este terreno ou edifício não está disponível.'};
+ if(type==='building'&&buildLevel(v,ref)>=D.BUILDINGS[ref].max)return {ok:false,error:'Edifício no nível máximo.'};
+ if(queue.some(q=>q.type===type&&(type==='field'?q.ref===ref:q.ref===ref||q.slot===slot))||v.buildQueue.some(q=>q.type===type&&q.ref===ref))return {ok:false,error:'Esta obra já está na fila ou no planejamento.'};
+ queue.push({id:id(st),type,ref,slot:type==='building'?slot:null});save(st);return {ok:true};
+}
+function removePlan(st,v,planId){const q=plans(v),i=q.findIndex(x=>x.id===planId);if(i<0)return {ok:false,error:'Obra planejada não encontrada.'};q.splice(i,1);save(st);return {ok:true};}
+function movePlan(st,v,planId,direction){const q=plans(v),i=q.findIndex(x=>x.id===planId),j=i+(direction==='up'?-1:direction==='down'?1:0);if(i<0||j<0||j>=q.length||i===j)return {ok:false,error:'Não é possível mover esta obra.'};[q[i],q[j]]=[q[j],q[i]];save(st);return {ok:true};}
+function runPlanned(st){
+ let started=0;
+ for(const v of st.villages){
+  const q=plans(v);
+  for(let i=0;i<q.length&&v.buildQueue.length<buildQueueCapacity(st);){
+   const plan=q[i],res=canBuild(st,v,plan.type,plan.ref,plan.slot);
+   if(res.ok){q.splice(i,1);const r=startBuild(st,v,plan.type,plan.ref,plan.slot);if(r.ok){started++;continue;}q.splice(i,0,plan);}
+   i++;
+  }
+ }
+ return started;
+}
 function canTrain(st,v,unitId,qty){const unit=troopDefs(st).find(t=>t.id===unitId);if(!unit)return {ok:false,error:'Unidade inválida.'};if(buildLevel(v,unit.building)<1)return {ok:false,error:`Requer ${D.BUILDINGS[unit.building].name}.`};
  qty=Math.floor(Number(qty));if(!Number.isFinite(qty)||qty<1||qty>500)return {ok:false,error:'Escolha entre 1 e 500 unidades.'};
  if(!canPay(v,unit.cost,qty))return {ok:false,error:'Recursos insuficientes.'};
@@ -247,7 +312,7 @@ function settle(st,v,x,y,name){const tile=tileAt(st,x,y);if(!tile||tile.kind!=='
  const culture=window.GSF_EXPANSION?.culture(st)||0,needed=window.GSF_EXPANSION?.neededCulture(st)||0;
  if(culture<needed)return {ok:false,error:`Cultura insuficiente: ${culture}/${needed} pontos.`};
  const price=[1600,1600,1600,1600];if(!canPay(v,price))return {ok:false,error:'Colonização custa 1.600 de cada recurso.'};
- pay(v,price);v.settlers-=3;const next=village(st,(name||'Nova Colônia').trim().slice(0,28)||'Nova Colônia',x,y);st.villages.push(next);st.activeVillageId=next.id;
+ pay(v,price);v.settlers-=3;const next=village(st,(name||'Nova Colônia').trim().slice(0,28)||'Nova Colônia',x,y,false,tileProfile(tile));st.villages.push(next);st.activeVillageId=next.id;
  log(st,`Uma nova aldeia foi fundada em (${x}|${y})!`,'build');report(st,'Nova aldeia fundada',`${next.name} agora faz parte do seu império.`,'victory');save(st);return {ok:true};}
 function questList(st){const v=st.villages[0];const levels=v.fields.filter(f=>f.level>=2).length;const available=[
  {id:'welcome',title:'Primeiros passos',desc:'Inicie seu império.',done:true,reward:120},
@@ -320,7 +385,7 @@ function advance(st,time=now()){
  }
  // Em um save com filas anormalmente grandes, conclui o avanço sem travar o navegador.
  if(cursor<time){const hours=(time-cursor)/3600000;st.villages.forEach(v=>{const rates=production(st,v);D.RES.forEach(k=>v.resources[k]=clamp(v.resources[k]+rates[k]*hours,0,capacity(v,k)));});}
- st.lastTick=time;return st;
+ st.lastTick=time;runPlanned(st);return st;
 }
 const BACKUP_KEY=KEY+'-backup';
 const validNumber=(x,min=0,max=1e15)=>typeof x==='number'&&Number.isFinite(x)&&x>=min&&x<=max;
@@ -337,6 +402,8 @@ function validateState(st){
   !validArray(st.questsClaimed,20)||!plain(st.hero))return false;
  if(st.preferences!==undefined&&(!plain(st.preferences)||typeof st.preferences.enemyAttacks!=='boolean'||(st.preferences.extraBuildSlots!==undefined&&(!Number.isSafeInteger(st.preferences.extraBuildSlots)||st.preferences.extraBuildSlots<0||st.preferences.extraBuildSlots>MAX_EXTRA_BUILD_SLOTS))))return false;
  if(window.GSF_EXPANSION&&!window.GSF_EXPANSION.validate(st.expansion))return false;
+ if(st.hero.productionFocus!==undefined&&!['wood','clay','iron','crop','all','custom'].includes(st.hero.productionFocus))return false;
+ if(st.hero.productionTargets!==undefined&&(!validArray(st.hero.productionTargets,4)||!st.hero.productionTargets.length||new Set(st.hero.productionTargets).size!==st.hero.productionTargets.length||!st.hero.productionTargets.every(k=>D.RES.includes(k))))return false;
  if(st.hero.inventory!==undefined&&(!validArray(st.hero.inventory,3)||new Set(st.hero.inventory).size!==st.hero.inventory.length||!st.hero.inventory.every(id=>!!HERO_ARTIFACTS[id])))return false;
  if(st.hero.equipped!==undefined&&st.hero.equipped!==null&&(!HERO_ARTIFACTS[st.hero.equipped]||!st.hero.inventory?.includes(st.hero.equipped)))return false;
  if(!validNumber(st.hero.level,1,1000)||!validNumber(st.hero.hp,0,100)||
@@ -349,6 +416,8 @@ function validateState(st){
   if(!plain(v)||typeof v.id!=='string'||typeof v.name!=='string'||v.name.length>100||
    !Number.isSafeInteger(v.x)||!Number.isSafeInteger(v.y)||Math.abs(v.x)>8||Math.abs(v.y)>8||
    ids.has(v.id)||positions.has(v.x+':'+v.y)||!validRes(v.resources)||
+   (v.fieldProfile!==undefined&&!['balanced','crop9','crop15'].includes(v.fieldProfile))||
+   (v.planQueue!==undefined&&(!validArray(v.planQueue,MAX_BUILD_PLANS)||!v.planQueue.every(q=>plain(q)&&typeof q.id==='string'&&['field','building'].includes(q.type)&&((q.type==='field'&&Number.isSafeInteger(q.ref)&&q.ref>=0&&q.ref<18)||(q.type==='building'&&!!D.BUILDINGS[q.ref]&&Number.isSafeInteger(q.slot)&&q.slot>=0&&q.slot<20)))))||
    (v.settlers!==undefined&&(!Number.isSafeInteger(v.settlers)||v.settlers<0||v.settlers>3))||
    !plain(v.buildings)||!plain(v.buildingSlots)||!validArmy(v.troops,st.tribe)||
    (v.militaryTech!==undefined&&(!plain(v.militaryTech)||!Object.entries(v.militaryTech).every(([k,l])=>D.TROOPS[st.tribe].some(u=>u.id===k)&&Number.isSafeInteger(l)&&l>=0&&l<=10)))||
@@ -367,7 +436,9 @@ function validateState(st){
  if(!st.world.tiles.every(t=>plain(t)&&typeof t.id==='string'&&typeof t.name==='string'&&
   Number.isSafeInteger(t.x)&&Number.isSafeInteger(t.y)&&Math.abs(t.x)<=8&&Math.abs(t.y)<=8&&
   ['empty','enemy','oasis'].includes(t.kind)&&validNumber(t.power,0,1e9)&&
-  (t.resources===null||validRes(t.resources))))return false;
+  (t.resources===null||validRes(t.resources))&&
+  (t.oasisType===undefined||t.kind==='oasis'&&D.RES.includes(t.oasisType))&&
+  (t.ownerVillageId===undefined||t.kind==='oasis'&&ids.has(t.ownerVillageId))))return false;
  if(!st.movements.every(m=>plain(m)&&ids.has(m.villageId)&&
   ['going','returning'].includes(m.phase)&&validNumber(m.endsAt)&&validNumber(m.startedAt)&&
   validArmy(m.army,st.tribe)&&(!m.loot||validRes(m.loot))&&
@@ -414,5 +485,5 @@ function importSave(text){
  if(!save(st))return {ok:false,error:'Não foi possível salvar a partida neste navegador.'};
  return {ok:true,state:st};
 }
-window.GSF={KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
+window.GSF={fieldMix,tileProfile,oasisResource,oasisCount,oasisLimit,captureOasis,releaseOasis,heroFocus,heroTargets,heroBonus,setHeroFocus,setHeroTargets,plans,planBuild,removePlan,movePlan,runPlanned,KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
 })();

@@ -69,6 +69,15 @@
 - Eventos econômicos de mundo a cada oito turnos, com relatórios e histórico.
 - Nova tela de Expansão; novos testes e compatibilidade com as partidas das versões anteriores.
 
+## Entregue: v0.8 — Territórios e Gestão Imperial
+
+- Escolha personalizada de produção do herói (um, dois, três ou quatro recursos ao mesmo tempo).
+- Oásis conquistáveis e bônus de produção, limites por Mansão do Herói.
+- Vales cerealistas de 9 e 15 campos, sem alterar as aldeias já existentes.
+- Planejamento persistente de obras por aldeia, prioridades e execução automática limitada às filas configuráveis.
+- Painel Imperial com projeções e situação de todas as aldeias.
+- Novo mapa com terrenos legíveis, cenários originais e vinte desenhos de edifícios em SVG.
+
 ## Fase 4 — Herói, facções e profundidade estratégica
 
 - Herói equipado, inventário, recompensas variadas, missões especiais e atributos completos.

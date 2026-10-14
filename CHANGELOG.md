@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.8.0] — Territórios e Gestão Imperial · 14/10/2026
+
+- Herói com seleção livre de 1 a 4 recursos para distribuição do bônus de produção; escolha salva na campanha e refletida nos modais do topo.
+- Oásis conquistáveis pelo herói: raio máximo 3, custo, requisito da Mansão do Herói, limites por nível e bônus de produção de +25%.
+- Vales de 6, 9 e 15 campos de cereal, sinalizados no mapa e aplicados a novas aldeias.
+- Planejador persistente de até 40 obras por aldeia, com fila, prioridades, cancelamento e execução quando possível.
+- Novo Painel Imperial com reservas, produção agregada, comparativo entre aldeias e projeções limitadas pelo armazenamento.
+- Redesign do mapa-múndi, cenários de campos e aldeia e 20 ícones arquitetônicos originais SVG.
+- Testes de economia, saves, filas, oásis, colonização e interface; compatibilidade com saves de versões anteriores.
+
 ## [0.7.0] — Expansão dos Impérios · 14/10/2026
 
 - Uma **vaga extra de construção** por padrão, configurável de 0 a 8 vagas adicionais (por aldeia); Romanos preservam paralelismo básico, filas extras são flexíveis.

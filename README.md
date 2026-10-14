@@ -1,8 +1,18 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 0.6, Crônicas do Império: estratégia medieval offline para navegador.**
+**Impérios & Conquistas — versão 0.8, Territórios e Gestão Imperial: estratégia medieval totalmente offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
+
+## 🏞️ Novidades da v0.8 — Territórios e Gestão Imperial
+
+- **Herói com produção personalizada:** em **Herói → Especialização produtiva**, marque qualquer combinação entre madeira, barro, ferro e cereal. O total do bônus por ponto de habilidade é distribuído igualmente entre os recursos escolhidos. Apenas um recurso recebe o bônus total; todos os quatro recebem 25% cada. A produção adicional é aplicada à **aldeia inicial**, mantendo a regra dos artefatos.
+- **Conquista de oásis:** selecione um oásis no Mapa-múndi e use **Conquistar oásis**. Requer Mansão do Herói, 20 soldados disponíveis na aldeia, herói com pelo menos 25 de vida, 250 unidades de cada recurso e distância máxima de 3 campos. A conquista custa 15 de saúde do herói; o oásis rende **+25% na produção de seu recurso**. Mansão níveis 1/10/20 permitem até 1/2/3 oásis por aldeia. É possível abandonar oásis.
+- **Vales cerealistas:** vales livres possuem variantes de 6, 9 e 15 campos de cereal (marcadas 9c e 15c no mapa); a composição de campos é preservada ao colonizá-los. Aldeias antigas mantêm seu arranjo.
+- **Planejador de obras:** o modal de campo/edifício tem **Planejar obra**. Até 40 planos por aldeia, reordenáveis ou removíveis. Uma obra só consome recursos e ocupa uma vaga quando pode começar. Obra planejada bloqueada por requisitos/recursos espera até haver condições; o planejamento não ultrapassa as filas configuráveis nas Configurações. Durante longas ausências, o início dos novos planos acontece ao retornar ao jogo.
+- **Painel Imperial:** reservas, produção líquida, população militar, fila de construções, oásis e projeções de 1, 6 e 24 horas com limite de armazenamento por aldeia.
+- **Reforma visual:** 20 ilustrações originais de edifícios em SVG, novos cenários de aldeia e campos, mapa com terrenos destacados, cores territoriais, marcadores de 9c/15c e indicador de oásis conquistados.
+- **Saves v0.1–v0.7:** continuam compatíveis sem ação manual. Exporte um backup antes de trocar de versão.
 
 ## 🚀 Como jogar
 
@@ -46,7 +56,7 @@ Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não
 - **Pontos de ataque do herói** agora ampliam o poder ofensivo; recursos clicáveis no topo e modais de obras permanecem.
 - **Compatibilidade de saves:** arquivos v0.1–v0.5 continuam válidos e recebem a campanha automaticamente. Exporte o save antes de atualizar.
 
-## 🎮 O que funciona na versão 0.7
+## 🎮 O que funciona na versão 0.8
 
 | Sistema | Funcionalidade |
 |---|---|
@@ -56,15 +66,15 @@ Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não
 | Filas | Romanos: 2 filas básicas; demais tribos: 1; +1 fila extra por padrão, configurável de 0 a 8 extras; cancelamento com devolução de 75% |
 | Tropas | Infantaria, cavalaria, batedores e unidades de cerco por tribo, recrutamento e manutenção de cereal |
 | Guerra v0.4 | Espionagem, reforços entre aldeias próprias, Ferreiro por unidade, muralhas operacionais, aríetes, catapultas e simulador aproximado |
-| Mapa | Região 17×17 com visualização 11×11, aldeias, vales, oásis, acampamentos e reinos rivais |
+| Mapa | Região 17×17 com visualização 11×11, terrenos ilustrados, oásis conquistáveis, vales 9c/15c e reinos rivais |
 | Mundo Vivo | 3 facções NPC com recursos, desenvolvimento, recrutamento, expansão, ataques, saques e conquistas de território |
 | Combates | Ataques e saques simulados, deslocamento, baixas, capacidade de carga, saque e retorno das tropas |
-| Herói | Aventuras, experiência, atributos, três artefatos encontrados em aventuras e bônus de produção ao equipar |
+| Herói | Aventuras, experiência, três artefatos e escolha de 1 a 4 recursos para bônus produtivo |
 | Missões | Sete objetivos com recompensas em recursos |
 | Mercado | Troca local, caravanas entre aldeias e comércio com reinos NPC aliados ou sob trégua |
-| Colonização | Até cinco aldeias: Residência nível 10, 3 colonizadores, cultura suficiente, custo de fundação e vale livre |
+| Colonização | Até cinco aldeias; vales com 6, 9 ou 15 campos de cereal; Residência, cultura, três colonizadores e recursos |
 | Persistência | Autosave em `localStorage`, avanço de tempo quando a página é reaberta, importação/exportação JSON |
-| Interface | Produção detalhada ao clicar em recursos do topo, modais para construir/evoluir edifícios e campos, responsiva, sem assets externos |
+| Interface | Edifícios originais em SVG, modais de obras, barra de produção, painel imperial, planejador de obras e modo responsivo |
 | Diplomacia | Embaixada permite propor trégua de 12 turnos com reinos NPC mediante recursos |
 | Paz opcional | Ataques inimigos podem ser desativados por campanha nas Configurações; reinos NPC continuam evoluindo |
 
@@ -105,7 +115,6 @@ GuerraSemFim/
 │   ├── expansion.js          # Cultura, comércio NPC e eventos (v0.7)
 │   ├── campaign.js           # Campanha e diplomacia (v0.6)
 │   ├── war.js                # Cálculos militares compartilhados (v0.4)
-│   ├── ai.js                 # Economia e ações das facções NPC (v0.3)
 │   ├── engine.js             # Estado, economia, tempo, filas, batalhas, save
 │   └── app.js                # Interface, navegação e interações
 ├── docs/
@@ -146,6 +155,8 @@ node tests/expansion.test.js
 node tests/ui-v05.test.js
 node tests/ui-v06.test.js
 node tests/ui-v07.test.js
+node tests/territories-v08.test.js
+node tests/ui-v08.test.js
 node tests/ui.test.js
 ```
 
@@ -153,7 +164,7 @@ Os testes cobrem criação de mundo, tribos, produção, filas, construção, ex
 
 ## ⚠️ Limites conhecidos
 
-Esta versão mantém-se **independente e inteiramente offline**. Não inclui jogadores reais, servidores públicos, conquistas multiplayer, guerras entre alianças de jogadores ou uma reprodução integral de Travian. O comércio NPC usa ofertas simples; os colonizadores são preparados instantaneamente com custo de recursos (sem fila específica de treinamento), e os eventos do mundo usam uma sequência econômica local, não campanhas aleatórias complexas. Oásis ainda não são anexáveis e a IA utiliza regras heurísticas. Os salvamentos permanecem locais ao navegador/origem.
+Esta versão mantém-se **independente e inteiramente offline**. Não inclui jogadores reais, servidores públicos, conquistas multiplayer, guerras entre alianças de jogadores ou uma reprodução integral de Travian. O comércio NPC usa ofertas simples; os colonizadores são preparados instantaneamente com custo de recursos (sem fila específica de treinamento), e os eventos do mundo usam uma sequência econômica local, não campanhas aleatórias complexas. Oásis podem ser anexados em um raio de 3 campos; não há batalhas de animais nem disputa de oásis entre reinos. A IA utiliza regras heurísticas. Os salvamentos permanecem locais ao navegador/origem.
 
 Veja o [manual da Era das Guerras](docs/ERA_DAS_GUERRAS.md), o [inventário completo](docs/ANALISE_TRAVIAN.md), o [roteiro de expansão](docs/ROADMAP.md) e o [guia de publicação no GitHub](docs/PUBLICACAO_GITHUB.md).
 
