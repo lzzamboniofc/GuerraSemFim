@@ -1,0 +1,3 @@
+# GuerraSemFim
+
+Projeto offline.
