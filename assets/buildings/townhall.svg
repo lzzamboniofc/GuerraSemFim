@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 122" role="img" aria-label="Edifício medieval townhall"><defs><linearGradient id="fac" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#f5e1b7"/><stop offset=".55" stop-color="#e0c9a1"/><stop offset="1" stop-color="#866f5a"/></linearGradient><linearGradient id="roof" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#79715d"/><stop offset="1" stop-color="#4d4e42"/></linearGradient></defs><ellipse cx="72" cy="107" rx="53" ry="9" fill="#233c2a" opacity=".22"/><path d="M19 91L64 74L120 94L76 115Z" fill="#bca980" opacity=".55"/><path d="M31 44 L86 44 L99 51 L99 91 L77 105 L31 92 Z" fill="url(#fac)" stroke="#665747" stroke-width="1.4"/>
- <path d="M77 44L99 51V91L77 105Z" fill="#765c49" opacity=".55"/>
- <path d="M31 44 L61 32 L99 51 L77 62Z" fill="url(#roof)" stroke="#574b42" stroke-width="1.6"/>
- <path d="M61 32 L77 62 L99 51" fill="#3e3c30" opacity=".17"/>
- <path d="M31 44 L77 62" stroke="#f6dfad" stroke-width="2" opacity=".6"/>
- <path d="M47 92 L47 72 L61 76 L61 98" fill="#735840" stroke="#514536" stroke-width="1.2"/>
- <path d="M49 78L59 81" stroke="#d1ad70" stroke-width="1.1"/>
- <path d="M70 67 L78 70 L78 78 L70 75Z" fill="#394d54" stroke="#f0d6a0" stroke-width="2"/><path d="M92 78l4 1v7l-4-1z" fill="#f1cb76" opacity=".85"/><path d="M79 50L79 14L94 14L94 54" fill="url(#fac)" stroke="#655c4f" stroke-width="1.5"/><path d="M75 18L86 5L100 18Z" fill="url(#roof)" stroke="#544737" stroke-width="1.6"/><rect x="85" y="28" width="5" height="12" rx="2" fill="#455961"/><path d="M86 4L86 -2" stroke="#796d52" stroke-width="2"/><path d="M87 -3L101 1L87 7Z" fill="#c99c43" stroke="#855e33"/><path d="M30 95L77 112L99 101" fill="none" stroke="#5c674d" stroke-opacity=".36" stroke-width="2"/></svg>

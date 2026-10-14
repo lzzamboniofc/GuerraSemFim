@@ -1,14 +1,12 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 0.8.1, refinamento visual do mapa e da aldeia: estratégia medieval totalmente offline.**
+**Impérios & Conquistas — versão 0.8.2, retorno ao visual clássico da aldeia e mapa: estratégia medieval totalmente offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
 
-## 🎨 Novidades da v0.8.1 — Refinamento visual do mapa e da aldeia
+## 🎨 Versão 0.8.2 — Visual clássico restaurado
 
-- **Centro da aldeia redesenhado:** o cenário recebeu uma ambientação muralhada mais rica, melhor leitura dos pontos de construção e um visual mais próximo do espírito dos clássicos jogos de império.
-- **Mapa-múndi refinado:** novo enquadramento visual com coordenadas nas bordas, grade melhor destacada e terrenos com texturas próprias para planícies, florestas, montanhas, cereais e oásis.
-- **Polimento geral de interface:** painéis e elementos visuais ajustados para combinar melhor com o novo tema medieval.
+A aldeia, os edifícios e o mapa-múndi voltaram à apresentação anterior à reforma gráfica: ícones tradicionais e cenário vetorial leve. A mudança é **somente visual**: produção do herói, oásis, colonização, modais, configurações de ataques, planejador e filas continuam funcionando.
 
 ## 🏞️ Novidades da v0.8 — Territórios e Gestão Imperial
 
@@ -17,7 +15,7 @@ Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldei
 - **Vales cerealistas:** vales livres possuem variantes de 6, 9 e 15 campos de cereal (marcadas 9c e 15c no mapa); a composição de campos é preservada ao colonizá-los. Aldeias antigas mantêm seu arranjo.
 - **Planejador de obras:** o modal de campo/edifício tem **Planejar obra**. Até 40 planos por aldeia, reordenáveis ou removíveis. Uma obra só consome recursos e ocupa uma vaga quando pode começar. Obra planejada bloqueada por requisitos/recursos espera até haver condições; o planejamento não ultrapassa as filas configuráveis nas Configurações. Durante longas ausências, o início dos novos planos acontece ao retornar ao jogo.
 - **Painel Imperial:** reservas, produção líquida, população militar, fila de construções, oásis e projeções de 1, 6 e 24 horas com limite de armazenamento por aldeia.
-- **Reforma visual:** 20 ilustrações originais de edifícios em SVG, novos cenários de aldeia e campos, mapa com terrenos destacados, cores territoriais, marcadores de 9c/15c e indicador de oásis conquistados.
+- **Reforma visual:** Visual clássico restaurado para aldeia, campos e edifícios; continuam disponíveis marcadores de 9c/15c e indicador de oásis conquistados no mapa.
 - **Saves v0.1–v0.7:** continuam compatíveis sem ação manual. Exporte um backup antes de trocar de versão.
 
 ## 🚀 Como jogar

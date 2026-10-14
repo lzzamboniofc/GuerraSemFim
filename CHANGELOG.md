@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.2] — Restauração do design clássico · 14/10/2026
+
+- Retorno da aldeia, dos campos, dos edifícios e do mapa ao design anterior às reformas gráficas.
+- Mantidos os recursos da v0.8, inclusive herói multirrecursos, oásis, planejador e configurações anteriores.
+- Remoção dos assets experimentais de fundo e das ilustrações descartadas, com manutenção dos marcadores 9c/15c.
+
 ## [0.8.1] — Refino Visual da Aldeia e do Mapa · 14/10/2026
 
 - Redesign visual da tela de **Aldeia** com atmosfera mais próxima dos clássicos de estratégia: cenário muralhado, base artística mais rica, rótulos em estilo pergaminho e integração mais orgânica dos edifícios.
