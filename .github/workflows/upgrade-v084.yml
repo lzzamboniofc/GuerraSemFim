@@ -1,0 +1,40 @@
+name: Publicar v0.8.4 — visual original e missões
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'v084-patch/**'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Aplicar patch validado e executar testes
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f v084-patch/upgrade.patch.b64 ]; then
+            echo "Patch já foi aplicado."
+            exit 0
+          fi
+          base64 --decode v084-patch/upgrade.patch.b64 | xz --decompress > /tmp/guerra-sem-fim-v084.patch
+          echo "40c26491ba8c133aa6a86f06ae564aa1ba2fce4da74b2bf2170e2b668e2b7386  /tmp/guerra-sem-fim-v084.patch" | sha256sum -c
+          git apply --check /tmp/guerra-sem-fim-v084.patch
+          git apply /tmp/guerra-sem-fim-v084.patch
+          node --check js/app.js
+          node --check js/engine.js
+          for file in tests/*.test.js; do
+            node "$file"
+          done
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -r v084-patch
+          git rm .github/workflows/upgrade-v084.yml
+          git add -A
+          git commit -m "feat: v0.8.4 missões progressivas e retorno visual original"
+          git push origin HEAD:main
