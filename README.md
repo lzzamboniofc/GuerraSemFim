@@ -1,6 +1,6 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 0.4, Era das Guerras: estratégia medieval offline para navegador.**
+**Impérios & Conquistas — versão 0.5, Impérios e Diplomacia: estratégia medieval offline para navegador.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
 
@@ -27,7 +27,7 @@ python -m http.server 8000
 
 Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não exige internet. Para voltar ao jogo, use sempre a mesma origem/porta e navegador, pois o salvamento local é separado por origem.
 
-## 🎮 O que funciona na versão 0.3
+## 🎮 O que funciona na versão 0.5
 
 | Sistema | Funcionalidade |
 |---|---|
@@ -40,12 +40,25 @@ Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não
 | Mapa | Região 17×17 com visualização 11×11, aldeias, vales, oásis, acampamentos e reinos rivais |
 | Mundo Vivo | 3 facções NPC com recursos, desenvolvimento, recrutamento, expansão, ataques, saques e conquistas de território |
 | Combates | Ataques e saques simulados, deslocamento, baixas, capacidade de carga, saque e retorno das tropas |
-| Herói | Aventuras, vida, experiência, níveis, evolução de atributos e produção bônus |
+| Herói | Aventuras, experiência, atributos, três artefatos encontrados em aventuras e bônus de produção ao equipar |
 | Missões | Sete objetivos com recompensas em recursos |
-| Mercado | Troca local de recursos com taxa de conversão, após construir o edifício |
+| Mercado | Troca local de recursos e caravanas entre aldeias próprias com tempo de viagem |
 | Colonização | Até cinco aldeias: Residência nível 10, custo de fundação e seleção de vale livre |
 | Persistência | Autosave em `localStorage`, avanço de tempo quando a página é reaberta, importação/exportação JSON |
-| Interface | Português brasileiro, responsiva para desktop e celular, sem assets externos |
+| Interface | Produção detalhada ao clicar em recursos do topo, modais para construir/evoluir edifícios e campos, responsiva, sem assets externos |
+| Diplomacia | Embaixada permite propor trégua de 12 turnos com reinos NPC mediante recursos |
+| Paz opcional | Ataques inimigos podem ser desativados por campanha nas Configurações; reinos NPC continuam evoluindo |
+
+## ✨ Destaques da versão 0.5
+
+- **Paz sob seu controle:** no início da campanha ou em **Configurações → Ataques inimigos**, ligue/desligue as invasões. Ao desligar, os ataques NPC que já estão a caminho são cancelados sem combate; os rivais continuam evoluindo e você ainda pode atacá-los.
+- **Produção detalhada:** clique em **madeira, barro, ferro ou cereal na barra superior** para abrir o modal. Você verá a quantidade armazenada, capacidade, produção por campos, bônus de edifícios, itens e consumo de cereal.
+- **Construção em janela:** clique em qualquer edifício, terreno vazio ou campo da aldeia para abrir o modal de construção ou melhoria. Os custos, pré-requisitos e tempo estimado ficam no próprio modal.
+- **Embaixadas e tréguas:** em **Reinos Rivais**, construa uma Embaixada e negocie paz de 12 turnos pagando 250 madeira, 200 barro, 150 ferro e 250 cereal. A trégua suspende novos ataques daquela facção e cancela as marchas hostis em curso.
+- **Caravanas:** com duas ou mais aldeias e Mercado na origem, envie um tipo de recurso por viagem. A entrega ocorre após um tempo proporcional à distância; recursos além da capacidade do destino não serão armazenados.
+- **Artefatos do herói:** a 2ª, 4ª e 6ª aventuras rendem, respectivamente, Machado do Lenhador, Chifre da Colheita e Coroa do Reino. Equipe um de cada vez para melhorar a produção da aldeia inicial.
+
+Os saves das versões **0.1 a 0.4** continuam aceitos sem conversão manual. Exporte o seu save antes de atualizar, por segurança.
 
 ## 🗺️ Primeiros passos
 

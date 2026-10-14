@@ -7,6 +7,7 @@ const SPECS = [
  {id:'aurora', name:'Ordem da Aurora', icon:'🛡️', color:'#b29042', aggression:0.56, home:[6,-4], city:'Alvorada'},
  {id:'espinhos', name:'Liga dos Espinhos', icon:'🌲', color:'#397855', aggression:0.68, home:[5,6], city:'Bosque Velado'}
 ];
+const attacksEnabled = st => st.preferences?.enemyAttacks !== false;
 const interval = st => Math.max(30000, Math.round(900000 / st.speed));
 const rand = (seed, n) => { let x=Math.imul(seed+1,1664525)+Math.imul(n+1,1013904223);x^=x>>>16;x=Math.imul(x,2246822519);return ((x^(x>>>13))>>>0)/4294967295;};
 const coord = (x,y) => `${x}:${y}`;
@@ -122,7 +123,7 @@ function turn(st,at){
     log(st,`${f.icon} ${f.name} fundou uma aldeia em (${p.x}|${p.y}).`,'army');}
   }
   // Trégua inicial de cinco turnos para um novo comandante.
-  if(ai.turn>5&&ai.turn%(index+4)===0&&ai.movements.filter(m=>m.factionId===f.id).length<2){
+  if(attacksEnabled(st)&&!(f.treatyUntil>ai.turn)&&ai.turn>5&&ai.turn%(index+4)===0&&ai.movements.filter(m=>m.factionId===f.id).length<2){
    const source=f.villages.filter(c=>c.troops>=36).sort((a,b)=>b.troops-a.troops)[0];
    const target=st.villages.slice().sort((a,b)=>Math.hypot(source?.x-a.x||100,source?.y-a.y||100)-Math.hypot(source?.x-b.x||100,source?.y-b.y||100))[0];
    if(source&&target&&rand(index+34,ai.turn)<f.aggression){
@@ -140,7 +141,7 @@ function resolveDue(st,at){
  if(!st.ai)return false;
  const ai=st.ai;ai.eventAt=at;let changed=false;
  for(const m of ai.movements.slice().filter(m=>m.endsAt<=at)){
-  if(m.phase==='outbound')battleDefense(st,m,at);
+  if(m.phase==='outbound'){if(attacksEnabled(st))battleDefense(st,m,at);else {m.phase='returning';m.endsAt=at+m.duration;}}
   else{
    const home=ai.factions.find(f=>f.id===m.factionId)?.villages.find(v=>v.id===m.sourceId);
    if(home){home.troops=Math.min(300,home.troops+m.troops);if(m.loot)for(const k of D.RES)home.stock[k]=Math.min(9000,home.stock[k]+m.loot[k]);}
@@ -157,6 +158,40 @@ function prepare(st,cursor,time){
  const cap=i*240;
  if(time-ai.nextTurnAt>cap){ai.nextTurnAt=time-cap;log(st,'Os reinos rivais evoluíram durante sua ausência. O resumo do mundo foi atualizado.','army');}
 }
+function setHostileAttacks(st,enabled){
+ if(typeof enabled!=='boolean')return {ok:false,error:'Preferência inválida.'};
+ st.preferences={...(st.preferences||{}),enemyAttacks:enabled};
+ if(!enabled&&st.ai){
+  // Cancel pending attacks without inflicting casualties or plundering resources.
+  // Return the marching soldiers immediately to the source settlement.
+  for(const m of st.ai.movements.slice().filter(m=>m.phase==='outbound')){
+   const origin=st.ai.factions.find(f=>f.id===m.factionId)?.villages.find(v=>v.id===m.sourceId);
+   if(origin)origin.troops=Math.min(300,origin.troops+m.troops);
+   st.ai.movements.splice(st.ai.movements.indexOf(m),1);
+  }
+  log(st,'Invasões inimigas desativadas. Marchas hostis canceladas; reinos continuam evoluindo.','info');
+ }else if(enabled){log(st,'Invasões inimigas ativadas. Os reinos podem voltar a atacar.','info');}
+ return {ok:true};
+}
+function negotiate(st,factionId){
+ const f=st.ai?.factions.find(x=>x.id===factionId);
+ if(!f||f.defeated||!f.villages.length)return {ok:false,error:'Reino indisponível.'};
+ const village=st.villages.find(v=>(v.buildings.embassy||0)>=1);
+ if(!village)return {ok:false,error:'Construa uma Embaixada para negociar.'};
+ if((f.treatyUntil||0)>st.ai.turn)return {ok:false,error:'Já existe uma trégua ativa.'};
+ const price={wood:250,clay:200,iron:150,crop:250};
+ if(!D.RES.every(k=>village.resources[k]>=price[k]))return {ok:false,error:'Recursos insuficientes para a oferta diplomática.'};
+ D.RES.forEach(k=>village.resources[k]-=price[k]);
+ f.treatyUntil=st.ai.turn+12;
+ for(const m of st.ai.movements.slice().filter(m=>m.factionId===f.id&&m.phase==='outbound')){
+  const origin=f.villages.find(c=>c.id===m.sourceId);
+  if(origin)origin.troops=Math.min(300,origin.troops+m.troops);
+  st.ai.movements.splice(st.ai.movements.indexOf(m),1);
+ }
+ log(st,`Tratado de paz de 12 turnos firmado com ${f.name}.`,'info');
+ report(st,`Paz com ${f.name}`,'Seu emissário negociou uma trégua temporária de 12 turnos.','info');
+ return {ok:true,until:f.treatyUntil};
+}
 function validate(ai,st){
  const num=(x,min=0,max=1e14)=>typeof x==='number'&&Number.isFinite(x)&&x>=min&&x<=max;
  if(!ai||ai.version!==1||!Number.isSafeInteger(ai.turn)||!num(ai.nextTurnAt)||!Array.isArray(ai.factions)||ai.factions.length>3||!Array.isArray(ai.movements)||ai.movements.length>100)return false;
@@ -165,6 +200,7 @@ function validate(ai,st){
  for(const f of ai.factions){
   const spec=SPECS.find(spec=>spec.id===f.id);
   if(!spec||f.name!==spec.name||f.icon!==spec.icon||f.color!==spec.color||!num(f.aggression,0,1)||!Array.isArray(f.villages)||f.villages.length>3||!Number.isSafeInteger(f.turns))return false;
+  if(f.treatyUntil!==undefined&&(!Number.isSafeInteger(f.treatyUntil)||f.treatyUntil<0||f.treatyUntil>1e9))return false;
   for(const v of f.villages){
    if(typeof v.id!=='string'||typeof v.name!=='string'||v.name.length>80||!Number.isSafeInteger(v.x)||!Number.isSafeInteger(v.y)||Math.abs(v.x)>8||Math.abs(v.y)>8||!num(v.level,1,15)||!num(v.walls,0,8)||!num(v.troops,0,300)||!v.stock)return false;
    if(occupiedTiles.has(coord(v.x,v.y)))return false;occupiedTiles.add(coord(v.x,v.y));
@@ -173,5 +209,5 @@ function validate(ai,st){
  }
  return ai.movements.every(m=>typeof m.id==='string'&&ai.factions.some(f=>f.id===m.factionId)&&typeof m.sourceId==='string'&&st.villages.some(v=>v.id===m.targetVillageId)&&num(m.troops,0,300)&&num(m.endsAt)&&num(m.startedAt)&&num(m.duration)&&['outbound','returning'].includes(m.phase));
 }
-window.GSF_AI={init,prepare,tileAt,isRivalTarget,resolveBattle,resolveDue,nextEvents,validate,interval};
+window.GSF_AI={init,prepare,tileAt,isRivalTarget,resolveBattle,resolveDue,nextEvents,validate,interval,attacksEnabled,setHostileAttacks,negotiate};
 })();

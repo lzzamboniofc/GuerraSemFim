@@ -46,6 +46,21 @@
 - Aríetes, catapultas, muralhas, esconderijo e perfis diferenciados de defesa.
 - Próximos aprimoramentos militares: alvos específicos para catapultas, pesquisa com tempo de espera, apoio a aliados e IA com unidades de cerco.
 
+## Entregue: v0.5 — Impérios e Diplomacia
+
+- Ataques inimigos opcionais com desligamento imediato das marchas pendentes e configuração gravada no save.
+- Recursos do topo e construções/campos abrem modais dedicados, com indicadores de produção e custos.
+- Tréguas de 12 turnos negociadas via Embaixada; os reinos continuam crescendo durante a paz.
+- Caravanas entre aldeias próprias com tempo de viagem e estoque de destino.
+- Três artefatos equipáveis do herói com bônus econômicos, obtidos por aventuras.
+
+## Próximo passo — v0.6: Reinos e Campanhas
+
+- Diplomacia mais profunda (alianças formais, reputação e comércio com NPCs).
+- Herói com inventário ampliado e habilidades de combate.
+- Colonizadores e pontos de cultura mais próximos dos sistemas clássicos de estratégia.
+- Missões por capítulos, objetivos de vitória e múltiplas dificuldades.
+
 ## Fase 4 — Herói, facções e profundidade estratégica
 
 - Herói equipado, inventário, recompensas variadas, missões especiais e atributos completos.

@@ -1,5 +1,15 @@
 # Histórico de versões — Guerra Sem Fim
 
+## v0.5 — Impérios e Diplomacia (14/10/2026)
+
+- Preferência persistente para ativar/desativar invasões inimigas, acessível nas Configurações e no início de uma campanha; ataques em trânsito são cancelados sem saques ao desativar.
+- Detalhamento da produção em modal ao clicar nas quatro categorias de recursos do topo: campos, bônus, capacidade e consumo de cereal.
+- Construção e evolução de edifícios e campos em modais com custos, requisitos, filas e cancelamento.
+- Tréguas diplomáticas com reinos NPC via Embaixada, com custo e duração de 12 turnos.
+- Caravanas de transporte entre aldeias próprias, com tempo de viagem e respeito à capacidade de armazenamento do destino.
+- Artefatos colecionáveis por aventuras do herói, equipáveis e com bônus econômicos.
+- Migração transparente dos saves anteriores, novos testes de IA, economia, interface e compatibilidade; validação visual automatizada no Chromium com código offline embutido.
+
 ## v0.4 — Era das Guerras (14/10/2026)
 
 - Novo menu Comando de Guerra: tecnologias, transferências de reforços, simulador e orientação tática.

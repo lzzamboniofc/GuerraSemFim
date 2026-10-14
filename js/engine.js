@@ -2,6 +2,7 @@
 'use strict';
 const D = window.GSF_DATA;
 const KEY = 'guerra-sem-fim-save-v1';
+const HERO_ARTIFACTS={axe:{name:'Machado do Lenhador',icon:'🪓',text:'+10% madeira',type:'wood',bonus:.10},horn:{name:'Chifre da Colheita',icon:'🌾',text:'+10% cereal',type:'crop',bonus:.10},crown:{name:'Coroa do Reino',icon:'👑',text:'+5% em todos os recursos',type:'all',bonus:.05}};
 const now = () => Date.now();
 const clamp = (x,a,b) => Math.min(b,Math.max(a,x));
 const sum = arr => arr.reduce((a,b)=>a+b,0);
@@ -19,7 +20,7 @@ function village(st,name,x,y,starter=false) {
 function newGame(options={}) {
  const tribe = D.TRIBES[options.tribe]?options.tribe:'romans';
  const st={version:1,nextId:1,player:(options.player||'Comandante').trim().slice(0,25)||'Comandante',tribe,speed:clamp(Number(options.speed)||12,1,100),
-  villages:[],activeVillageId:null,hero:{name:'Guardião',level:1,xp:0,hp:100,attack:4,resources:0,points:0,adventure:null,adventures:0},
+  villages:[],activeVillageId:null,preferences:{enemyAttacks:options.enemyAttacks!==false},hero:{name:'Guardião',level:1,xp:0,hp:100,attack:4,resources:0,points:0,adventure:null,adventures:0,inventory:[],equipped:null},
   world:{seed:37,tiles:[]},movements:[],reports:[],events:[],questsClaimed:[],tutorialDismissed:false,createdAt:now(),lastTick:now()};
  const home=village(st,(options.village||'Nova Esperança').trim().slice(0,28)||'Nova Esperança',0,0,true);
  st.villages=[home];st.activeVillageId=home.id;
@@ -49,7 +50,7 @@ function population(v){let n=2;for(const [k,l] of Object.entries(v.buildings))n+
 function upkeep(st,v){return troopDefs(st).reduce((a,t)=>a+(v.troops[t.id]||0)*t.upkeep,0);}
 function production(st,v){const base={wood:0,clay:0,iron:0,crop:0};v.fields.forEach(f=>{base[f.type]+=f.level?Math.round(5*Math.pow(1.68,f.level-1)):0;});
  const out={};const bonus={wood:'sawmill',clay:'brickyard',iron:'ironworks',crop:'mill'};
- D.RES.forEach(k=>{out[k]=Math.floor(base[k]*(1+0.05*buildLevel(v,bonus[k]))*st.speed);});
+ D.RES.forEach(k=>{const item=HERO_ARTIFACTS[st.hero.equipped];const gearBonus=st.villages[0].id===v.id&&(item?.type===k||item?.type==='all')?item.bonus:0;out[k]=Math.floor(base[k]*(1+0.05*buildLevel(v,bonus[k])+gearBonus)*st.speed);});
  if(st.villages[0].id===v.id)out.wood+=st.hero.resources*st.speed*2;
  out.crop-=population(v)+upkeep(st,v);return out;
 }
@@ -186,16 +187,32 @@ function returnArmy(st,m){const v=st.villages.find(q=>q.id===m.villageId);if(!v)
  log(st,`As tropas voltaram a ${v.name}${m.loot?' com recursos saqueados':''}.`,'army');}
 function startAdventure(st){if(st.hero.adventure)return {ok:false,error:'O herói já está em uma aventura.'};if(st.hero.hp<20)return {ok:false,error:'Seu herói precisa recuperar a saúde.'};
  const seconds=Math.max(10,Math.round(240/st.speed));st.hero.adventure={id:id(st),endsAt:now()+seconds*1000};log(st,'O herói partiu para explorar terras desconhecidas.','hero');save(st);return {ok:true};}
-function resolveAdventure(st){st.hero.adventures++;st.hero.xp+=36+st.hero.level*6;st.hero.hp=Math.max(15,st.hero.hp-8);const v=st.villages[0];const r={wood:110+st.hero.level*20,clay:110+st.hero.level*20,iron:110+st.hero.level*20,crop:110+st.hero.level*20};addResources(v,r);
+function resolveAdventure(st){st.hero.inventory ||= [];st.hero.adventures++;st.hero.xp+=36+st.hero.level*6;st.hero.hp=Math.max(15,st.hero.hp-8);if(st.hero.adventures===2||st.hero.adventures===4||st.hero.adventures===6){const reward=st.hero.adventures===2?'axe':st.hero.adventures===4?'horn':'crown';if(!st.hero.inventory.includes(reward)){st.hero.inventory.push(reward);log(st,`Artefato encontrado: ${HERO_ARTIFACTS[reward].name}.`,'hero');}}const v=st.villages[0];const r={wood:110+st.hero.level*20,clay:110+st.hero.level*20,iron:110+st.hero.level*20,crop:110+st.hero.level*20};addResources(v,r);
  while(st.hero.xp>=st.hero.level*100){st.hero.xp-=st.hero.level*100;st.hero.level++;st.hero.points+=4;st.hero.hp=100;log(st,`Seu herói subiu para o nível ${st.hero.level}!`,'hero');}
  report(st,'Aventura concluída',`O herói retornou com recursos e experiência. Recompensa: ${r.wood} de cada recurso e experiência de combate.`,'victory');
  log(st,'Seu herói concluiu a aventura com sucesso.','hero');st.hero.adventure=null;}
+function equipHero(st,itemId){if(itemId!==null&&(!HERO_ARTIFACTS[itemId]||!(st.hero.inventory||[]).includes(itemId)))return {ok:false,error:'Artefato não encontrado no inventário.'};st.hero.equipped=itemId;save(st);return {ok:true};}
 function spendHero(st,kind){if(!['attack','resources'].includes(kind)||st.hero.points<1)return {ok:false,error:'Sem pontos de atributo disponíveis.'};st.hero.points--;st.hero[kind]++;save(st);return {ok:true};}
 function healHero(st){const v=active(st);const price=[100,100,100,100];if(st.hero.hp>=100)return {ok:false,error:'O herói já está saudável.'};if(!pay(v,price))return {ok:false,error:'Recursos insuficientes.'};st.hero.hp=Math.min(100,st.hero.hp+45);save(st);return {ok:true};}
 function trade(st,v,from,to,amount){amount=Math.floor(Number(amount));if(!D.RES.includes(from)||!D.RES.includes(to)||from===to||!Number.isFinite(amount)||amount<100)return {ok:false,error:'Troca inválida (mínimo 100).'};
  if(buildLevel(v,'marketplace')<1)return {ok:false,error:'Construa o Mercado.'};
  const received=Math.floor(amount*.75);if(v.resources[from]<amount)return {ok:false,error:'Recursos insuficientes.'};if(v.resources[to]+received>capacity(v,to))return {ok:false,error:'Sem espaço no armazém de destino.'};
  v.resources[from]-=amount;v.resources[to]+=received;log(st,`Mercado: ${amount} ${D.RESOURCE[from].name} por ${received} ${D.RESOURCE[to].name}.`,'trade');save(st);return {ok:true,received};}
+function sendCaravan(st,v,targetId,resource,amount){
+ const target=st.villages.find(v=>v.id===targetId);
+ if(!target||target.id===v.id)return {ok:false,error:'Escolha outra aldeia do seu império.'};
+ if(buildLevel(v,'marketplace')<1)return {ok:false,error:'Construa um Mercado na aldeia de origem.'};
+ const n=Number(amount);
+ if(!D.RES.includes(resource)||!Number.isSafeInteger(n)||n<50||n>100000)return {ok:false,error:'Envie de 50 a 100.000 unidades de um recurso.'};
+ if(v.resources[resource]<n)return {ok:false,error:'Recursos insuficientes.'};
+ if(target.resources[resource]>=capacity(target,resource))return {ok:false,error:'O destino está com o armazenamento cheio.'};
+ v.resources[resource]-=n;
+ const seconds=Math.max(10,Math.ceil(distance(v,target)*240/st.speed));
+ const cargo={wood:0,clay:0,iron:0,crop:0};cargo[resource]=n;
+ st.movements.push({id:id(st),villageId:v.id,targetVillageId:target.id,mode:'trade',phase:'going',army:{},cargo,startedAt:now(),endsAt:now()+seconds*1000,x:target.x,y:target.y});
+ log(st,`Caravana de ${n} ${D.RESOURCE[resource].name} enviada para ${target.name}.`,'trade');
+ save(st);return {ok:true,seconds};
+}
 function settle(st,v,x,y,name){const tile=tileAt(st,x,y);if(!tile||tile.kind!=='empty')return {ok:false,error:'Escolha um vale desabitado.'};if(buildLevel(v,'residence')<10)return {ok:false,error:'É necessária uma Residência nível 10.'};
  if(st.villages.length>=5)return {ok:false,error:'Limite de cinco aldeias nesta versão.'};
  const price=[1600,1600,1600,1600];if(!canPay(v,price))return {ok:false,error:'Colonização custa 1.600 de cada recurso.'};
@@ -233,7 +250,10 @@ function resolveDue(st,at){
  }
  for(const m of st.movements.slice()){
   if(m.endsAt>at)continue;
-  if(m.phase==='going'&&m.mode==='reinforce'){
+  if(m.phase==='going'&&m.mode==='trade'){
+   const dest=st.villages.find(v=>v.id===m.targetVillageId);if(dest){addResources(dest,m.cargo);log(st,`Caravana recebida por ${dest.name}.`,'trade');}
+   st.movements.splice(st.movements.indexOf(m),1);
+  }else if(m.phase==='going'&&m.mode==='reinforce'){
    const destination=st.villages.find(v=>v.id===m.targetVillageId);
    if(destination){for(const [unit,qty] of Object.entries(m.army))destination.troops[unit]=(destination.troops[unit]||0)+qty;
     log(st,`Reforços chegaram a ${destination.name}.`,'army');st.movements.splice(st.movements.indexOf(m),1);}
@@ -284,6 +304,9 @@ function validateState(st){
   !validArray(st.villages,5)||st.villages.length===0||!plain(st.world)||!validArray(st.world.tiles,1000)||
   !validArray(st.movements,500)||!validArray(st.reports,100)||!validArray(st.events,100)||
   !validArray(st.questsClaimed,20)||!plain(st.hero))return false;
+ if(st.preferences!==undefined&&(!plain(st.preferences)||typeof st.preferences.enemyAttacks!=='boolean'))return false;
+ if(st.hero.inventory!==undefined&&(!validArray(st.hero.inventory,3)||new Set(st.hero.inventory).size!==st.hero.inventory.length||!st.hero.inventory.every(id=>!!HERO_ARTIFACTS[id])))return false;
+ if(st.hero.equipped!==undefined&&st.hero.equipped!==null&&(!HERO_ARTIFACTS[st.hero.equipped]||!st.hero.inventory?.includes(st.hero.equipped)))return false;
  if(!validNumber(st.hero.level,1,1000)||!validNumber(st.hero.hp,0,100)||
   !validNumber(st.hero.xp,0,1e8)||!validNumber(st.hero.attack,0,10000)||
   !validNumber(st.hero.resources,0,10000)||!validNumber(st.hero.points,0,10000)||
@@ -314,6 +337,7 @@ function validateState(st){
  if(!st.movements.every(m=>plain(m)&&ids.has(m.villageId)&&
   ['going','returning'].includes(m.phase)&&validNumber(m.endsAt)&&validNumber(m.startedAt)&&
   validArmy(m.army,st.tribe)&&(!m.loot||validRes(m.loot))&&
+  (m.mode!=='trade'||(ids.has(m.targetVillageId)&&m.targetVillageId!==m.villageId&&validRes(m.cargo)&&D.RES.reduce((n,k)=>n+m.cargo[k],0)>=50))&&
   (m.mode!=='reinforce'||(ids.has(m.targetVillageId)&&m.targetVillageId!==m.villageId))))return false;
  return st.reports.every(r=>plain(r)&&typeof r.title==='string'&&typeof r.body==='string'&&validNumber(r.at))&&
   st.events.every(e=>plain(e)&&typeof e.message==='string'&&validNumber(e.at));
@@ -352,5 +376,5 @@ function importSave(text){
  if(!save(st))return {ok:false,error:'Não foi possível salvar a partida neste navegador.'};
  return {ok:true,state:st};
 }
-window.GSF={KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY};
+window.GSF={KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero};
 })();
