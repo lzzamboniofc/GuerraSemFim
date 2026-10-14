@@ -9,5 +9,5 @@ const E=win.GSF,st=E.newGame(),v=E.active(st);v.buildings.barracks=3;for(const k
 vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),ctx,{filename:'app'});
 const click=d=>callbacks.click({target:{closest:()=>({dataset:d})}});
 click({nav:'army'});assert(dom.innerHTML.includes('data-max-train="legionary"'));assert(dom.innerHTML.includes('data-max-train="praetorian"'));assert(dom.innerHTML.includes('Máximo agora:'));assert.match(dom.innerHTML,/data-max-train="praetorian" disabled/);
-const max=E.maxTrainable(st,v,'legionary');click({maxTrain:'legionary'});assert.equal(input.value,String(max));click({train:'legionary'});assert.equal(E.load().villages[0].trainingQueue.at(-1).qty,max);
+const stored=E.load(),max=E.maxTrainable(stored,E.active(stored),'legionary');click({maxTrain:'legionary'});assert.equal(input.value,String(max));click({train:'legionary'});assert.equal(E.load().villages[0].trainingQueue.at(-1).qty,max);
 console.log('✓ v1.0.1 — botão Máx. e recrutamento');
