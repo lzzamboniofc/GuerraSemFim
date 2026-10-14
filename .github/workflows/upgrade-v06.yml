@@ -1,0 +1,44 @@
+name: Publicar Guerra Sem Fim v0.6
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'v06-update/**'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  aplicar-v06:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do projeto
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Validar e publicar Crônicas do Império
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -f v06-update/patch.b64 ]]; then
+            echo "Patch já aplicado."
+            exit 0
+          fi
+          base64 --decode v06-update/patch.b64 | xz --decompress > /tmp/gsf-v06.patch
+          echo '14d2d38dbde183e236dcf78c7a05b5c9505d84ae0a3fedd8b218597bcbf29ac0  /tmp/gsf-v06.patch' | sha256sum --check
+          git apply --check /tmp/gsf-v06.patch
+          git apply /tmp/gsf-v06.patch
+          node --check js/campaign.js
+          node --check js/ai.js
+          node --check js/engine.js
+          node --check js/app.js
+          for test in tests/*.test.js; do
+            echo "Executando $test"
+            node "$test"
+          done
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm -r v06-update
+          git rm .github/workflows/upgrade-v06.yml
+          git add -A
+          git commit -m 'feat: Guerra Sem Fim v0.6 - Cronicas do Imperio'
+          git push origin HEAD:main
