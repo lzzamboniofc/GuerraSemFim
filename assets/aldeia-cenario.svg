@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" role="img" aria-label="Paisagem verde e trilhas de uma aldeia medieval">
+<defs><linearGradient id="ground" x2="0" y2="1"><stop stop-color="#a2c496"/><stop offset=".55" stop-color="#83ab76"/><stop offset="1" stop-color="#577f60"/></linearGradient><linearGradient id="water" x2="1" y2="1"><stop stop-color="#b4d6c4"/><stop offset="1" stop-color="#537f83"/></linearGradient><pattern id="grasses" width="54" height="62" patternUnits="userSpaceOnUse"><path d="M5 23l3 -7m26 14l4 -8m-17 29l4 -6" stroke="#d4dca1" opacity=".21" stroke-width="3"/></pattern><filter id="shadow"><feGaussianBlur stdDeviation="9"/></filter><pattern id="forest" width="81" height="80" patternUnits="userSpaceOnUse"><circle cx="24" cy="31" r="19" fill="#4d8059" stroke="#305840" stroke-width="3"/><circle cx="18" cy="26" r="10" fill="#a2c38e" opacity=".5"/><circle cx="60" cy="70" r="22" fill="#618e5f" stroke="#345c4b" stroke-width="3"/><circle cx="53" cy="62" r="12" fill="#b2c897" opacity=".4"/></pattern></defs>
+<rect width="1280" height="800" fill="url(#ground)"/><rect width="1280" height="800" fill="url(#grasses)"/>
+<path d="M0 92Q270 45 430 111T830 112T1280 68V0H0Z" fill="#c5d6a1" opacity=".34"/>
+<path d="M0 760Q215 615 435 703T858 668T1280 744V800H0Z" fill="#3e725c" opacity=".18"/>
+<path d="M1238 -30Q1190 110 1234 213T1210 490T1270 820" stroke="#446b69" stroke-width="170" opacity=".28" fill="none" filter="url(#shadow)"/>
+<path d="M1238 -30Q1190 110 1234 213T1210 490T1270 820" stroke="#679a9b" stroke-width="142" fill="none"/>
+<path d="M1238 -30Q1190 110 1234 213T1210 490T1270 820" stroke="url(#water)" stroke-width="125" fill="none"/>
+<path d="M1238 -30Q1190 110 1234 213T1210 490T1270 820" stroke="#cfe3c2" stroke-width="4" fill="none" stroke-dasharray="12 23" opacity=".3"/>
+<path d="M-40 640Q250 572 470 475T855 330T1170 240" stroke="#567751" stroke-width="65" fill="none" opacity=".32"/>
+<path d="M-40 630Q250 563 470 468T855 325T1170 235" stroke="#d5c39a" stroke-width="34" fill="none" opacity=".75"/>
+<path d="M60 -25Q275 170 375 320T590 800" stroke="#b3a981" stroke-width="21" fill="none" opacity=".6"/>
+<g fill="#bccb8d" stroke="#739564" stroke-width="5" opacity=".82"><path d="M30 600l170 -92 97 62 -180 109Z"/><path d="M190 693l175 -89 118 63 -200 115Z"/><path d="M780 25l230 -65 100 110 -236 92Z"/></g>
+<g stroke="#e1d9a8" stroke-width="5" opacity=".75"><path d="M55 613l171 -89M76 632l171 -89M101 650l171 -89M221 708l162 -83M250 736l162 -83M838 36l184 -42M858 65l184 -42M884 92l184 -42"/></g>
+
+<path d="M0 0h230v335H0ZM0 635h330v165H0ZM1010 0h270v220h-270ZM990 630h290v170H990Z" fill="url(#forest)" opacity=".82"/>
+</svg>

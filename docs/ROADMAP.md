@@ -7,6 +7,14 @@
 - Mapa, acampamentos NPC, saque, retorno, herói, missões, mercado e colonização simplificada.
 - Persistência e exportação/importação da campanha.
 
+## Entregue: v0.2 — Visual e confiabilidade
+
+- Cenários originais SVG e melhor hierarquia visual na aldeia e nos campos.
+- Conselho do Reino com orientação contextual, medidores de capacidade e melhorias de acessibilidade.
+- Validação de campanhas importadas e recuperação de backup local.
+- Correção de envio de tropas e progressão de eventos offline em ordem cronológica.
+- Regressões automatizadas para militares, construção, salvamento e retorno de tropas.
+
 ## Fase 2 — Economia e aldeias profundas
 
 - Produção e limites de armazenamento mais próximos dos níveis de referência, com melhor balanceamento a longo prazo.

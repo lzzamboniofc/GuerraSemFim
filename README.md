@@ -27,7 +27,7 @@ python -m http.server 8000
 
 Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não exige internet. Para voltar ao jogo, use sempre a mesma origem/porta e navegador, pois o salvamento local é separado por origem.
 
-## 🎮 O que funciona na versão 0.1
+## 🎮 O que funciona na versão 0.2
 
 | Sistema | Funcionalidade |
 |---|---|
@@ -62,7 +62,9 @@ GuerraSemFim/
 ├── index.html                # Página inicial; abre diretamente no navegador
 ├── styles.css                # Interface e mapas estilizados
 ├── assets/
-│   └── favicon.svg           # Símbolo original do projeto
+│   ├── favicon.svg           # Símbolo original do projeto
+│   ├── aldeia-cenario.svg    # Cenário vetorial do centro da aldeia
+│   └── campos-cenario.svg    # Cenário vetorial dos recursos
 ├── js/
 │   ├── data.js               # Tribos, edifícios, tropas, custo, posições
 │   ├── engine.js             # Estado, economia, tempo, filas, batalhas, save
@@ -72,10 +74,22 @@ GuerraSemFim/
 │   ├── ROADMAP.md            # Próximas etapas de desenvolvimento
 │   └── PUBLICACAO_GITHUB.md # Como subir para o GitHub
 └── tests/
-    └── smoke.test.js         # Testes básicos sem dependências
+    ├── smoke.test.js         # Testes básicos sem dependências
+    └── regression.test.js    # Regressões e segurança do motor
 ```
 
 O código utiliza apenas JavaScript nativo, HTML e CSS. **Nenhum `npm install` é necessário para jogar.**
+
+## ✨ Novidades da versão 0.2
+
+- Cenários originais SVG para **aldeias e campos**, destaque de edifícios por patamar e visual aprimorado para tela pequena.
+- **Conselho do Reino** no Centro da Aldeia com objetivo atual, progresso das missões e atalho para a próxima ação.
+- Barra de ocupação dos depósitos na área de recursos.
+- Correção de envio militar: impede quantidade negativa, fracionária, acima do efetivo ou unidade inexistente.
+- Avanço offline com eventos em ordem temporal (obras, treinamento, batalha, retorno e herói).
+- **Backup automático local** com recuperação do save secundário se o principal ficar corrompido.
+- Validação de campanhas importadas para impedir saves incompletos ou valores ilegais.
+- Testes de regressão adicionais; a partida antiga da v0.1 continua compatível.
 
 ## 🧪 Testes
 
@@ -83,13 +97,14 @@ Se tiver Node.js instalado:
 
 ```bash
 node tests/smoke.test.js
+node tests/regression.test.js
 ```
 
 Os testes cobrem criação de mundo, tribos, produção, filas, construção, exploração, batalha, herói, missões e salvamento. Validações manuais devem ser repetidas nos navegadores pretendidos para distribuição.
 
 ## ⚠️ Limites conhecidos
 
-Esta é uma primeira versão funcional — **não é uma reprodução integral do Travian**. A fórmula de combate é simplificada; não há jogadores reais, alianças, mercado entre jogadores, modo multijogador, Natares, maravilhas do mundo, eventos de servidor, herói equipado, cerco operacional, rotas comerciais, colonizadores nem pontos de cultura. As tropas de exploração ainda não executam espionagem especial; os confrontos são contra acampamentos controlados localmente. Oásis aparecem no mapa, mas sua anexação ainda não foi implementada.
+Esta é uma versão inicial funcional — **não é uma reprodução integral do Travian**. A fórmula de combate é simplificada; não há jogadores reais, alianças, mercado entre jogadores, modo multijogador, Natares, maravilhas do mundo, eventos de servidor, herói equipado, cerco operacional, rotas comerciais, colonizadores nem pontos de cultura. As tropas de exploração ainda não executam espionagem especial; os confrontos são contra acampamentos controlados localmente. Oásis aparecem no mapa, mas sua anexação ainda não foi implementada.
 
 Veja o [inventário completo](docs/ANALISE_TRAVIAN.md), o [roteiro de expansão](docs/ROADMAP.md) e o [guia de publicação no GitHub](docs/PUBLICACAO_GITHUB.md).
 
