@@ -1,0 +1,133 @@
+/* v0.8.5 — layout pensado para caber no espaço, sem arrastar na horizontal.
+   Padrão inspirado em interfaces responsivas de jogos, sem copiar outro projeto. */
+html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
+.content,.panel,.scene,.map-area{min-width:0;max-width:100%}
+
+/* Recursos em cartões — quatro colunas em monitores e duas em celulares. */
+.masthead .resource-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;min-width:0;width:100%}
+.masthead .resource-pill{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;max-width:none;min-width:0;width:100%;padding:9px 10px;overflow:hidden}
+.masthead .resource-pill .ico{font-size:clamp(20px,2.4vw,27px)}
+.masthead .resource-detail{display:grid;min-width:0;gap:2px}
+.masthead .resource-label{font:700 11px Arial,sans-serif;color:#e9dcb9;letter-spacing:.1px}
+.masthead .resource-pill strong{font-size:clamp(14px,1.5vw,19px);line-height:1.2;white-space:normal;overflow-wrap:anywhere}
+.masthead .resource-pill small{font-size:10px;white-space:normal;line-height:1.3;overflow-wrap:anywhere}
+.masthead .resource-meter{width:100%}
+
+/* A antiga paisagem absoluta era a causa das sobreposições dos edifícios.
+   Agora cada espaço tem a própria área clicável dentro de uma grade fluida. */
+.scene.town-board,.scene.field-board{
+  width:100%;height:auto;min-height:0;display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:12px;align-items:stretch;justify-items:stretch;
+  padding:18px;
+  background:linear-gradient(155deg,#dce7b9 0%,#afc999 40%,#86ac80 100%);
+  border:3px solid #c2ab7f;border-radius:13px;
+  isolation:isolate;
+}
+.scene.town-board:before,.scene.field-board:before{opacity:.13}
+.scene.town-board:after,.scene.field-board:after{display:none}
+.scene .board-intro{grid-column:1/-1;z-index:2;position:relative;display:flex;gap:4px 16px;flex-wrap:wrap;align-items:baseline;padding:4px 6px 12px;border-bottom:1px solid #71976750}
+.scene .board-intro strong{font:700 16px Georgia,serif;color:#345135}
+.scene .board-intro small{font:12px Arial,sans-serif;color:#4d6044}
+.scene.town-board .town-road,.scene.town-board .town-water,.scene .town-tree,.scene.field-board .field-hamlet{display:none}
+.scene .town-slot,.scene .field-slot{
+  position:relative!important;left:auto!important;top:auto!important;
+  transform:none!important;margin:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  width:100%;max-width:none;min-width:0;min-height:110px;
+  padding:12px 7px;gap:7px;
+  border:1px solid #b2a177;border-radius:11px;
+  background:linear-gradient(160deg,#fff8e5eF,#eadcbaeb);
+  color:#3c3d29;box-shadow:0 3px 8px #344a2729;
+  transition:transform .14s,border-color .14s,box-shadow .14s;
+}
+.scene .town-slot:hover,.scene .town-slot.selected,.scene .field-slot:hover,.scene .field-slot.selected{
+  transform:translateY(-2px)!important;outline:2px solid #c2a661;outline-offset:0;
+  background:linear-gradient(150deg,#fffce9,#ede4c4);box-shadow:0 5px 11px #2a4a3345;
+}
+.scene .town-slot:focus-visible,.scene .field-slot:focus-visible{outline:3px solid #5d743f!important;outline-offset:2px}
+.scene .town-slot .building-art{font-size:clamp(27px,3vw,36px);width:58px;height:49px;line-height:1;background:transparent;filter:drop-shadow(0 2px 1px #344b322a)}
+.scene .town-slot.empty .building-art{width:52px;height:46px;border:2px dashed #a79b78;border-radius:8px;background:#f5e8c7;font-size:24px}
+.scene .town-slot .slot-name{
+  display:block;max-width:100%;width:100%;text-align:center;
+  font:700 12px/1.3 Arial,sans-serif;white-space:normal;overflow-wrap:anywhere;
+  color:#41513b;text-shadow:none;background:transparent;box-shadow:none;
+}
+.scene .town-slot .slot-level{position:absolute;top:5px;right:5px;left:auto;transform:none;min-width:25px;height:23px;display:grid;place-items:center;border-radius:10px;background:#486345;color:white;font:700 12px Arial,sans-serif}
+.scene .field-slot{border-width:1px;min-height:110px;gap:5px}
+.scene .field-slot .icon{font-size:31px;line-height:1.2}
+.scene .field-slot .field-name{font:700 12px/1.2 Arial,sans-serif;text-align:center;color:#394b35;overflow-wrap:anywhere}
+.scene .field-slot small{font-size:11px}
+.scene .field-slot.queued:after{content:'⏳';position:absolute;right:6px;top:6px;font-size:15px}
+
+/* Mapa adaptativo: 5x5 / 7x7 / 9x9 / 11x11 conforme a largura. */
+.map-area{overflow:visible;padding:14px}
+.map-view-hint{margin:4px 0 9px;font:12px/1.4 Arial,sans-serif;color:#63724e}
+.map-area .map-grid{
+  display:grid;grid-template-columns:repeat(var(--map-columns,9),minmax(0,1fr));
+  gap:clamp(2px,.5vw,5px);padding:clamp(4px,.9vw,11px);
+  width:100%;max-width:100%;overflow:hidden;min-width:0;
+  background:linear-gradient(145deg,#9bad86,#799c78);
+}
+.map-area .map-tile{width:100%;min-width:0;aspect-ratio:1;min-height:0;touch-action:manipulation}
+.map-area .map-tile .glyph{font-size:clamp(18px,2.5vw,30px);line-height:1.1}
+.map-area .map-tile .coord{font:9px Arial,sans-serif;bottom:2px;left:2px;opacity:.85}
+.map-area .map-controls{display:grid;grid-template-columns:minmax(0,1fr);gap:9px}
+.map-area .map-controls>.btn-row{width:100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.map-area .map-controls .btn{min-width:0;width:100%;font-size:clamp(10px,1.05vw,12px);padding:9px 3px;line-height:1.25}
+.map-area .legend{display:flex;flex-wrap:wrap;gap:10px 14px}
+
+@media(max-width:1450px){
+ .scene.town-board,.scene.field-board{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:1000px){
+ .scene.town-board,.scene.field-board{grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;padding:12px}
+}
+@media(max-width:900px){
+ .masthead .resource-bar{flex:unset;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+ .scene.town-board,.scene.field-board{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .scene .town-slot,.scene .field-slot{min-height:100px}
+ .sidebar .nav-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;overflow:visible;scroll-snap-type:none}
+ .sidebar .nav-item{min-width:0;width:100%;padding:9px 5px;text-align:center;justify-content:center;flex-direction:column;gap:4px;min-height:54px;white-space:normal;font:11px/1.2 Arial,sans-serif}
+ .sidebar .nav-ico{font-size:17px;width:auto}
+}
+@media(max-width:650px){
+ .masthead .resource-bar{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .masthead .resource-pill{min-height:66px;padding:8px 10px;gap:9px;justify-content:start}
+ .masthead .resource-pill strong{font-size:16px}
+ .masthead .resource-label{font-size:10px}
+ .masthead .resource-pill small{font-size:10px}
+ .scene.town-board,.scene.field-board{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:10px}
+ .scene .town-slot,.scene .field-slot{min-height:100px;padding:10px 5px}
+ .scene .town-slot .slot-name{font-size:11px}
+ .scene .field-slot .field-name{font-size:11px}
+ .map-area .map-controls>.btn-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .map-area .map-controls .btn{font-size:11px;padding:10px 5px}
+ .map-area .map-tile .glyph{font-size:clamp(20px,5vw,28px)}
+ .map-area .map-tile .coord{font-size:8px}
+ .sidebar .nav-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:7px}
+ .sidebar .nav-item{min-height:49px;padding:7px 4px}
+ .sidebar .nav-ico{font-size:16px}
+}
+@media(max-width:375px){
+ .map-area{padding:8px}
+ .map-area .map-grid{gap:2px;padding:4px}
+ .map-area .map-tile .glyph{font-size:19px}
+ .map-area .map-tile .coord{font-size:7px;left:1px}
+ .scene .town-slot,.scene .field-slot{min-height:96px}
+ .scene .town-slot .building-art{font-size:27px}
+ .masthead .resource-pill{gap:5px;padding:6px}
+ .masthead .resource-pill .ico{font-size:20px}
+}
+@media(prefers-reduced-motion:reduce){.scene .town-slot,.scene .field-slot{transition:none}}
+
+/* Acesso rápido: menus secundários recolhidos até que o jogador os peça. */
+.nav-more-toggle{display:none}
+@media(max-width:900px){
+ .sidebar .nav-list{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .sidebar:not(.nav-expanded) .nav-list>.nav-item:not([data-nav="village"]):not([data-nav="fields"]):not([data-nav="map"]){display:none}
+ .sidebar .nav-more-toggle{display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;min-height:54px;min-width:0;padding:7px 4px;border:1px solid transparent;background:#eadbbd;color:#4c5c40;border-radius:6px;font:700 11px/1.2 Arial,sans-serif}
+ .sidebar .nav-more-toggle .nav-ico{font-size:17px}
+ .sidebar .nav-more-toggle[aria-expanded="true"]{background:#d5e0ca;border-color:#899b78}
+ .sidebar .nav-item{min-height:54px}
+}

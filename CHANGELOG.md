@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.5] — Telas adaptativas sem sobreposição · 14/10/2026
+
+- Grade fluida de edifícios e campos com seleção e melhorias nos mesmos modais.
+- Mapa responsivo por quantidade de casas visíveis, mantendo exploração por coordenadas.
+- Cabeçalho de recursos em cartões legíveis no celular e menu compacto com acessos rápidos e botão **Mais**, sem deslocamento lateral.
+- Testes de layout e compatibilidade da lógica de aldeias, recursos e mundo.
+
 ## [0.8.4] — Missões e retorno visual à versão inicial · 14/10/2026
 
 - Aldeia, campos e mapa restaurados especificamente ao layout da v0.1, com grades e ícones clássicos e sem rolagem horizontal interna obrigatória. O restante do layout responsivo da v0.8.3 permanece.

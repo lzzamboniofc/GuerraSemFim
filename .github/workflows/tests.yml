@@ -1,0 +1,30 @@
+name: Testes do Guerra Sem Fim
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obter codigo
+        uses: actions/checkout@v4
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validar JavaScript
+        run: |
+          node --check js/app.js
+          node --check js/engine.js
+      - name: Executar todas as suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          for test in tests/*.test.js; do
+            echo "Executando $test"
+            node "$test"
+          done

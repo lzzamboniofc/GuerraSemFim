@@ -1,8 +1,16 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 0.8.4, mapas e aldeias no visual original com missões progressivas: estratégia medieval totalmente offline.**
+**Impérios & Conquistas — versão 0.8.5, telas de aldeia, campos e mapa adaptadas sem sobreposições: estratégia medieval totalmente offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
+
+## v0.8.5 — Visão adaptativa de aldeia, recursos e mapa
+
+- **Edifícios e campos:** substituída a disposição absoluta que sobrepunha botões por uma grade de cartões clicáveis de 2 a 5 colunas, conforme o espaço disponível.
+- **Mapa:** região local varia entre 5×5, 7×7, 9×9 e 11×11 casas, evitando arrastar horizontalmente para ver terrenos; as setas continuam navegando pelo mundo inteiro.
+- **Recursos:** exibição em 2×2 no celular, com nome, quantidade, capacidade e produção por hora; clique continua abrindo o modal.
+- **Navegação:** acessos rápidos a Aldeia, Recursos e Mapa; botão **Mais** abre as outras telas sem rolagem horizontal.
+- **Base preservada:** nenhuma mudança em preços, evolução dos edifícios, salvamentos, IA, missões ou combate.
 
 ## 📜 Versão 0.8.4 — Visual original e novas missões
 
@@ -17,7 +25,7 @@ Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldei
 
 - **Resolução intermediária:** menu lateral e área de jogo ocupam a largura disponível sem espremer o painel principal; a ajuda aparece abaixo.
 - **Celular e tablet:** barra superior reorganizada, navegação lateral vira uma faixa horizontal deslizável e cartões se reorganizam conforme a tela.
-- **Mapa e aldeia (na v0.8.3):** as cenas passaram temporariamente a usar rolagem horizontal; a v0.8.4 voltou ao dimensionamento da primeira versão.
+- **Mapa e aldeia (na v0.8.3):** as cenas passaram temporariamente a usar rolagem horizontal; a v0.8.5 voltou ao dimensionamento da primeira versão.
 - **Janelas, configurações e painéis:** campos e ações quebram linha para evitar elementos cortados.
 - Nenhuma mudança nas regras da campanha ou formato do salvamento.
 
