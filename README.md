@@ -27,7 +27,7 @@ python -m http.server 8000
 
 Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não exige internet. Para voltar ao jogo, use sempre a mesma origem/porta e navegador, pois o salvamento local é separado por origem.
 
-## 🎮 O que funciona na versão 0.2
+## 🎮 O que funciona na versão 0.3
 
 | Sistema | Funcionalidade |
 |---|---|
@@ -36,7 +36,8 @@ Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não
 | Aldeia | 20 espaços, edifícios com custos escalonados, pré-requisitos, níveis e tempos de construção |
 | Filas | Uma construção de cada categoria para Romanos; uma por vez para outras tribos; cancelamento com devolução de 75% |
 | Tropas | Quatro tipos por tribo, recrutamento e manutenção de cereal |
-| Mapa | Região 17×17 com visualização 11×11, aldeias, vales, oásis e acampamentos hostis |
+| Mapa | Região 17×17 com visualização 11×11, aldeias, vales, oásis, acampamentos e reinos rivais |
+| Mundo Vivo | 3 facções NPC com recursos, desenvolvimento, recrutamento, expansão, ataques, saques e conquistas de território |
 | Combates | Ataques e saques simulados, deslocamento, baixas, capacidade de carga, saque e retorno das tropas |
 | Herói | Aventuras, vida, experiência, níveis, evolução de atributos e produção bônus |
 | Missões | Sete objetivos com recompensas em recursos |
@@ -66,6 +67,7 @@ GuerraSemFim/
 │   ├── aldeia-cenario.svg    # Cenário vetorial do centro da aldeia
 │   └── campos-cenario.svg    # Cenário vetorial dos recursos
 ├── js/
+│   ├── ai.js                 # Reinos rivais, economia, turnos e ataques NPC
 │   ├── data.js               # Tribos, edifícios, tropas, custo, posições
 │   ├── engine.js             # Estado, economia, tempo, filas, batalhas, save
 │   └── app.js                # Interface, navegação e interações
@@ -80,7 +82,7 @@ GuerraSemFim/
 
 O código utiliza apenas JavaScript nativo, HTML e CSS. **Nenhum `npm install` é necessário para jogar.**
 
-## ✨ Novidades da versão 0.2
+## ✨ Novidades da versão 0.3
 
 - Cenários originais SVG para **aldeias e campos**, destaque de edifícios por patamar e visual aprimorado para tela pequena.
 - **Conselho do Reino** no Centro da Aldeia com objetivo atual, progresso das missões e atalho para a próxima ação.
@@ -98,16 +100,24 @@ Se tiver Node.js instalado:
 ```bash
 node tests/smoke.test.js
 node tests/regression.test.js
+node tests/world.test.js
+node tests/regression.test.js
 ```
 
 Os testes cobrem criação de mundo, tribos, produção, filas, construção, exploração, batalha, herói, missões e salvamento. Validações manuais devem ser repetidas nos navegadores pretendidos para distribuição.
 
 ## ⚠️ Limites conhecidos
 
-Esta é uma versão inicial funcional — **não é uma reprodução integral do Travian**. A fórmula de combate é simplificada; não há jogadores reais, alianças, mercado entre jogadores, modo multijogador, Natares, maravilhas do mundo, eventos de servidor, herói equipado, cerco operacional, rotas comerciais, colonizadores nem pontos de cultura. As tropas de exploração ainda não executam espionagem especial; os confrontos são contra acampamentos controlados localmente. Oásis aparecem no mapa, mas sua anexação ainda não foi implementada.
+Esta é uma versão inicial funcional — **não é uma reprodução integral do Travian**. A fórmula de combate é simplificada; não há jogadores reais, alianças, mercado entre jogadores, modo multijogador, Natares, maravilhas do mundo, eventos de servidor, herói equipado, cerco operacional, rotas comerciais, colonizadores nem pontos de cultura. As tropas de exploração ainda não executam espionagem especial; os confrontos agora incluem guarnições de reinos NPC locais. A IA usa decisões heurísticas e ainda não possui diplomacia, cerco ou conquista de aldeias próprias do jogador. Oásis aparecem no mapa, mas sua anexação ainda não foi implementada.
 
 Veja o [inventário completo](docs/ANALISE_TRAVIAN.md), o [roteiro de expansão](docs/ROADMAP.md) e o [guia de publicação no GitHub](docs/PUBLICACAO_GITHUB.md).
 
 ## 📜 Licença
 
 O código original deste repositório está sob a licença MIT (`LICENSE`). Travian e demais marcas de terceiros pertencem aos seus respectivos titulares. Este projeto não possui afiliação com a Travian Games.
+
+## 🏯 v0.3 — Mundo Vivo
+
+Três reinos rivais (Clã dos Corvos, Ordem da Aurora e Liga dos Espinhos) surgem em posições disponíveis do mapa. A cada turno da IA, suas cidades produzem, se desenvolvem e treinam soldados; os reinos podem fundar até três assentamentos e enviar ataques às aldeias do jogador após cinco turnos de trégua. As marchas aparecem na tela **Reinos Rivais**. Saques do jogador roubam recursos dos rivais; ataques completos com sucesso podem destruir um assentamento e liberar seu vale, mas a colonização pelo jogador ainda exige Residência e recursos.
+
+O jogo processa as atividades rivais offline ao abrir a partida. Para não travar o dispositivo depois de longos períodos, o avanço da IA é limitado a até 240 turnos por atualização longa. O tempo e os conflitos usam simulação local e não exigem rede. Saves v0.1/v0.2 são migrados automaticamente (mantendo as aldeias e os recursos existentes). **Exporte seu backup antes de atualizar.**

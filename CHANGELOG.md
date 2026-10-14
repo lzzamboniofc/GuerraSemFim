@@ -1,27 +1,23 @@
-# Histórico de versões
+# Histórico de versões — Guerra Sem Fim
 
-## v0.2 — Visual & Confiabilidade (2026-10-14)
+## v0.3 — Mundo Vivo (14/10/2026)
 
-### Adicionado
-- Cenários originais em SVG para centro da aldeia e campos de recursos, totalmente offline.
-- Distinção visual entre construções simples, desenvolvidas e avançadas.
-- Conselho do Reino: próxima missão, progresso e atalho contextual.
-- Medidores discretos de capacidade dos armazéns na barra de recursos.
-- Salvamento reserva em `localStorage` com recuperação do backup local em caso de corrupção do principal.
-- Validação dos dados importados, com rejeição de valores fora de faixa e estruturas inválidas.
-- Testes de regressão para envio de tropas, tempo offline, combate/retorno e saves.
+- Três reinos rivais com capital, bandeira, nível de desenvolvimento, muralhas, guarnição e economia locais.
+- Turnos da IA com geração de recursos, evolução de cidades, recrutamento e fundação de novos postos.
+- Marchas NPC com aviso prévio, batalhas defensivas, perdas, saques e retorno dos sobreviventes.
+- Aldeias rivais visíveis no mapa e acessíveis por saque ou ataque completo.
+- Ataques completos podem libertar um território (sem colonizá-lo automaticamente).
+- Tela Reinos Rivais com visão por facção, tropas, assentamentos e marchas iminentes.
+- Migração automática de salvamentos v0.1/v0.2; a estrutura de save continua compatível com as regras da versão 1.
+- Processamento offline determinístico integrado à linha do tempo do motor, limitado a 240 turnos recentes em períodos longos para manter desempenho.
+- Oito novos testes de IA, migração, combate e salvamento.
 
-### Corrigido
-- Envio de tropas acima da quantidade disponível não pode mais criar saldo negativo.
-- Envio com unidade inexistente, quantidade negativa/fracionária ou ordem inválida é rejeitado.
-- Eventos antigos são processados na sequência cronológica ao carregar uma partida.
-- Batalha e retorno podem se resolver na mesma retomada offline quando ambos já venceram.
+## v0.2 — Alicerce e apresentação
 
-### Compatibilidade
-- Campanhas salvas no formato da v0.1 permanecem compatíveis.
-- O jogo continua sem bibliotecas, serviços ou assets externos.
-- Para melhor persistência, sirva os arquivos via `python -m http.server 8000` e use sempre a mesma origem.
+- Cenários SVG para aldeia e campos, melhorias de interface e painel de missões.
+- Correção do envio de tropas inválidas, da ordem cronológica dos eventos offline e validação de saves.
+- Backup local automático e testes de regressão.
 
-### Limitações
-- Esta atualização não adiciona reinos de IA, novas tropas nem combate avançado; esses recursos fazem parte das próximas fases.
-- A recuperação usa a cópia local anterior; exportar um arquivo JSON periodicamente continua recomendado.
+## v0.1 — Fundação
+
+- Aldeias, recursos, construções, tropas, missões, aventura de herói, mapa, batalhas, mercado e salvamentos offline.

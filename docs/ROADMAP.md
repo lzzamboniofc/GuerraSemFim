@@ -24,12 +24,19 @@
 - Consumo crítico de cereal, fome, recuperação e população mais detalhada.
 - Colonizadores, pontos de cultura e residência/palácio com espaços de expansão.
 
-## Fase 3 — Guerra tática e IA
+## Entregue parcialmente: v0.3 — Mundo Vivo
+
+- Três facções NPC com aldeias próprias e crescimento autônomo.
+- Recursos, turnos, treinamento e expansão locais.
+- Invasões, defesas, saque e conquista/liberação de vales inimigos.
+- Tela de situação dos reinos e alertas de marchas.
+
+## Fase 3 — Guerra tática e IA (continuação)
 
 - Combate separado por tipo de defesa contra infantaria/cavalaria, muralha, moral, ferreiro e simulador.
 - Espionagem, reforço, saques repetidos, combate de animais e domínio de oásis.
 - Máquinas de cerco com aríetes e catapultas; dano em edifícios.
-- Vários chefes NPC com aldeias, economia, treinamento, ataques proativos, reação à guerra e expansão rival.
+- IA NPC: melhorar escolhas de alvos, reação a cercos, diplomacia, dificuldade ajustável e coordenação de exércitos.
 - Registro de combates detalhado, predileção de alvos e regras para vitória/derrota da campanha.
 
 ## Fase 4 — Herói, facções e profundidade estratégica

@@ -38,3 +38,24 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 @media(max-width:920px){.kingdom-guide{flex-wrap:wrap}.guide-action{margin-left:77px}}
 @media(max-width:580px){.kingdom-guide{padding:13px;gap:10px}.guide-emblem{min-width:45px;height:45px;font-size:25px}.guide-copy strong{font-size:16px}.guide-action{margin-left:0;width:100%}.scene-title{font-size:9px;top:8px;left:8px;padding:5px 8px}}
 @media(prefers-reduced-motion:reduce){.town-slot.building .building-art{animation:none}.town-slot,.field-slot,.resource-meter>span{transition:none}}
+
+/* v0.3 — painel dos reinos, alertas de invasões e assentamentos no mapa */
+.map-tile.rival{background:linear-gradient(145deg,#b89b73,#80584d);border-color:#703b3c;box-shadow:inset 0 0 0 1px #e9c58d}
+.map-tile.rival .glyph{filter:drop-shadow(0 2px 2px #301b19);animation:rivalBanner 3.2s ease-in-out infinite}
+.map-dot.rival{background:#995452;border-color:#5e2a31}
+.rivals-intro{margin-bottom:18px;border:1px solid #c6a66c;border-radius:9px;display:flex;justify-content:space-between;gap:16px;padding:22px;align-items:center;background:linear-gradient(110deg,#f5ebd2 12%,#e2cfa7 62%,#d1bc8c);box-shadow:0 5px 20px #4038221b}
+.rivals-intro h3{font-size:23px;color:#354f38;margin:8px 0 5px}.rivals-intro p{max-width:580px;line-height:1.65;font-size:13px;color:#74654b;margin:0}
+.rival-summary{border:1px solid #9d8a66;background:#f9eacaaf;border-radius:8px;min-width:175px;padding:15px;display:grid;gap:7px;font:12px Arial,sans-serif;text-align:center}
+.rival-summary strong{font-size:14px;color:#6e4639}.rival-summary small{color:#786e53}.rival-summary span{font-weight:700;color:#395939}
+.faction-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.faction-card{border:1px solid #d7c39e;border-top:5px solid var(--faction-color);border-radius:8px;background:linear-gradient(155deg,#fff8e7,#e9ddbe);padding:17px;box-shadow:var(--soft);min-width:0}
+.faction-card.defeated{filter:grayscale(.65);opacity:.8}.faction-title{display:flex;gap:10px;align-items:center}.faction-icon{background:var(--faction-color);border-radius:8px;display:grid;place-items:center;height:43px;min-width:43px;font-size:23px;color:white;box-shadow:inset 0 0 0 2px #fff7df40}
+.faction-title h3{font-size:16px;color:#3a4f38;margin:0 0 5px}.faction-title small{color:#958466;font:11px Arial,sans-serif}
+.faction-metrics{display:flex;gap:5px;justify-content:space-between;margin:17px 0 10px;padding:11px 5px;border-top:1px solid #ddcbaa;border-bottom:1px solid #ddcbaa}
+.faction-metrics span{display:grid;text-align:center;font:10px Arial,sans-serif;color:#837255}.faction-metrics b{font:700 17px Arial,sans-serif;color:#405e41;margin-bottom:3px}
+.faction-card p{font:12px/1.55 Arial,sans-serif;color:#736753;min-height:62px}.faction-card .btn{width:100%}
+.threat-panel{border-left:5px solid #aa594d}.incoming-row{background:#f6e2d6;border-left:3px solid #b45649;padding:12px 13px;margin:7px 0;border-radius:4px}
+@keyframes rivalBanner{50%{transform:translateY(-3px)}}
+@media(max-width:1200px){.faction-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.faction-grid{grid-template-columns:1fr}.rivals-intro{flex-direction:column;align-items:stretch;padding:15px}.rivals-intro h3{font-size:19px}.rival-summary{min-width:0}}
+@media(prefers-reduced-motion:reduce){.map-tile.rival .glyph{animation:none}}

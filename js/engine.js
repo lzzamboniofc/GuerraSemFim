@@ -33,12 +33,13 @@ function newGame(options={}) {
   st.world.tiles.push({id:`${x}:${y}`,x,y,kind,name:kind==='enemy'?`${prefix} Sombrio`:kind==='oasis'?'Oásis Selvagem':'Vale Desabitado',
    power:kind==='enemy'?power:0,resources:kind==='enemy'?{wood:130+power*29,clay:110+power*27,iron:110+power*25,crop:160+power*26}:null});
  }
+ if(window.GSF_AI)window.GSF_AI.init(st,now());
  log(st,'Bem-vindo ao Guerra Sem Fim! Sua aldeia está pronta para crescer.','welcome');
  report(st,'O início de um império','Seu povo ergueu os primeiros edifícios e aguarda suas ordens. Expanda os campos, crie um exército e descubra o mapa.', 'info');
  save(st);return st;
 }
 function active(st){return st.villages.find(v=>v.id===st.activeVillageId)||st.villages[0];}
-function tileAt(st,x,y){const owned=st.villages.find(v=>v.x===x&&v.y===y);if(owned)return {id:owned.id,x,y,kind:'player',name:owned.name};return st.world.tiles.find(t=>t.x===x&&t.y===y)||null;}
+function tileAt(st,x,y){const owned=st.villages.find(v=>v.x===x&&v.y===y);if(owned)return {id:owned.id,x,y,kind:'player',name:owned.name};const rival=window.GSF_AI?.tileAt(st,x,y);return rival||st.world.tiles.find(t=>t.x===x&&t.y===y)||null;}
 function buildLevel(v,key){return v.buildings[key]||0;}
 function cost(type,key,next) {const base=type==='field'?D.FIELDS[key].base:D.BUILDINGS[key].base;return base.map(n=>Math.ceil(n*Math.pow(1.32,next-1)));}
 function buildTime(st,v,type,key,next){const base=type==='field'?D.FIELDS[key].time:D.BUILDINGS[key].time;const main=buildLevel(v,'main');return Math.max(5,Math.round(base*Math.pow(1.23,next-1)*Math.pow(0.96,Math.max(0,main-1))/st.speed));}
@@ -86,7 +87,7 @@ function train(st,v,unitId,qty){const c=canTrain(st,v,unitId,qty);if(!c.ok)retur
 function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
 function send(st,v,x,y,army,mode='raid'){
  const target=tileAt(st,x,y);
- if(!target||target.kind!=='enemy')return {ok:false,error:'Escolha um acampamento hostil no mapa.'};
+ if(!target||!['enemy','rival'].includes(target.kind))return {ok:false,error:'Escolha um acampamento ou reino rival no mapa.'};
  if(buildLevel(v,'rally')<1)return {ok:false,error:'Construa o Ponto de Reunião.'};
  if(!army||typeof army!=='object'||Array.isArray(army))return {ok:false,error:'Seleção de tropas inválida.'};
  if(!['raid','attack'].includes(mode))return {ok:false,error:'Tipo de missão inválido.'};
@@ -111,7 +112,8 @@ function send(st,v,x,y,army,mode='raid'){
 }
 function report(st,title,body,type='info',details=null){st.reports.unshift({id:id(st),title,body,type,details,at:now(),read:false});if(st.reports.length>100)st.reports.length=100;}
 function log(st,message,type='info'){st.events.unshift({id:id(st),message,type,at:now()});if(st.events.length>45)st.events.length=45;}
-function resolveBattle(st,m,arrivedAt){const v=st.villages.find(q=>q.id===m.villageId),t=st.world.tiles.find(q=>q.id===m.targetId);if(!v||!t){m.phase='returning';m.endsAt=arrivedAt+5000;return;}
+function resolveBattle(st,m,arrivedAt){
+ if(window.GSF_AI?.isRivalTarget(st,m))return window.GSF_AI.resolveBattle(st,m,arrivedAt);const v=st.villages.find(q=>q.id===m.villageId),t=st.world.tiles.find(q=>q.id===m.targetId);if(!v||!t){m.phase='returning';m.endsAt=arrivedAt+5000;return;}
  const defs=troopDefs(st);const atk=sum(defs.map(u=>(m.army[u.id]||0)*u.attack));const def=t.power*32+10;
  const win=atk>=def*0.72;const fraction=win?clamp((def/(atk+def))*0.55,0.02,0.58):clamp(def/(atk+def)*0.9,.4,1);
  const survivors={};const losses={};defs.forEach(u=>{const n=m.army[u.id]||0;const killed=Math.min(n,Math.round(n*fraction));if(n){survivors[u.id]=n-killed;losses[u.id]=killed;}});
@@ -179,6 +181,7 @@ function resolveDue(st,at){
   resolved=true;
  }
  if(st.hero.adventure&&st.hero.adventure.endsAt<=at){resolveAdventure(st);resolved=true;}
+ if(window.GSF_AI?.resolveDue(st,at))resolved=true;
  return resolved;
 }
 function advance(st,time=now()){
@@ -187,6 +190,7 @@ function advance(st,time=now()){
  let cursor=Number(st.lastTick)||time;
  if(time<cursor){st.lastTick=time;return st;}
  cursor=Math.max(cursor,time-30*86400000);
+ window.GSF_AI?.prepare(st,cursor,time);
  // Eventos que já venceram antes do ponto inicial também devem ser resolvidos.
  let steps=0;
  while(resolveDue(st,cursor)&&++steps<10000){}
@@ -195,6 +199,7 @@ function advance(st,time=now()){
   st.villages.forEach(v=>{v.buildQueue.forEach(q=>{if(q.endsAt>cursor)next.push(q.endsAt);});v.trainingQueue.forEach(q=>{if(q.endsAt>cursor)next.push(q.endsAt);});});
   st.movements.forEach(m=>{if(m.endsAt>cursor)next.push(m.endsAt);});
   if(st.hero.adventure?.endsAt>cursor)next.push(st.hero.adventure.endsAt);
+  if(window.GSF_AI)next.push(...window.GSF_AI.nextEvents(st,cursor));
   const end=Math.min(time,...next),hours=Math.max(0,end-cursor)/3600000;
   st.villages.forEach(v=>{const rates=production(st,v);D.RES.forEach(k=>v.resources[k]=clamp(v.resources[k]+rates[k]*hours,0,capacity(v,k)));});
   cursor=end;
@@ -238,6 +243,7 @@ function validateState(st){
   if(!v.trainingQueue.every(q=>plain(q)&&validNumber(q.endsAt)&&Number.isSafeInteger(q.qty)&&q.qty>=1&&q.qty<=500&&D.TROOPS[st.tribe].some(t=>t.id===q.unitId)))return false;
  }
  if(!ids.has(st.activeVillageId))return false;
+ if(st.ai&&window.GSF_AI&&!window.GSF_AI.validate(st.ai,st))return false;
  if(!st.world.tiles.every(t=>plain(t)&&typeof t.id==='string'&&typeof t.name==='string'&&
   Number.isSafeInteger(t.x)&&Number.isSafeInteger(t.y)&&Math.abs(t.x)<=8&&Math.abs(t.y)<=8&&
   ['empty','enemy','oasis'].includes(t.kind)&&validNumber(t.power,0,1e9)&&
