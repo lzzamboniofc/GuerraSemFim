@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.8.4] — Missões e retorno visual à versão inicial · 14/10/2026
+
+- Aldeia, campos e mapa restaurados especificamente ao layout da v0.1, com grades e ícones clássicos e sem rolagem horizontal interna obrigatória. O restante do layout responsivo da v0.8.3 permanece.
+- 157 missões permanentes na aldeia inicial; linhas progressivas de edifícios, campos, exército, herói, população, oásis e expansão. Novas aldeias passam a ter missões próprias.
+- Interface de missões com filtros por situação e categoria, medidores de progresso e exibição de recompensas de recursos e XP.
+- Novas missões preservam os 7 identificadores históricos; recompensas são únicas e persistem nos saves existentes.
+- Validação de saves ampliada para acomodar os resgates adicionais e impedir IDs duplicados.
+- Referência de progressão: https://support.travian.com/pt/articles/17-sistema-de-tarefas; sem copiar textos, arte ou recompensas.
+- Novos testes de missão, compatibilidade de saves, filtros e restauração visual.
+
 ## [0.8.3] — Layout adaptativo e correções de espaço · 14/10/2026
 
 - Menu lateral e conteúdo deixam de competir por espaço em telas intermediárias; o conselheiro passa para baixo do conteúdo quando necessário.

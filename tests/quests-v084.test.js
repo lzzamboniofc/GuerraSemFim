@@ -1,0 +1,47 @@
+'use strict';
+const fs=require('fs'),vm=require('vm'),path=require('path'),assert=require('node:assert/strict');
+const root=path.resolve(__dirname,'..'),db=new Map(),C={window:{},Math,JSON,Date,console,localStorage:{getItem:k=>db.get(k)||null,setItem:(k,v)=>db.set(k,v),removeItem:k=>db.delete(k)}};
+vm.createContext(C);
+for(const f of ['data','war','ai','campaign','expansion','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',f+'.js'),'utf8'),C,{filename:f});
+const E=C.window.GSF;
+const st=E.newGame({speed:12});let v=E.active(st),tasks=E.questList(st);
+assert(tasks.length>=140,`Missões iniciais insuficientes: ${tasks.length}`);
+const categories=new Set(tasks.map(t=>t.category));
+for(const c of ['Início','Aldeia','Campos','Economia','Militar','Herói','Expansão','Império'])assert(categories.has(c),`Categoria ${c} ausente`);
+assert.equal(new Set(tasks.map(t=>t.id)).size,tasks.length,'IDs únicos');
+assert(tasks.every(t=>t.target>0&&t.progress>=0&&t.reward>0&&t.xp>=0),'Recompensas/progresso válidos');
+for(const id of ['welcome','fields','construction','army','adventure','raid','settle'])assert(tasks.find(q=>q.id===id),'ID histórico perdido: '+id);
+assert(!E.claim(st,'g:villages:5').ok,'Missões pendentes não devem permitir resgate');
+const startExp=st.hero.xp,startResources=v.resources.wood;
+assert(E.claim(st,'welcome').ok,'Missão antiga ainda funciona');
+assert(st.hero.xp>startExp,'Recompensa concede experiência do herói');
+assert(v.resources.wood>=startResources,'Missão concede recurso até a capacidade');
+assert(!E.claim(st,'welcome').ok,'Não é possível duplicar a recompensa');
+assert(E.claim(st,`v:${v.id}:b:main:1`).ok,'Edifício inicial pode desbloquear recompensa');
+assert(E.claim(st,`v:${v.id}:field:wood:2`).ok===false,'Campo nível 2 não pode ser resgatado antecipadamente');
+for(const f of v.fields.filter(f=>f.type==='wood'))f.level=2;
+assert(E.questList(st).find(q=>q.id===`v:${v.id}:all:wood:2`).done,'Todos os bosques contam');
+assert(E.claim(st,`v:${v.id}:all:wood:2`).ok,'Todos os bosques recompensados');
+assert(E.questList(st).find(q=>q.id===`v:${v.id}:all-fields:2`).done===false,'Um recurso não completa todos os campos');
+// Salvos da v0.8.3 podem manter todos os resgates sem mudar o formato de save.
+const before=E.exportSave(st);assert(E.importSave(before).ok,'Importação do JSON');
+assert(E.load().questsClaimed.includes('welcome'),'Estado de resgate persistido');
+const old=JSON.parse(before);old.questsClaimed=['welcome','fields'];
+assert(E.importSave(JSON.stringify(old)).ok,'Save legado com IDs antigos é aceito');
+assert(E.questList(E.load()).find(q=>q.id==='welcome').claimed,'Missão antiga não reaparece como não resgatada');
+// Configuração fraudulenta de IDs repetidos deve ser rejeitada.
+const invalid=JSON.parse(before);invalid.questsClaimed=['welcome','welcome'];
+assert(!E.importSave(JSON.stringify(invalid)).ok,'IDs duplicados devem ser rejeitados');
+// Aldeias novas recebem uma linha independente de missões.
+const fresh=E.newGame(),source=fresh.villages[0];
+const second=JSON.parse(JSON.stringify(source));second.id='e999';second.name='Nova Colônia';second.x=1;second.y=1;
+second.buildings={main:1,warehouse:0,granary:0,rally:0};
+second.buildingSlots={0:'main'};second.fields.forEach(f=>f.level=0);
+fresh.villages.push(second);
+const quests=E.questList(fresh),local=quests.filter(q=>q.villageId==='e999');
+assert(local.length>=55,'Aldeia fundada gera missões locais');
+assert(!local.some(q=>q.id.startsWith('v:'+source.id+':')),'IDs locais sem colisões');
+const started=quests.find(q=>q.id==='v:e999:b:main:1');assert(started?.done,'Aldeia nova tem tarefa de Edifício Principal');
+assert(E.claim(fresh,started.id).ok,'Aldeia fundada pode reivindicar prêmio local');
+assert(fresh.questsClaimed.includes(started.id),'A recompensa é persistente');
+console.log(`✓ Missões v0.8.4: ${tasks.length} etapas na aldeia inicial, linhas por aldeia, recursos, XP, saves antigos e anti-duplicação`);

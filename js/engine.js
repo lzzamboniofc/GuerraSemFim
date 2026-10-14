@@ -314,16 +314,118 @@ function settle(st,v,x,y,name){const tile=tileAt(st,x,y);if(!tile||tile.kind!=='
  const price=[1600,1600,1600,1600];if(!canPay(v,price))return {ok:false,error:'Colonização custa 1.600 de cada recurso.'};
  pay(v,price);v.settlers-=3;const next=village(st,(name||'Nova Colônia').trim().slice(0,28)||'Nova Colônia',x,y,false,tileProfile(tile));st.villages.push(next);st.activeVillageId=next.id;
  log(st,`Uma nova aldeia foi fundada em (${x}|${y})!`,'build');report(st,'Nova aldeia fundada',`${next.name} agora faz parte do seu império.`,'victory');save(st);return {ok:true};}
-function questList(st){const v=st.villages[0];const levels=v.fields.filter(f=>f.level>=2).length;const available=[
- {id:'welcome',title:'Primeiros passos',desc:'Inicie seu império.',done:true,reward:120},
- {id:'fields',title:'Terra fértil',desc:'Melhore 3 campos ao nível 2.',done:levels>=3,reward:200},
- {id:'construction',title:'Pedra sobre pedra',desc:'Construa ou melhore 5 edifícios (níveis somados: 12).',done:sum(Object.values(v.buildings))>=12,reward:300},
- {id:'army',title:'Bandeira de guerra',desc:'Treine um total de 20 tropas em uma aldeia.',done:st.villages.some(v=>sum(Object.values(v.troops))>=20),reward:280},
- {id:'adventure',title:'Desbravador',desc:'Conclua uma aventura do herói.',done:st.hero.adventures>=1,reward:250},
- {id:'raid',title:'Os despojos',desc:'Retorne com sucesso de um ataque.',done:st.reports.some(r=>r.type==='victory'&&r.title.includes('Vitória em')),reward:400},
- {id:'settle',title:'Um novo horizonte',desc:'Funde uma segunda aldeia.',done:st.villages.length>=2,reward:800}
- ];return available.map(q=>({...q,claimed:st.questsClaimed.includes(q.id)}));}
-function claim(st,questId){const q=questList(st).find(q=>q.id===questId);if(!q||!q.done||q.claimed)return {ok:false,error:'Missão ainda não concluída.'};st.questsClaimed.push(q.id);const v=st.villages[0];addResources(v,{wood:q.reward,clay:q.reward,iron:q.reward,crop:q.reward});log(st,`Missão concluída: ${q.title}.`,'quest');save(st);return {ok:true};}
+// Missões progressivas inspiradas na organização geral das tarefas de Travian:
+// missões globais e linhas de objetivos por aldeia. Arte, textos e recompensas são próprios.
+function questList(st){
+ const first=st.villages[0], claimed=new Set(st.questsClaimed||[]), out=[];
+ const allTroops=st.villages.reduce((n,v)=>n+sum(Object.values(v.troops)),0);
+ const add=(id,category,series,title,desc,progress,target,reward,xp=0,villageId=null)=>{
+  const count=Number.isFinite(progress)?Math.max(0,Math.floor(progress)):0;
+  out.push({id,category,series,title,desc,progress:count,target,done:count>=target,reward,xp,villageId,claimed:claimed.has(id)});
+ };
+ const legacy=[
+  ['welcome','Primeiros passos','Inicie seu império.',1,1,120],
+  ['fields','Terra fértil','Melhore 3 campos ao nível 2.',first.fields.filter(f=>f.level>=2).length,3,200],
+  ['construction','Pedra sobre pedra','Construa ou melhore 5 edifícios (níveis somados: 12).',sum(Object.values(first.buildings)),12,300],
+  ['army','Bandeira de guerra','Mantenha pelo menos 20 tropas em uma aldeia.',Math.max(...st.villages.map(v=>sum(Object.values(v.troops)))),20,280],
+  ['adventure','Desbravador','Conclua uma aventura do herói.',st.hero.adventures,1,250],
+  ['raid','Os despojos','Retorne com sucesso de um ataque.',st.reports.some(r=>r.type==='victory'&&r.title.includes('Vitória em'))?1:0,1,400],
+  ['settle','Um novo horizonte','Funde uma segunda aldeia.',st.villages.length,2,800]
+ ];
+ for(const [key,title,desc,value,target,reward] of legacy)
+  add(key,'Início',`intro:${key}`,title,desc,value,target,reward,20,first.id);
+ const buildingGoals={
+  main:[1,3,7,12,20],warehouse:[1,3,7,12,20],granary:[1,3,7,12,20],
+  barracks:[1,3,7,12,20],stable:[1,3,7,12,20],academy:[1,10,20],
+  smithy:[1,10,20],townhall:[1,10,20],workshop:[1],rally:[1,10,20],
+  marketplace:[1,3,7,12,20],embassy:[1,3,7,12,20],residence:[1,3,7,10,20],
+  heroMansion:[1,10,20],wall:[1,3,7,12,20],cranny:[1,3,6,10],
+  sawmill:[1,5],brickyard:[1,5],ironworks:[1,5],mill:[1,5]
+ };
+ const military=new Set(['barracks','stable','academy','smithy','workshop','rally','wall']);
+ const resourceBuildings=new Set(['warehouse','granary','marketplace','cranny','sawmill','brickyard','ironworks','mill']);
+ const resourceGoals=[2,4,7,10];
+ for(const [position,v] of st.villages.entries()){
+  const scope=`v:${v.id}`,fresh=position>0;
+  for(const [key,baseTargets] of Object.entries(buildingGoals)){
+   const b=D.BUILDINGS[key];
+   const targets=fresh?baseTargets.filter(n=>n===1||n===10||n===20):baseTargets;
+   for(const [index,target] of targets.entries()){
+    if(target>b.max)continue;
+    const cat=military.has(key)?'Militar':resourceBuildings.has(key)?'Economia':'Aldeia';
+    add(`${scope}:b:${key}:${target}`,cat,`${scope}:b:${key}`,`${b.name} — nível ${target}`,
+     `${v.name}: evolua ${b.name} até o nível ${target}.`,buildLevel(v,key),target,
+     Math.min(3200,70+target*48+index*85),15+target*3,v.id);
+   }
+  }
+  for(const resource of D.RES){
+   const fields=v.fields.filter(f=>f.type===resource);
+   for(const [i,target] of resourceGoals.entries()){
+    const progress=Math.max(...fields.map(f=>f.level));
+    add(`${scope}:field:${resource}:${target}`,'Campos',`${scope}:field:${resource}`,
+     `${D.FIELDS[resource].name} — nível ${target}`,
+     `${v.name}: eleve pelo menos um campo de ${D.RESOURCE[resource].name.toLowerCase()} ao nível ${target}.`,
+     progress,target,Math.min(2400,140+target*60+i*40),15+target*3,v.id);
+   }
+   for(const target of [2,3,5,8,10]){
+    const count=fields.filter(f=>f.level>=target).length;
+    add(`${scope}:all:${resource}:${target}`,'Campos',`${scope}:all:${resource}`,
+     `Todos os campos de ${D.RESOURCE[resource].name} — nível ${target}`,
+     `${v.name}: tenha os ${fields.length} campos de ${D.RESOURCE[resource].name.toLowerCase()} no nível ${target}.`,
+     count,fields.length,Math.min(3300,250+target*65),25+target*4,v.id);
+   }
+  }
+  for(const target of [2,4,7,8,9,10]){
+   const progress=v.fields.filter(f=>f.level>=target).length;
+   add(`${scope}:all-fields:${target}`,'Campos',`${scope}:all-fields`,
+    `Desenvolvimento equilibrado — nível ${target}`,
+    `${v.name}: eleve todos os 18 campos ao nível ${target}.`,
+    progress,18,Math.min(4500,380+target*95),40+target*4,v.id);
+  }
+  for(const [i,target] of [50,100,150,250,350,500,750,1000].entries()){
+   add(`${scope}:pop:${target}`,'Aldeia',`${scope}:pop`,`${v.name}: ${target} habitantes`,
+    `Alcance ${target} habitantes nesta aldeia.`,population(v),target,180+100*i,30+i*8,v.id);
+  }
+ }
+ for(const [i,target] of [50,100,150,250,350,500,750,1000].entries()){
+  const count=st.villages.reduce((n,v)=>n+population(v),0);
+  add(`g:population:${target}`,'Império','g:population',`Império populoso — ${target}`,
+   `Tenha pelo menos ${target} habitantes somando todas as aldeias.`,count,target,280+i*155,40+i*10,first.id);
+ }
+ for(const [i,target] of [1,3,5,10,20,30].entries()){
+  add(`g:adventures:${target}`,'Herói','g:adventures',`Explorador experiente — ${target} aventuras`,
+   `Conclua ${target} aventuras com o herói.`,st.hero.adventures,target,180+i*230,30+i*20,first.id);
+ }
+ for(const [i,target] of [25,50,100,200,400].entries()){
+  add(`g:troops:${target}`,'Militar','g:troops',`Força militar — ${target} soldados`,
+   `Mantenha ${target} soldados disponíveis nas suas aldeias.`,allTroops,target,180+i*255,35+i*15,first.id);
+ }
+ for(const [i,target] of [2,3,4,5].entries()){
+  add(`g:villages:${target}`,'Império','g:villages',`Novas fronteiras — ${target} aldeias`,
+   `Controle ${target} aldeias em seu império.`,st.villages.length,target,650+i*400,70+i*25,first.id);
+ }
+ const oases=st.world.tiles.filter(t=>t.kind==='oasis'&&st.villages.some(v=>v.id===t.ownerVillageId)).length;
+ for(const [i,target] of [1,2,3,5].entries()){
+  add(`g:oases:${target}`,'Expansão','g:oases',`Senhor dos oásis — ${target}`,
+   `Conquiste ${target} oásis para suas aldeias.`,oases,target,400+i*245,55+i*25,first.id);
+ }
+ return out;
+}
+function claim(st,questId){
+ const q=questList(st).find(q=>q.id===questId);
+ if(!q||!q.done||q.claimed)return {ok:false,error:'Missão ainda não concluída ou já resgatada.'};
+ const v=st.villages.find(v=>v.id===q.villageId)||st.villages[0];
+ // Grava o resgate de forma atômica: não permite obter a mesma recompensa duas vezes.
+ st.questsClaimed.push(q.id);
+ addResources(v,{wood:q.reward,clay:q.reward,iron:q.reward,crop:q.reward});
+ st.hero.xp+=(q.xp||0);
+ while(st.hero.xp>=st.hero.level*100&&st.hero.level<1000){
+  st.hero.xp-=st.hero.level*100;st.hero.level++;st.hero.points+=4;st.hero.hp=100;
+  log(st,`Seu herói subiu para o nível ${st.hero.level}!`,'hero');
+ }
+ log(st,`Missão concluída: ${q.title} (+${q.reward} de cada recurso e +${q.xp||0} EXP).`,'quest');
+ save(st);return {ok:true};
+}
 // Processa eventos em ordem temporal antes de contabilizar a produção do próximo trecho.
 // Isto evita perder construções, retornos de tropas ou mudanças econômicas durante o tempo offline.
 function resolveDue(st,at){
@@ -399,7 +501,7 @@ function validateState(st){
   !validNumber(st.lastTick,0)||!validNumber(st.createdAt,0)||
   !validArray(st.villages,5)||st.villages.length===0||!plain(st.world)||!validArray(st.world.tiles,1000)||
   !validArray(st.movements,500)||!validArray(st.reports,100)||!validArray(st.events,100)||
-  !validArray(st.questsClaimed,20)||!plain(st.hero))return false;
+  !validArray(st.questsClaimed,1000)||!st.questsClaimed.every(q=>typeof q==='string'&&q.length<=100)||new Set(st.questsClaimed).size!==st.questsClaimed.length||!plain(st.hero))return false;
  if(st.preferences!==undefined&&(!plain(st.preferences)||typeof st.preferences.enemyAttacks!=='boolean'||(st.preferences.extraBuildSlots!==undefined&&(!Number.isSafeInteger(st.preferences.extraBuildSlots)||st.preferences.extraBuildSlots<0||st.preferences.extraBuildSlots>MAX_EXTRA_BUILD_SLOTS))))return false;
  if(window.GSF_EXPANSION&&!window.GSF_EXPANSION.validate(st.expansion))return false;
  if(st.hero.productionFocus!==undefined&&!['wood','clay','iron','crop','all','custom'].includes(st.hero.productionFocus))return false;

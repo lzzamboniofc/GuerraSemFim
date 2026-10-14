@@ -11,7 +11,7 @@ click({slot:'1'});assert(dom.innerHTML.includes('data-plan-building="warehouse"'
 click({planBuilding:'warehouse'});assert(dom.innerHTML.includes('Obra'));assert(window.GSF.plans(window.GSF.load().villages[0]).length>=0);
 click({nav:'fields'});click({field:'0'});assert(dom.innerHTML.includes('data-plan-field="0"'));click({planField:'0'});
 click({nav:'hero'});assert(dom.innerHTML.includes('data-hero-target="wood"'));assert(dom.innerHTML.includes('data-hero-apply'));
-click({nav:'map'});assert(dom.innerHTML.includes('terrain-forest'));assert(dom.innerHTML.includes('tile-mark'));assert(!dom.innerHTML.includes('map-axis'));
+click({nav:'map'});assert(dom.innerHTML.includes('class="map-tile'));assert(dom.innerHTML.includes('tile-mark'));assert(!dom.innerHTML.includes('map-axis'));
 click({nav:'empire'});assert(dom.innerHTML.includes('Painel Imperial'));assert(dom.innerHTML.includes('Projeção imperial'));
 click({openResource:'wood'});assert(dom.innerHTML.includes('Produção de Madeira'));
-console.log('✓ UI v0.8/v0.8.2: visual clássico, planejador, herói, mapa, painel imperial e modal');
+console.log('✓ UI v0.8.4: visual inicial, planejador, herói, mapa, painel imperial e modal');

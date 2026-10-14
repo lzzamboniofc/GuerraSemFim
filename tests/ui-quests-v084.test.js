@@ -1,0 +1,26 @@
+/* Missões por categorias e layout original em DOM simulado. */
+'use strict';
+const fs=require('fs'),vm=require('vm'),path=require('path'),assert=require('node:assert/strict');
+const root=path.resolve(__dirname,'..'),db=new Map(),callbacks={},dom={innerHTML:''};
+const window={addEventListener:()=>{},scrollTo:()=>{}};
+const document={querySelector:s=>s==='#app'?dom:null,querySelectorAll:()=>[],addEventListener:(ev,fn)=>callbacks[ev]=fn,body:{appendChild:()=>{}},createElement:()=>({setAttribute:()=>{},remove:()=>{}})};
+const context={window,document,localStorage:{getItem:k=>db.get(k)||null,setItem:(k,v)=>db.set(k,v),removeItem:k=>db.delete(k)},Date,Math,JSON,console,setInterval:()=>0,setTimeout:()=>0};
+vm.createContext(context);
+for(const f of ['data','war','ai','campaign','expansion','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',f+'.js'),'utf8'),context,{filename:f});
+const game=window.GSF.newGame();vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),context,{filename:'app'});
+const click=dataset=>callbacks.click({target:{closest:()=>({dataset})}});
+click({nav:'village'});assert(dom.innerHTML.includes('town-board'));
+assert(!dom.innerHTML.includes('scene-scroll'),'Aldeia inicial sem rolagem horizontal forçada');
+click({nav:'map'});assert(dom.innerHTML.includes('map-grid'));
+assert(!dom.innerHTML.includes('map-scroll'),'Mapa inicial sem rolagem horizontal forçada');
+assert(!dom.innerHTML.includes('terrain-forest'),'Mapa inicial sem terrenos coloridos adicionados');
+click({nav:'quests'});assert(dom.innerHTML.includes('Próximas'));
+assert(dom.innerHTML.includes('Resgatáveis'));
+assert(dom.innerHTML.includes('Categoria'));
+assert(dom.innerHTML.includes('quest-progress-track'));
+click({questFilter:'ready'});assert(dom.innerHTML.includes('Primeiros passos'));
+click({questFilter:'claimed'});assert(dom.innerHTML.includes('Nenhuma missão corresponde'));
+click({questFilter:'all'});assert(dom.innerHTML.includes('Edifício Principal'));
+callbacks.change({target:{id:'quest-category',value:'Herói'}});assert(dom.innerHTML.includes('Explorador experiente'));
+click({questFilter:'current'});assert(dom.innerHTML.includes('Conclua 1 aventuras'));
+console.log('✓ UI v0.8.4: mapa e aldeia iniciais, categorias, filtros, progresso e missões do herói');

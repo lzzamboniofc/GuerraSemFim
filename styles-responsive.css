@@ -98,19 +98,8 @@ input,select,textarea{max-width:100%}
   .btn-row>.btn{max-width:100%}
 }
 
-/* Mapas e cenários mantêm proporções clicáveis; somente eles rolam na horizontal. */
-.scene-scroll,.map-scroll{max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
-.scene-scroll:focus-visible,.map-scroll:focus-visible{outline:2px solid #b18a3a;outline-offset:2px}
-.scene-scroll .scene,.map-scroll .map-grid{width:100%}
-@media(max-width:699px){
-  .scene-scroll .town-board{min-width:570px;height:470px}
-  .scene-scroll .field-board{min-width:535px;height:440px}
-  .map-scroll .map-grid{min-width:535px;gap:3px;padding:5px}
-  .scene-scroll .town-slot .building-art{width:48px;height:41px}
-  .scene-scroll .town-slot .slot-name{max-width:86px;font-size:10px}
-  .scene-scroll .town-slot{min-width:56px}
-  .scene-scroll .field-slot{min-width:48px}
-}
+/* v0.8.4: aldeia, campos e mapa regressaram à apresentação fluida original.
+   Menu, modais, formulários e recursos continuam adaptativos. */
 @media(max-width:419px){
   .masthead .brand h1{font-size:14px;letter-spacing:1px}
   .masthead .brand small{letter-spacing:1px}

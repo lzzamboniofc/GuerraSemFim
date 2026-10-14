@@ -190,3 +190,69 @@ button.resource-pill:active{transform:translateY(0)}
 /* v0.8.2 — volta à apresentação clássica; preserva marcadores de novos terrenos. */
 .map-tile .tile-mark{position:absolute;top:2px;right:2px;font:700 9px Arial,sans-serif;color:#564525;background:#f4df9a;border:1px solid #bca66d;border-radius:3px;padding:1px 2px;z-index:2}
 .map-tile.oasis-owned{box-shadow:inset 0 0 0 2px #debf6b}
+
+/* v0.8.4 — aldeia, campos e mapa restaurados para o desenho da primeira versão (v0.1). */
+.town-board{height:545px;background:radial-gradient(ellipse at 49% 50%,#d6d8a8 0 30%,#a3c188 30% 53%,#81a879 56%,#98bb84 72%)}
+.field-board{height:520px;background:radial-gradient(ellipse at center,#bbd3a4 0 18%,#8bb07c 42%,#658f65 80%,#49785b)}
+.town-board:after{content:"";position:absolute;inset:8% 12%;border:17px double #b29d72;border-radius:50%;pointer-events:none;opacity:.45;transform:rotate(-13deg)}
+.field-board:after{content:"";position:absolute;left:36%;top:34%;width:27%;height:32%;border:12px solid #d1b88d;border-radius:50%;background:radial-gradient(#c8cba4,#a4ba8d);opacity:.86;box-shadow:0 2px 14px #203d2544}
+.town-slot{position:absolute;transform:translate(-50%,-50%);z-index:3;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;min-width:65px;max-width:85px;padding:3px 0;transition:.16s}
+.town-slot .building-art{font-size:27px;line-height:1;display:grid;place-items:center;width:56px;height:45px;border-radius:15px;background:radial-gradient(ellipse at 50% 70%,#c8a474 0,#aa805c 46%,#6b8c53 48%,transparent 69%);text-shadow:0 2px 1px #fff8;filter:drop-shadow(2px 4px 2px #23351b66)}
+.town-slot.empty .building-art{font-size:23px;color:#756f54;border:2px dashed #b5a476;background:#d3d3a685;width:43px;height:32px}
+.town-slot .slot-name{display:block;white-space:nowrap;font:700 10px Arial,sans-serif;padding:3px 5px;border-radius:4px;background:#fff9e9e8;border:1px solid #cdbb8f;box-shadow:0 2px 3px #282b1830;color:#594831;max-width:104px;text-overflow:ellipsis;overflow:hidden}
+.map-area{padding:15px}
+.map-grid{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:3px;padding:8px;background:#849c77;border:4px solid #bba782;border-radius:8px}
+.map-tile{aspect-ratio:1;border:1px solid #839d72;background:linear-gradient(145deg,#a7c98a,#84b074);padding:1px;display:flex;align-items:center;justify-content:center;position:relative;border-radius:3px;min-width:0}
+.map-tile:nth-child(5n){background:linear-gradient(#b4cb85,#96b87b)}
+.map-tile:hover{outline:2px solid #fff2c8;z-index:1}
+.map-tile .glyph{font-size:clamp(12px,1.85vw,28px);filter:drop-shadow(1px 2px 1px #324f3855)}
+.map-tile .coord{position:absolute;left:3px;bottom:1px;font:8px Arial,sans-serif;color:#425e39;opacity:.65}
+.map-tile.player{background:#d3bf83;border:2px solid #e9dcad}
+.map-tile.enemy{background:linear-gradient(#c6b28e,#a69b6f)}
+.map-tile.oasis{background:linear-gradient(#aad8a4,#6dada1)}
+.map-tile.selected{outline:3px solid #e9bd54;z-index:2}
+.map-tile.center{box-shadow:inset 0 0 0 2px #fdf8d4}
+.field-slot{position:absolute;z-index:3;transform:translate(-50%,-50%);background:#e8dcadba;border:2px solid #a89060;border-radius:9px;padding:6px 6px 5px;min-width:55px;box-shadow:0 3px 0 #4c5c4166;display:grid;justify-items:center;gap:2px;transition:.15s;color:#403921}
+.field-slot:hover,.field-slot.selected{background:#fff1b3;transform:translate(-50%,-54%) scale(1.13);z-index:5}
+
+/* Elimina intervenções posteriores sem alterar o restante do layout responsivo. */
+.scene.town-board,.scene.field-board{isolation:auto;box-shadow:inset 0 0 0 2px #fef8e5,0 6px 12px #352d1d22}
+.scene.town-board:before,.scene.field-board:before{content:"";pointer-events:none;position:absolute;inset:0;background-image:radial-gradient(#d5dfac 1px,transparent 2px),radial-gradient(#547d52 1px,transparent 2px);background-size:34px 41px,53px 47px;background-position:2px 4px,21px 12px;opacity:.48;z-index:auto}
+.town-board .town-road{background:#d2be8f80;border:0}
+.town-slot .building-art{transition:none}
+.town-slot.tier-2 .building-art,.town-slot.tier-3 .building-art{background:radial-gradient(ellipse at 50% 70%,#c8a474 0,#aa805c 46%,#6b8c53 48%,transparent 69%);filter:drop-shadow(2px 4px 2px #23351b66)}
+.town-slot:hover .building-art,.town-slot.selected .building-art{transform:none}
+.field-slot{backdrop-filter:none}
+.field-slot.tier-2,.field-slot.tier-3{border-width:2px;border-color:#a89060;box-shadow:0 3px 0 #4c5c4166}
+.map-tile.rival{background:linear-gradient(145deg,#b89b73,#80584d);border:1px solid #997c5d}
+.map-tile .glyph{animation:none}
+/* Marcadores discretos mantêm a identificação dos novos vales/oásis sem trocar a grade original. */
+.map-tile .tile-mark{position:absolute;right:1px;top:1px;font:700 8px Arial,sans-serif;background:#eed59a;color:#5a4422;border:1px solid #b7975e;border-radius:3px;padding:1px 2px;z-index:2}
+.map-tile.oasis-owned{box-shadow:inset 0 0 0 2px #dfbf67}
+/* Vista original dimensionada ao painel, sem rolagem horizontal forçada. */
+@media(max-width:580px){.scene.town-board{height:395px}.scene.field-board{height:400px}.map-grid{gap:1px;padding:2px}.map-tile .coord{display:none}.map-tile .glyph{font-size:15px}}
+
+/* Missões progressivas: filtros leves e barras para centenas de objetivos sem apertar o layout. */
+.quest-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+.quest-stats>div{background:#efe4c9;border:1px solid #d3c19b;border-radius:8px;padding:12px;display:grid;gap:4px}
+.quest-stats strong{font:700 23px Georgia,serif;color:#38513b}
+.quest-stats small{font:11px Arial,sans-serif;color:#78674e}
+.quest-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:16px 0}
+.quest-filters{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.quest-filter{border:1px solid #c7b38a;background:#eee1c2;color:#514b37;border-radius:6px;padding:9px 12px;font:700 12px Arial,sans-serif}
+.quest-filter.active{background:#3f6344;color:#fff4d3;border-color:#2f5136}
+.quest-category-label{display:flex;align-items:center;gap:8px;font:700 12px Arial,sans-serif;color:#675a45;min-width:0}
+.quest-category-label select{max-width:180px;background:#fff9ec;border:1px solid #cbb58b;border-radius:6px;padding:8px;color:#59472f}
+.quest-description{color:#796c57;font:12px/1.5 Arial,sans-serif}
+.quest-card{min-width:0;gap:12px}
+.quest-card .info{min-width:0;flex:1}
+.quest-card .info p{margin:4px 0 8px;overflow-wrap:anywhere}
+.quest-card .btn{flex-shrink:0}
+.quest-context{color:#8b7652;font:700 10px Arial,sans-serif;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px}
+.quest-progress-row{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.quest-progress-track{height:8px;background:#d9caaa;border:1px solid #bba881;border-radius:99px;overflow:hidden;flex:1}
+.quest-progress-track span{display:block;height:100%;background:linear-gradient(90deg,#658c58,#b1c275);border-radius:99px}
+.quest-progress-row small{min-width:48px;text-align:right;color:#76684b;font:11px Arial,sans-serif}
+.quest-reward{display:block;color:#57704c;font:11px Arial,sans-serif}
+.quest-card.quest-ready{border-left:4px solid #789c5d;background:#f6f2e2}
+@media(max-width:650px){.quest-stats{gap:6px}.quest-stats>div{padding:9px}.quest-stats strong{font-size:20px}.quest-filter{padding:8px 9px}.quest-category-label{width:100%;justify-content:space-between}.quest-category-label select{flex:1;max-width:240px}.quest-card{flex-wrap:wrap}.quest-card .btn{margin-left:auto}}

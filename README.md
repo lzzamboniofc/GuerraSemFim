@@ -1,14 +1,23 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 0.8.3, layout responsivo com visual clássico da aldeia e mapa: estratégia medieval totalmente offline.**
+**Impérios & Conquistas — versão 0.8.4, mapas e aldeias no visual original com missões progressivas: estratégia medieval totalmente offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
+
+## 📜 Versão 0.8.4 — Visual original e novas missões
+
+- **Aldeia, campos e mapa como na v0.1:** retomei a composição, os cenários geométricos e a grade simples da primeira versão. O restante da interface (menu, barra superior, telas, modais e configurações) continua com as melhorias responsivas da v0.8.3. Os marcadores 9c/15c e NPCs continuam disponíveis para preservar a jogabilidade atual.
+- **157 missões na primeira aldeia:** além das sete missões antigas, agora existem trilhas de evolução por edifício, todos os campos, crescimento da população, exército, aventuras, oásis e colonização. Cada aldeia fundada recebe suas próprias trilhas de construção, recursos e população; tarefas gerais acompanham o império inteiro.
+- **Missões progressivas:** em **Missões**, use as categorias e filtros **Próximas / Resgatáveis / Todas / Concluídas**. O filtro padrão mostra apenas a próxima etapa não resgatada de cada linha de tarefas.
+- **Recompensas reais:** cada etapa cumprida pode conceder recursos em sua aldeia de origem (respeitando a capacidade de armazenamento) e experiência ao herói. Cada missão só pode ser resgatada uma única vez.
+- **Compatibilidade:** as sete missões antigas mantêm exatamente seus IDs; saves anteriores à atualização não perdem resgates nem progresso. A quantidade de missões aumenta conforme o número de aldeias.
+- **Referência para a progressão:** Centro de Ajuda oficial do Travian — [Sistema de Tarefas](https://support.travian.com/pt/articles/17-sistema-de-tarefas) e [Tarefas diárias](https://support.travian.com/pt/articles/16-tarefas-diarias). O jogo reproduz o princípio das tarefas em marcos de níveis, não os textos nem os valores exatos de recompensas do Travian. As tarefas diárias reiniciáveis do Travian ainda não foram implementadas aqui.
 
 ## 📐 Versão 0.8.3 — Ajustes de layout
 
 - **Resolução intermediária:** menu lateral e área de jogo ocupam a largura disponível sem espremer o painel principal; a ajuda aparece abaixo.
 - **Celular e tablet:** barra superior reorganizada, navegação lateral vira uma faixa horizontal deslizável e cartões se reorganizam conforme a tela.
-- **Mapa e aldeia:** a cena é preservada em tamanho legível; quando necessário, arraste horizontalmente **dentro da cena** para explorar todos os terrenos.
+- **Mapa e aldeia (na v0.8.3):** as cenas passaram temporariamente a usar rolagem horizontal; a v0.8.4 voltou ao dimensionamento da primeira versão.
 - **Janelas, configurações e painéis:** campos e ações quebram linha para evitar elementos cortados.
 - Nenhuma mudança nas regras da campanha ou formato do salvamento.
 
@@ -78,15 +87,15 @@ Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não
 | Filas | Romanos: 2 filas básicas; demais tribos: 1; +1 fila extra por padrão, configurável de 0 a 8 extras; cancelamento com devolução de 75% |
 | Tropas | Infantaria, cavalaria, batedores e unidades de cerco por tribo, recrutamento e manutenção de cereal |
 | Guerra v0.4 | Espionagem, reforços entre aldeias próprias, Ferreiro por unidade, muralhas operacionais, aríetes, catapultas e simulador aproximado |
-| Mapa | Região 17×17 com visualização 11×11, terrenos ilustrados, oásis conquistáveis, vales 9c/15c e reinos rivais |
+| Mapa | Região 17×17, visualização 11×11 da versão original, oásis conquistáveis, vales 9c/15c e reinos rivais |
 | Mundo Vivo | 3 facções NPC com recursos, desenvolvimento, recrutamento, expansão, ataques, saques e conquistas de território |
 | Combates | Ataques e saques simulados, deslocamento, baixas, capacidade de carga, saque e retorno das tropas |
 | Herói | Aventuras, experiência, três artefatos e escolha de 1 a 4 recursos para bônus produtivo |
-| Missões | Sete objetivos com recompensas em recursos |
+| Missões | 157 etapas permanentes na primeira aldeia, metas por aldeia e globais, filtros, progresso, experiência do herói e recompensas de recursos |
 | Mercado | Troca local, caravanas entre aldeias e comércio com reinos NPC aliados ou sob trégua |
 | Colonização | Até cinco aldeias; vales com 6, 9 ou 15 campos de cereal; Residência, cultura, três colonizadores e recursos |
 | Persistência | Autosave em `localStorage`, avanço de tempo quando a página é reaberta, importação/exportação JSON |
-| Interface | Edifícios originais em SVG, modais de obras, barra de produção, painel imperial, planejador de obras e modo responsivo |
+| Interface | Ícones clássicos da versão inicial para edifícios, modais de obras, barra de produção, painel imperial, planejador e responsividade para as demais telas |
 | Diplomacia | Embaixada permite propor trégua de 12 turnos com reinos NPC mediante recursos |
 | Paz opcional | Ataques inimigos podem ser desativados por campanha nas Configurações; reinos NPC continuam evoluindo |
 
