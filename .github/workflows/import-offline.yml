@@ -1,0 +1,37 @@
+name: Concluir importação offline v0.1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'import-parts/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  concluir-importacao:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Reconstituir e verificar arquivos
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f import-parts/part01.b64 ]; then
+            echo "A importação já foi concluída."
+            exit 0
+          fi
+          cat import-parts/part{01..05}.b64 | base64 --decode | tar -xz
+          echo "82b979369d793207f14261b745e56a5748271b249783cefaad1e4f2f71fba36d  js/app.js" | sha256sum -c
+          echo "16a1658dac65c1288889e26f3dd3465222f8239eaf96e3fd96941248d3e34e9d  styles.css" | sha256sum -c
+          node tests/smoke.test.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/app.js styles.css
+          git rm -r import-parts
+          git commit -m "feat: finalizar importação do jogo offline v0.1"
+          git push origin HEAD:main
