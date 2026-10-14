@@ -15,12 +15,12 @@ function village(st,name,x,y,starter=false) {
  const buildings = {main:starter?3:1,warehouse:1,granary:1,rally:1};
  const troops = {};
  if(starter) troops[D.TROOPS[st.tribe][0].id]=12;
- return {id:id(st),name,x,y,fields,buildings,resources:starter?{wood:1000,clay:1000,iron:1000,crop:1000}:{wood:650,clay:650,iron:650,crop:650},buildQueue:[],trainingQueue:[],troops,buildingSlots:{0:'main',1:'warehouse',2:'granary',3:'rally'},militaryTech:{},foundedAt:now()};
+ return {id:id(st),name,x,y,fields,buildings,resources:starter?{wood:1000,clay:1000,iron:1000,crop:1000}:{wood:650,clay:650,iron:650,crop:650},buildQueue:[],trainingQueue:[],troops,buildingSlots:{0:'main',1:'warehouse',2:'granary',3:'rally'},militaryTech:{},settlers:0,foundedAt:now()};
 }
 function newGame(options={}) {
  const tribe = D.TRIBES[options.tribe]?options.tribe:'romans';
  const st={version:1,nextId:1,player:(options.player||'Comandante').trim().slice(0,25)||'Comandante',tribe,speed:clamp(Number(options.speed)||12,1,100),
-  villages:[],activeVillageId:null,preferences:{enemyAttacks:options.enemyAttacks!==false},hero:{name:'Guardião',level:1,xp:0,hp:100,attack:4,resources:0,points:0,adventure:null,adventures:0,inventory:[],equipped:null},
+  villages:[],activeVillageId:null,preferences:{enemyAttacks:options.enemyAttacks!==false,extraBuildSlots:1},hero:{name:'Guardião',level:1,xp:0,hp:100,attack:4,resources:0,points:0,adventure:null,adventures:0,inventory:[],equipped:null},
   world:{seed:37,tiles:[]},movements:[],reports:[],events:[],questsClaimed:[],tutorialDismissed:false,createdAt:now(),lastTick:now()};
  const home=village(st,(options.village||'Nova Esperança').trim().slice(0,28)||'Nova Esperança',0,0,true);
  st.villages=[home];st.activeVillageId=home.id;
@@ -36,6 +36,7 @@ function newGame(options={}) {
  }
  if(window.GSF_AI)window.GSF_AI.init(st,now());
  window.GSF_CAMPAIGN?.init(st,options.difficulty);
+ window.GSF_EXPANSION?.init(st);
  log(st,'Bem-vindo ao Guerra Sem Fim! Sua aldeia está pronta para crescer.','welcome');
  report(st,'O início de um império','Seu povo ergueu os primeiros edifícios e aguarda suas ordens. Expanda os campos, crie um exército e descubra o mapa.', 'info');
  save(st);return st;
@@ -59,6 +60,12 @@ function canPay(v,price,count=1){return D.RES.every((k,i)=>v.resources[k]+0.0000
 function pay(v,price,count=1){if(!canPay(v,price,count))return false;D.RES.forEach((k,i)=>v.resources[k]-=price[i]*count);return true;}
 function addResources(v,rewards){D.RES.forEach(k=>v.resources[k]=clamp(v.resources[k]+(rewards[k]||0),0,capacity(v,k)));}
 function unmet(v,key){const req=D.BUILDINGS[key].req;return Object.entries(req).filter(([k,l])=>buildLevel(v,k)<l).map(([k,l])=>`${D.BUILDINGS[k].name} nível ${l}`);}
+const MAX_EXTRA_BUILD_SLOTS=8;
+function extraBuildSlots(st){const x=st.preferences?.extraBuildSlots;return Number.isSafeInteger(x)?clamp(x,0,MAX_EXTRA_BUILD_SLOTS):1;}
+function buildQueueCapacity(st){return (st.tribe==='romans'?2:1)+extraBuildSlots(st);}
+function setBuildSlots(st,value){const n=Number(value);if((typeof value!=='string'&&typeof value!=='number')||String(value).trim()===''||!Number.isSafeInteger(n)||n<0||n>MAX_EXTRA_BUILD_SLOTS)return {ok:false,error:'Selecione entre 0 e 8 vagas extras.'};
+ st.preferences??={enemyAttacks:true};st.preferences.extraBuildSlots=n;
+ save(st);return {ok:true,capacity:buildQueueCapacity(st)};}
 function canBuild(st,v,type,ref,slot) {
  let key,level;
  if(type==='field') {const f=v.fields[ref];if(!f)return {ok:false,error:'Campo inválido.'};key=f.type;level=f.level;if(level>=20)return {ok:false,error:'Nível máximo.'};}
@@ -66,8 +73,18 @@ function canBuild(st,v,type,ref,slot) {
    if(level===0&&(slot===undefined||slot===null||v.buildingSlots[slot]))return {ok:false,error:'Escolha um terreno livre.'};
    if(level===0&&Object.values(v.buildingSlots).includes(key))return {ok:false,error:'Este edifício já foi construído.'};
  }
- const isRoman=st.tribe==='romans';const queueBusy=v.buildQueue.some(q=>!isRoman || q.type===type);
- if(queueBusy)return {ok:false,error:isRoman?'Já existe uma obra deste tipo.':'Os construtores estão ocupados.'};
+ // Uma fila extra por padrão, ajustável em Configurações. Os Romanos mantêm
+ // uma obra de campo e uma obra civil em paralelo, além das vagas extras flexíveis.
+ if(v.buildQueue.some(q=>q.type===type&&(type==='field'?q.ref===ref:q.ref===ref)))
+  return {ok:false,error:'Este local já possui uma melhoria em andamento.'};
+ const extra=extraBuildSlots(st),max=buildQueueCapacity(st);
+ if(v.buildQueue.length>=max)return {ok:false,error:`Todas as ${max} vagas de construção estão ocupadas.`};
+ if(st.tribe==='romans'){
+  const fieldJobs=v.buildQueue.filter(q=>q.type==='field').length+(type==='field'?1:0);
+  const buildingJobs=v.buildQueue.filter(q=>q.type==='building').length+(type==='building'?1:0);
+  if(Math.max(0,fieldJobs-1)+Math.max(0,buildingJobs-1)>extra)
+   return {ok:false,error:'Não há vaga extra para outra obra deste tipo.'};
+ }
  const price=cost(type,key,level+1);if(!canPay(v,price))return {ok:false,error:'Recursos insuficientes.',price};
  return {ok:true,price,seconds:buildTime(st,v,type,key,level+1),level:level+1,key};
 }
@@ -215,10 +232,22 @@ function sendCaravan(st,v,targetId,resource,amount){
  log(st,`Caravana de ${n} ${D.RESOURCE[resource].name} enviada para ${target.name}.`,'trade');
  save(st);return {ok:true,seconds};
 }
+function trainSettlers(st,v,count=1){
+ const n=Number(count);
+ if(!Number.isSafeInteger(n)||n<1||n>3)return {ok:false,error:'Recrute de 1 a 3 colonizadores por vez.'};
+ if(buildLevel(v,'residence')<10)return {ok:false,error:'Requer Residência nível 10.'};
+ if((v.settlers||0)+n>3)return {ok:false,error:'Esta aldeia pode preparar até 3 colonizadores.'};
+ const price=[350,350,350,350];if(!canPay(v,price,n))return {ok:false,error:'Recursos insuficientes: cada colonizador custa 350 de cada recurso.'};
+ pay(v,price,n);v.settlers=(v.settlers||0)+n;
+ log(st,`${n} colonizador(es) preparados em ${v.name}.`,'build');save(st);return {ok:true};
+}
 function settle(st,v,x,y,name){const tile=tileAt(st,x,y);if(!tile||tile.kind!=='empty')return {ok:false,error:'Escolha um vale desabitado.'};if(buildLevel(v,'residence')<10)return {ok:false,error:'É necessária uma Residência nível 10.'};
  if(st.villages.length>=5)return {ok:false,error:'Limite de cinco aldeias nesta versão.'};
+ if((v.settlers||0)<3)return {ok:false,error:'Prepare 3 colonizadores na Residência da aldeia de origem.'};
+ const culture=window.GSF_EXPANSION?.culture(st)||0,needed=window.GSF_EXPANSION?.neededCulture(st)||0;
+ if(culture<needed)return {ok:false,error:`Cultura insuficiente: ${culture}/${needed} pontos.`};
  const price=[1600,1600,1600,1600];if(!canPay(v,price))return {ok:false,error:'Colonização custa 1.600 de cada recurso.'};
- pay(v,price);const next=village(st,(name||'Nova Colônia').trim().slice(0,28)||'Nova Colônia',x,y);st.villages.push(next);st.activeVillageId=next.id;
+ pay(v,price);v.settlers-=3;const next=village(st,(name||'Nova Colônia').trim().slice(0,28)||'Nova Colônia',x,y);st.villages.push(next);st.activeVillageId=next.id;
  log(st,`Uma nova aldeia foi fundada em (${x}|${y})!`,'build');report(st,'Nova aldeia fundada',`${next.name} agora faz parte do seu império.`,'victory');save(st);return {ok:true};}
 function questList(st){const v=st.villages[0];const levels=v.fields.filter(f=>f.level>=2).length;const available=[
  {id:'welcome',title:'Primeiros passos',desc:'Inicie seu império.',done:true,reward:120},
@@ -306,7 +335,8 @@ function validateState(st){
   !validArray(st.villages,5)||st.villages.length===0||!plain(st.world)||!validArray(st.world.tiles,1000)||
   !validArray(st.movements,500)||!validArray(st.reports,100)||!validArray(st.events,100)||
   !validArray(st.questsClaimed,20)||!plain(st.hero))return false;
- if(st.preferences!==undefined&&(!plain(st.preferences)||typeof st.preferences.enemyAttacks!=='boolean'))return false;
+ if(st.preferences!==undefined&&(!plain(st.preferences)||typeof st.preferences.enemyAttacks!=='boolean'||(st.preferences.extraBuildSlots!==undefined&&(!Number.isSafeInteger(st.preferences.extraBuildSlots)||st.preferences.extraBuildSlots<0||st.preferences.extraBuildSlots>MAX_EXTRA_BUILD_SLOTS))))return false;
+ if(window.GSF_EXPANSION&&!window.GSF_EXPANSION.validate(st.expansion))return false;
  if(st.hero.inventory!==undefined&&(!validArray(st.hero.inventory,3)||new Set(st.hero.inventory).size!==st.hero.inventory.length||!st.hero.inventory.every(id=>!!HERO_ARTIFACTS[id])))return false;
  if(st.hero.equipped!==undefined&&st.hero.equipped!==null&&(!HERO_ARTIFACTS[st.hero.equipped]||!st.hero.inventory?.includes(st.hero.equipped)))return false;
  if(!validNumber(st.hero.level,1,1000)||!validNumber(st.hero.hp,0,100)||
@@ -319,6 +349,7 @@ function validateState(st){
   if(!plain(v)||typeof v.id!=='string'||typeof v.name!=='string'||v.name.length>100||
    !Number.isSafeInteger(v.x)||!Number.isSafeInteger(v.y)||Math.abs(v.x)>8||Math.abs(v.y)>8||
    ids.has(v.id)||positions.has(v.x+':'+v.y)||!validRes(v.resources)||
+   (v.settlers!==undefined&&(!Number.isSafeInteger(v.settlers)||v.settlers<0||v.settlers>3))||
    !plain(v.buildings)||!plain(v.buildingSlots)||!validArmy(v.troops,st.tribe)||
    (v.militaryTech!==undefined&&(!plain(v.militaryTech)||!Object.entries(v.militaryTech).every(([k,l])=>D.TROOPS[st.tribe].some(u=>u.id===k)&&Number.isSafeInteger(l)&&l>=0&&l<=10)))||
    !validArray(v.fields,18)||v.fields.length!==18||!validArray(v.buildQueue,50)||!validArray(v.trainingQueue,500))return false;
@@ -364,6 +395,7 @@ function load(){
    const st=JSON.parse(raw);if(!validateState(st))continue;
    window.GSF_RECOVERED_BACKUP=key===BACKUP_KEY;
    window.GSF_CAMPAIGN?.init(st);
+   window.GSF_EXPANSION?.init(st);
    advance(st);
    // Não sobrescrever o backup recuperado até o jogador executar a próxima ação.
    return st;
@@ -378,8 +410,9 @@ function importSave(text){
  if(!validateState(st))return {ok:false,error:'Save incompatível ou dados inválidos.'};
  st.lastTick=now();
  window.GSF_CAMPAIGN?.init(st);
+ window.GSF_EXPANSION?.init(st);
  if(!save(st))return {ok:false,error:'Não foi possível salvar a partida neste navegador.'};
  return {ok:true,state:st};
 }
-window.GSF={KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero};
+window.GSF={KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
 })();

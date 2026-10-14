@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.7.0] — Expansão dos Impérios · 14/10/2026
+
+- Uma **vaga extra de construção** por padrão, configurável de 0 a 8 vagas adicionais (por aldeia); Romanos preservam paralelismo básico, filas extras são flexíveis.
+- Configuração persistente em Configurações, contagem de vagas no painel da aldeia, prevenção de melhorias duplicadas. Reduzir o limite não cancela as obras existentes.
+- Colonizadores preparáveis na Residência nível 10; cultura necessária para fundar novas aldeias, consumo dos três colonizadores na fundação.
+- Feira comercial entre o jogador e facções NPC amigas ou sob trégua, com cooldown de dois turnos rivais, custo e limite de armazenamento.
+- Eventos econômicos locais a cada oito turnos rivais, registrados no histórico e em relatórios.
+- Aba Expansão com painel de colonização, comércio e eventos; compatibilidade preservada com saves 0.1–0.6.
+- Novos testes do motor e de interface, mais toda a bateria de regressões anteriores.
+
 ## [0.6.0] — Crônicas do Império · 14/10/2026
 
 - **Campanha por capítulos:** Fundação, Fronteiras e Legado. Recompensas resgatáveis em ordem e objetivos exibidos na nova tela **Campanha**.

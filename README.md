@@ -27,6 +27,16 @@ python -m http.server 8000
 
 Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não exige internet. Para voltar ao jogo, use sempre a mesma origem/porta e navegador, pois o salvamento local é separado por origem.
 
+## 🌍 Novidades da v0.7 — Expansão dos Impérios
+
+- **Filas extras ajustáveis em Configurações:** a partida começa com uma vaga adicional de construção por aldeia. Romanos têm 3 obras em paralelo (2 tradicionais + 1 extra); Gauleses/Teutões têm 2 (1 tradicional + 1 extra). Escolha de 0 a 8 vagas extras. Reduzir as vagas não cancela construções já iniciadas.
+- **Obras simultâneas reais:** uma fila adicional pode construir edifícios ou melhorar campos; a mesma construção/campo não pode ser melhorada duas vezes ao mesmo tempo. Fila e contador aparecem na interface.
+- **Colonizadores:** prepare 3 colonizadores na Residência nível 10 (350 de cada recurso por unidade), acumule cultura suficiente e funda uma nova aldeia por 1.600 de cada recurso no Mapa-múndi. Colonizadores são consumidos na fundação.
+- **Cultura para expansão:** a primeira colonização requer 40 pontos de cultura; cada aldeia adicional aumenta o requisito em 90 pontos (limite total de 5 aldeias).
+- **Feira dos reinos NPC:** trocas comerciais com facções aliadas ou sob trégua, com Mercado e reposição a cada 2 turnos rivais.
+- **Eventos periódicos:** a cada 8 turnos rivais, um evento econômico concede madeira, barro, ferro ou cereal, respeitando o estoque máximo. Os eventos são registrados em **Expansão** e **Relatórios**.
+- **Saves antigos:** migração não destrutiva e validação de novas propriedades; ataques inimigos opcionais e modais anteriores foram preservados.
+
 ## 🏆 Novidades da v0.6 — Crônicas do Império
 
 - **Campanha** no menu principal, com três capítulos em ordem, metas e recompensas.
@@ -36,14 +46,14 @@ Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não
 - **Pontos de ataque do herói** agora ampliam o poder ofensivo; recursos clicáveis no topo e modais de obras permanecem.
 - **Compatibilidade de saves:** arquivos v0.1–v0.5 continuam válidos e recebem a campanha automaticamente. Exporte o save antes de atualizar.
 
-## 🎮 O que funciona na versão 0.6
+## 🎮 O que funciona na versão 0.7
 
 | Sistema | Funcionalidade |
 |---|---|
 | Início | Escolha de Romanos, Gauleses ou Teutões, comandante, nome e velocidade |
 | Economia | 4 recursos, 18 campos (4/4/4/6), produção por hora, bônus econômicos, armazém, celeiro e consumo de cereal |
 | Aldeia | 20 espaços, edifícios com custos escalonados, pré-requisitos, níveis e tempos de construção |
-| Filas | Uma construção de cada categoria para Romanos; uma por vez para outras tribos; cancelamento com devolução de 75% |
+| Filas | Romanos: 2 filas básicas; demais tribos: 1; +1 fila extra por padrão, configurável de 0 a 8 extras; cancelamento com devolução de 75% |
 | Tropas | Infantaria, cavalaria, batedores e unidades de cerco por tribo, recrutamento e manutenção de cereal |
 | Guerra v0.4 | Espionagem, reforços entre aldeias próprias, Ferreiro por unidade, muralhas operacionais, aríetes, catapultas e simulador aproximado |
 | Mapa | Região 17×17 com visualização 11×11, aldeias, vales, oásis, acampamentos e reinos rivais |
@@ -51,14 +61,14 @@ Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não
 | Combates | Ataques e saques simulados, deslocamento, baixas, capacidade de carga, saque e retorno das tropas |
 | Herói | Aventuras, experiência, atributos, três artefatos encontrados em aventuras e bônus de produção ao equipar |
 | Missões | Sete objetivos com recompensas em recursos |
-| Mercado | Troca local de recursos e caravanas entre aldeias próprias com tempo de viagem |
-| Colonização | Até cinco aldeias: Residência nível 10, custo de fundação e seleção de vale livre |
+| Mercado | Troca local, caravanas entre aldeias e comércio com reinos NPC aliados ou sob trégua |
+| Colonização | Até cinco aldeias: Residência nível 10, 3 colonizadores, cultura suficiente, custo de fundação e vale livre |
 | Persistência | Autosave em `localStorage`, avanço de tempo quando a página é reaberta, importação/exportação JSON |
 | Interface | Produção detalhada ao clicar em recursos do topo, modais para construir/evoluir edifícios e campos, responsiva, sem assets externos |
 | Diplomacia | Embaixada permite propor trégua de 12 turnos com reinos NPC mediante recursos |
 | Paz opcional | Ataques inimigos podem ser desativados por campanha nas Configurações; reinos NPC continuam evoluindo |
 
-## ✨ Destaques da versão 0.6
+## ✨ Funcionalidades preservadas das versões 0.5 e 0.6
 
 - **Paz sob seu controle:** no início da campanha ou em **Configurações → Ataques inimigos**, ligue/desligue as invasões. Ao desligar, os ataques NPC que já estão a caminho são cancelados sem combate; os rivais continuam evoluindo e você ainda pode atacá-los.
 - **Produção detalhada:** clique em **madeira, barro, ferro ou cereal na barra superior** para abrir o modal. Você verá a quantidade armazenada, capacidade, produção por campos, bônus de edifícios, itens e consumo de cereal.
@@ -67,7 +77,7 @@ Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não
 - **Caravanas:** com duas ou mais aldeias e Mercado na origem, envie um tipo de recurso por viagem. A entrega ocorre após um tempo proporcional à distância; recursos além da capacidade do destino não serão armazenados.
 - **Artefatos do herói:** a 2ª, 4ª e 6ª aventuras rendem, respectivamente, Machado do Lenhador, Chifre da Colheita e Coroa do Reino. Equipe um de cada vez para melhorar a produção da aldeia inicial.
 
-Os saves das versões **0.1 a 0.4** continuam aceitos sem conversão manual. Exporte o seu save antes de atualizar, por segurança.
+Os saves das versões **0.1 a 0.6** continuam aceitos sem conversão manual. Exporte o seu save antes de atualizar, por segurança.
 
 ## 🗺️ Primeiros passos
 
@@ -92,6 +102,8 @@ GuerraSemFim/
 ├── js/
 │   ├── ai.js                 # Reinos rivais, economia, turnos e ataques NPC
 │   ├── data.js               # Tribos, edifícios, tropas, custo, posições
+│   ├── expansion.js          # Cultura, comércio NPC e eventos (v0.7)
+│   ├── campaign.js           # Campanha e diplomacia (v0.6)
 │   ├── war.js                # Cálculos militares compartilhados (v0.4)
 │   ├── ai.js                 # Economia e ações das facções NPC (v0.3)
 │   ├── engine.js             # Estado, economia, tempo, filas, batalhas, save
@@ -128,17 +140,20 @@ node tests/smoke.test.js
 node tests/regression.test.js
 node tests/world.test.js
 node tests/war.test.js
+node tests/empire.test.js
+node tests/campaign.test.js
+node tests/expansion.test.js
+node tests/ui-v05.test.js
+node tests/ui-v06.test.js
+node tests/ui-v07.test.js
 node tests/ui.test.js
-node tests/regression.test.js
-node tests/world.test.js
-node tests/regression.test.js
 ```
 
 Os testes cobrem criação de mundo, tribos, produção, filas, construção, exploração, batalha, herói, missões e salvamento. Validações manuais devem ser repetidas nos navegadores pretendidos para distribuição.
 
 ## ⚠️ Limites conhecidos
 
-Esta é uma versão inicial funcional — **não é uma reprodução integral do Travian**. A fórmula de combate é simplificada; não há jogadores reais, alianças, mercado entre jogadores, modo multijogador, Natares, maravilhas do mundo, eventos de servidor, herói equipado, cerco operacional, rotas comerciais, colonizadores nem pontos de cultura. As tropas de exploração ainda não executam espionagem especial; os confrontos agora incluem guarnições de reinos NPC locais. A IA usa decisões heurísticas e ainda não possui diplomacia, cerco ou conquista de aldeias próprias do jogador. Oásis aparecem no mapa, mas sua anexação ainda não foi implementada.
+Esta versão mantém-se **independente e inteiramente offline**. Não inclui jogadores reais, servidores públicos, conquistas multiplayer, guerras entre alianças de jogadores ou uma reprodução integral de Travian. O comércio NPC usa ofertas simples; os colonizadores são preparados instantaneamente com custo de recursos (sem fila específica de treinamento), e os eventos do mundo usam uma sequência econômica local, não campanhas aleatórias complexas. Oásis ainda não são anexáveis e a IA utiliza regras heurísticas. Os salvamentos permanecem locais ao navegador/origem.
 
 Veja o [manual da Era das Guerras](docs/ERA_DAS_GUERRAS.md), o [inventário completo](docs/ANALISE_TRAVIAN.md), o [roteiro de expansão](docs/ROADMAP.md) e o [guia de publicação no GitHub](docs/PUBLICACAO_GITHUB.md).
 

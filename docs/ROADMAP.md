@@ -61,6 +61,14 @@
 - Pontos de cultura contabilizados e exibidos; colonizadores clássicos continuam planejados.
 - Três capítulos, dois finais de campanha (militar e diplomático), três dificuldades; manutenção do controle de invasões da v0.5.
 
+## Entregue: v0.7 — Expansão dos Impérios
+
+- Fila extra de construção inicial e configuração de zero a oito vagas adicionais por aldeia; vantagem de construção romana preservada.
+- Preparação e uso de colonizadores com cultura mínima e Residência nível 10; até cinco aldeias.
+- Comércio NPC com facções sob trégua ou aliança, respeitando cooldown e limite de recursos.
+- Eventos econômicos de mundo a cada oito turnos, com relatórios e histórico.
+- Nova tela de Expansão; novos testes e compatibilidade com as partidas das versões anteriores.
+
 ## Fase 4 — Herói, facções e profundidade estratégica
 
 - Herói equipado, inventário, recompensas variadas, missões especiais e atributos completos.

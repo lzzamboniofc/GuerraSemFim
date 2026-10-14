@@ -1,0 +1,23 @@
+/* UI v0.7 — controle das filas e nova aba Expansão */
+const fs=require('fs'),vm=require('vm'),path=require('path'),assert=require('assert');
+const root=path.resolve(__dirname,'..'),store=new Map(),events={},dom={innerHTML:''};
+const window={addEventListener:()=>{},GSF_RECOVERED_BACKUP:false};
+const document={querySelector:s=>s==='#app'?dom:s==='#settlers-count'?{value:'1'}:null,addEventListener:(t,fn)=>events[t]=fn,body:{appendChild:()=>{}},createElement:()=>({setAttribute:()=>{},remove:()=>{}})};
+const context={window,document,localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},Date,Math,JSON,console,setInterval:()=>0,setTimeout:()=>0};
+vm.createContext(context);
+for(const f of ['data','war','ai','campaign','expansion','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',f+'.js'),'utf8'),context,{filename:f});
+const s=window.GSF.newGame();vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),context,{filename:'app'});
+const click=dataset=>events.click({target:{closest:()=>({dataset})}});
+click({nav:'settings'});assert(dom.innerHTML.includes('id="extra-build-slots"'));
+assert(dom.innerHTML.includes('Filas extras de construção'));
+events.change({target:{id:'extra-build-slots',value:'4'}});
+assert.strictEqual(JSON.parse(store.get(window.GSF.KEY)).preferences.extraBuildSlots,4);
+assert(dom.innerHTML.includes('+4 extras'));
+click({nav:'village'});assert(dom.innerHTML.includes('0/6'));
+click({nav:'expansion'});assert(dom.innerHTML.includes('Fundação de novas aldeias'));
+assert(dom.innerHTML.includes('id="settlers-count"'));
+assert(dom.innerHTML.includes('data-npc-trade="corvos"'));
+assert(dom.innerHTML.includes('Eventos do mundo'));
+click({nav:'fields'});click({field:'0'});assert(dom.innerHTML.includes('role="dialog"'));
+click({openResource:'wood'});assert(dom.innerHTML.includes('Produção de Madeira'));
+console.log('✓ UI v0.7: construção ajustável, expansão, comércio, eventos e modais compatíveis.');

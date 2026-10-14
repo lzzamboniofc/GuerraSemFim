@@ -45,3 +45,14 @@ node tests/regression.test.js
 10. Importe um save v0.5 e confirme que a campanha aparece sem perder aldeias, tropas nem configuração dos ataques.
 
 Testes automatizados adicionais: `node tests/campaign.test.js` e `node tests/ui-v06.test.js`.
+
+## Versão 0.7 — Expansão e filas adicionais
+
+1. Novo jogo Romano: iniciar uma obra no campo, outra num edifício e outra noutro campo; confirmar 3 vagas ocupadas. Tentar quarta e duplicar o mesmo campo: ambas devem ser bloqueadas.
+2. Configurações → Filas extras: mudar de +1 para +3, iniciar outras obras; reduzir a +0. Obras em andamento não devem ser canceladas; novas obras aguardam vagas livres.
+3. Exportar save, recarregar e importar: a configuração de filas extras deve permanecer a mesma. Salvar/importar um save da v0.6 deve atribuir +1 vaga extra padrão.
+4. Expansão → preparar colonizadores: tentar antes da Residência nível 10 (falha); subir Residência e fornecer recursos para preparar até 3.
+5. No mapa, selecionar vale vazio: confirmar requisitos de cultura, colonizadores e 1.600 de cada recurso. Colonização consome 3 colonizadores e cria uma aldeia nova.
+6. Após construir Mercado e assinar trégua/aliança, usar Feira NPC. Repetir imediatamente: cooldown deve impedir troca.
+7. Avançar a IA por 8 turnos e verificar eventos em Expansão e Relatórios, sem produção acima do armazenamento.
+8. Em todos os passos: verificar que modais de recursos/construção e opção de ataques NPC continuam funcionando em desktop e mobile.

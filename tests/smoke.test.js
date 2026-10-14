@@ -10,7 +10,8 @@ assert.strictEqual(v.fields.length,18);assert.strictEqual(v.fields.filter(f=>f.t
 assert.strictEqual(E.production(s,v).wood,240);assert.strictEqual(E.capacity(v,'wood'),1200);
 let result=E.startBuild(s,v,'field',0);assert(result.ok,'Campo deve iniciar upgrade');
 result=E.startBuild(s,v,'building','warehouse',1);assert(result.ok,'Romanos devem ter obra civil e campo simultâneos');
-result=E.startBuild(s,v,'field',1);assert(!result.ok,'Não pode haver duas obras de campo simultâneas');
+result=E.startBuild(s,v,'field',1);assert(result.ok,'Vaga extra permite outro campo romano');
+result=E.startBuild(s,v,'field',2);assert(!result.ok,'A quarta obra excede as vagas disponíveis');
 for(const q of v.buildQueue)q.endsAt=Date.now()-1;
 s.lastTick=Date.now()-5000;E.advance(s,Date.now());
 assert.strictEqual(v.fields[0].level,2);assert.strictEqual(v.buildings.warehouse,2);
@@ -23,5 +24,5 @@ E.advance(s,Date.now());assert(s.reports.some(r=>r.title.includes('Vitória')||r
 assert(E.startAdventure(s).ok);s.hero.adventure.endsAt=Date.now()-1;s.lastTick=Date.now()-3000;E.advance(s,Date.now());assert.strictEqual(s.hero.adventures,1);
 const exported=E.exportSave(s);assert(E.importSave(exported).ok);assert(E.load());
 const originalSpeed=s.speed;s.speed=30;assert(E.production(s,v).wood>E.production({...s,speed:originalSpeed},v).wood);
-let g=E.newGame({tribe:'gauls'}),gv=E.active(g);assert(E.startBuild(g,gv,'field',0).ok);assert(!E.startBuild(g,gv,'building','warehouse',1).ok);
+let g=E.newGame({tribe:'gauls'}),gv=E.active(g);assert(E.startBuild(g,gv,'field',0).ok);assert(E.startBuild(g,gv,'building','warehouse',1).ok,'Fila extra permite uma segunda construção gaulesa');assert(!E.startBuild(g,gv,'field',1).ok,'Terceira obra gaulesa excede a capacidade');
 console.log('✓ Novo mundo, produção, custo, Romanos, filas, batalha, herói, missões, salvamento, tribos e progressão');
