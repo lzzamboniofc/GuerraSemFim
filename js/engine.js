@@ -35,6 +35,7 @@ function newGame(options={}) {
    power:kind==='enemy'?power:0,resources:kind==='enemy'?{wood:130+power*29,clay:110+power*27,iron:110+power*25,crop:160+power*26}:null});
  }
  if(window.GSF_AI)window.GSF_AI.init(st,now());
+ window.GSF_CAMPAIGN?.init(st,options.difficulty);
  log(st,'Bem-vindo ao Guerra Sem Fim! Sua aldeia está pronta para crescer.','welcome');
  report(st,'O início de um império','Seu povo ergueu os primeiros edifícios e aguarda suas ordens. Expanda os campos, crie um exército e descubra o mapa.', 'info');
  save(st);return st;
@@ -89,6 +90,7 @@ function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
 function send(st,v,x,y,army,mode='raid'){
  const target=tileAt(st,x,y);
  if(!target||!['enemy','rival'].includes(target.kind))return {ok:false,error:'Escolha um acampamento ou reino rival no mapa.'};
+ if(target.kind==='rival'&&window.GSF_CAMPAIGN?.isAlly(st,target.factionId))return {ok:false,error:'Esta facção é sua aliada. Rompa o pacto antes de atacar (ainda não disponível).'};
  if(buildLevel(v,'rally')<1)return {ok:false,error:'Construa o Ponto de Reunião.'};
  if(!army||typeof army!=='object'||Array.isArray(army))return {ok:false,error:'Seleção de tropas inválida.'};
  if(!['raid','attack','scout'].includes(mode))return {ok:false,error:'Tipo de missão inválido.'};
@@ -123,7 +125,7 @@ function simulate(st,v,x,y,army){
   if(!defs.some(u=>u.id===key)||!Number.isSafeInteger(Number(value))||Number(value)<0||Number(value)>(v.troops[key]||0))return {ok:false,error:'Quantidade inválida.'};count+=Number(value);
  }
  if(!count)return {ok:false,error:'Selecione tropas para simular.'};
- const power=window.GSF_WAR.offense(army,defs,v),defense=target.kind==='rival'?(target.power*27+18)*window.GSF_WAR.fortification(target.walls||0):target.power*32+10;
+ const power=window.GSF_WAR.offense(army,defs,v)*(window.GSF_CAMPAIGN?.attackBonus(st)||1),defense=target.kind==='rival'?(target.power*27+18)*window.GSF_WAR.fortification(target.walls||0):target.power*32+10;
  const wins=target.kind==='rival'?power>=defense*.85:power>=defense*.72;
  const ratio=wins?Math.min(.65,defense/(power+defense)*.72):Math.min(1,.50+defense/(power+defense)*.43);
  return {ok:true,power:Math.round(power),defense:Math.round(defense),wins,losses:Math.round(count*ratio),units:count,warning:'Estimativa simplificada; resultados reais podem variar conforme tropas e fortificações.'};
@@ -172,7 +174,7 @@ function log(st,message,type='info'){st.events.unshift({id:id(st),message,type,a
 function resolveBattle(st,m,arrivedAt){
  if(m.mode==='scout')return resolveScouting(st,m,arrivedAt);
  if(window.GSF_AI?.isRivalTarget(st,m))return window.GSF_AI.resolveBattle(st,m,arrivedAt);const v=st.villages.find(q=>q.id===m.villageId),t=st.world.tiles.find(q=>q.id===m.targetId);if(!v||!t){m.phase='returning';m.endsAt=arrivedAt+5000;return;}
- const defs=troopDefs(st);const atk=window.GSF_WAR.offense(m.army,defs,v);const def=t.power*32+10;
+ const defs=troopDefs(st);const atk=window.GSF_WAR.offense(m.army,defs,v)*(window.GSF_CAMPAIGN?.attackBonus(st)||1);const def=t.power*32+10;
  const win=atk>=def*0.72;const fraction=win?clamp((def/(atk+def))*0.55,0.02,0.58):clamp(def/(atk+def)*0.9,.4,1);
  const survivors={};const losses={};defs.forEach(u=>{const n=m.army[u.id]||0;const killed=Math.min(n,Math.round(n*fraction));if(n){survivors[u.id]=n-killed;losses[u.id]=killed;}});
  let loot={wood:0,clay:0,iron:0,crop:0};if(win){const carry=sum(defs.map(u=>(survivors[u.id]||0)*u.carry));const per=Math.floor(carry/4);D.RES.forEach(k=>{loot[k]=Math.min(per,t.resources[k]);t.resources[k]-=loot[k];});
@@ -330,6 +332,7 @@ function validateState(st){
  }
  if(!ids.has(st.activeVillageId))return false;
  if(st.ai&&window.GSF_AI&&!window.GSF_AI.validate(st.ai,st))return false;
+ if(window.GSF_CAMPAIGN&&!window.GSF_CAMPAIGN.validate(st.campaign))return false;
  if(!st.world.tiles.every(t=>plain(t)&&typeof t.id==='string'&&typeof t.name==='string'&&
   Number.isSafeInteger(t.x)&&Number.isSafeInteger(t.y)&&Math.abs(t.x)<=8&&Math.abs(t.y)<=8&&
   ['empty','enemy','oasis'].includes(t.kind)&&validNumber(t.power,0,1e9)&&
@@ -360,6 +363,7 @@ function load(){
    const raw=localStorage.getItem(key);if(!raw)continue;
    const st=JSON.parse(raw);if(!validateState(st))continue;
    window.GSF_RECOVERED_BACKUP=key===BACKUP_KEY;
+   window.GSF_CAMPAIGN?.init(st);
    advance(st);
    // Não sobrescrever o backup recuperado até o jogador executar a próxima ação.
    return st;
@@ -373,6 +377,7 @@ function importSave(text){
  let st;try{st=JSON.parse(text);}catch(_){return {ok:false,error:'Arquivo JSON inválido.'};}
  if(!validateState(st))return {ok:false,error:'Save incompatível ou dados inválidos.'};
  st.lastTick=now();
+ window.GSF_CAMPAIGN?.init(st);
  if(!save(st))return {ok:false,error:'Não foi possível salvar a partida neste navegador.'};
  return {ok:true,state:st};
 }

@@ -3,7 +3,7 @@ const fs=require('fs'),vm=require('vm'),path=require('path'),assert=require('ass
 const dir=path.resolve(__dirname,'..'), memory=new Map(),window={};
 const ctx={window,Date,Math,JSON,console,localStorage:{getItem:k=>memory.get(k)||null,setItem:(k,v)=>memory.set(k,v),removeItem:k=>memory.delete(k)}};
 vm.createContext(ctx);
-for(const f of ['data','war','ai','engine'])vm.runInContext(fs.readFileSync(path.join(dir,'js',f+'.js'),'utf8'),ctx,{filename:f});
+for(const f of ['data','war','ai','campaign','engine'])vm.runInContext(fs.readFileSync(path.join(dir,'js',f+'.js'),'utf8'),ctx,{filename:f});
 const E=window.GSF,AI=window.GSF_AI;
 let count=0;function check(name,fn){fn();console.log('✓ '+name);count++;}
 check('Configuração padrão é permitir invasões, e nova campanha aceita desativação',()=>{

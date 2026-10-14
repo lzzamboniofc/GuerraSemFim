@@ -3,7 +3,7 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
 const db=new Map();const localStorage={getItem:k=>db.get(k)??null,setItem:(k,v)=>db.set(k,String(v)),removeItem:k=>db.delete(k)};
 const context={window:{},localStorage,console,Date,Math,JSON};vm.createContext(context);
-for(const name of ['data','war','ai','engine'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../js',name+'.js'),'utf8'),context,{filename:name});
+for(const name of ['data','war','ai','campaign','engine'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../js',name+'.js'),'utf8'),context,{filename:name});
 const E=context.window.GSF,D=context.window.GSF_DATA,W=context.window.GSF_WAR,AI=context.window.GSF_AI;
 let passed=0;function test(name,run){run();console.log('✓ '+name);passed++;}
 const game=(tribe='romans')=>{const s=E.newGame({tribe,speed:12}),v=E.active(s);return {s,v};};

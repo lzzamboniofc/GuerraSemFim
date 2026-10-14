@@ -1,6 +1,6 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 0.5, Impérios e Diplomacia: estratégia medieval offline para navegador.**
+**Impérios & Conquistas — versão 0.6, Crônicas do Império: estratégia medieval offline para navegador.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
 
@@ -27,7 +27,16 @@ python -m http.server 8000
 
 Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não exige internet. Para voltar ao jogo, use sempre a mesma origem/porta e navegador, pois o salvamento local é separado por origem.
 
-## 🎮 O que funciona na versão 0.5
+## 🏆 Novidades da v0.6 — Crônicas do Império
+
+- **Campanha** no menu principal, com três capítulos em ordem, metas e recompensas.
+- **Dois caminhos de vitória:** vencer os três reinos NPC militarmente ou aliar-se aos três reinos e possuir duas aldeias. Os ataques inimigos podem continuar desligados.
+- **Conselho diplomático** em Reinos Rivais: envie presentes (Embaixada nível 1), negocie tréguas e formalize alianças permanentes (Embaixada nível 3, 40 reputação).
+- **Dificuldade** Explorador, Equilibrado e Conquistador, configurável na criação ou durante a campanha.
+- **Pontos de ataque do herói** agora ampliam o poder ofensivo; recursos clicáveis no topo e modais de obras permanecem.
+- **Compatibilidade de saves:** arquivos v0.1–v0.5 continuam válidos e recebem a campanha automaticamente. Exporte o save antes de atualizar.
+
+## 🎮 O que funciona na versão 0.6
 
 | Sistema | Funcionalidade |
 |---|---|
@@ -49,7 +58,7 @@ Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não
 | Diplomacia | Embaixada permite propor trégua de 12 turnos com reinos NPC mediante recursos |
 | Paz opcional | Ataques inimigos podem ser desativados por campanha nas Configurações; reinos NPC continuam evoluindo |
 
-## ✨ Destaques da versão 0.5
+## ✨ Destaques da versão 0.6
 
 - **Paz sob seu controle:** no início da campanha ou em **Configurações → Ataques inimigos**, ligue/desligue as invasões. Ao desligar, os ataques NPC que já estão a caminho são cancelados sem combate; os rivais continuam evoluindo e você ainda pode atacá-los.
 - **Produção detalhada:** clique em **madeira, barro, ferro ou cereal na barra superior** para abrir o modal. Você verá a quantidade armazenada, capacidade, produção por campos, bônus de edifícios, itens e consumo de cereal.

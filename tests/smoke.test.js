@@ -3,7 +3,7 @@ const fs=require('fs'), vm=require('vm'),assert=require('assert'),path=require('
 const root=path.resolve(__dirname,'..');
 const store=new Map();const context={window:{},console,Date,Math,JSON,localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)}};
 vm.createContext(context);
-for(const name of ['data','war','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',name+'.js'),'utf8'),context,{filename:name+'.js'});
+for(const name of ['data','war','campaign','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',name+'.js'),'utf8'),context,{filename:name+'.js'});
 const E=context.window.GSF;
 let s=E.newGame({tribe:'romans',player:'Teste',speed:12});let v=E.active(s);
 assert.strictEqual(v.fields.length,18);assert.strictEqual(v.fields.filter(f=>f.type==='crop').length,6);

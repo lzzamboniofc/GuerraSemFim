@@ -1,3 +1,16 @@
+# Changelog
+
+## [0.6.0] — Crônicas do Império · 14/10/2026
+
+- **Campanha por capítulos:** Fundação, Fronteiras e Legado. Recompensas resgatáveis em ordem e objetivos exibidos na nova tela **Campanha**.
+- **Dois finais:** vitória militar ao derrotar os três reinos ou vitória diplomática com três alianças e pelo menos duas aldeias. A campanha continua jogável após a vitória.
+- **Diplomacia ampliada:** emissários com presentes (+20 reputação, espera de três turnos), reputação 0–100, alianças permanentes com Embaixada nível 3. Tréguas agora concedem +10 reputação.
+- **Acordos reais:** aliados não enviam invasões nem podem ser atacados; marchas hostis em andamento são canceladas sem prejuízo ao jogador.
+- **Dificuldade:** Explorador, Equilibrado e Conquistador regulam agressividade/recrutamento da IA; escolha no início ou modifique nas Configurações.
+- **Herói:** pontos de ataque acima do nível inicial agora concedem bônus ofensivo (1,5% por ponto) em combate e simulador.
+- **Compatibilidade:** saves anteriores ganham campanha padrão sem perder progresso; controle de ataques inimigos e modais de produção/construção preservados.
+- **Testes:** 12 novos testes de campanha, um teste de integração da interface e manutenção das suítes anteriores.
+
 # Histórico de versões — Guerra Sem Fim
 
 ## v0.5 — Impérios e Diplomacia (14/10/2026)

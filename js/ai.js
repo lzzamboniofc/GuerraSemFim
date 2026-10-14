@@ -52,7 +52,8 @@ function log(st,message,type='army'){
 function cityAt(st,x,y){for(const f of st.ai.factions){const city=f.villages.find(v=>v.x===x&&v.y===y);if(city)return {f,city};}return null;}
 function resolveBattle(st,m,at){
  const ref=cityAt(st,m.x,m.y);
- const defs=D.TROOPS[st.tribe],origin=st.villages.find(v=>v.id===m.villageId),power=window.GSF_WAR.offense(m.army,defs,origin);
+ if(ref&&window.GSF_CAMPAIGN?.isAlly(st,ref.f.id)){m.phase='returning';m.endsAt=at+Math.max(5000,at-m.startedAt);m.loot=null;return;}
+ const defs=D.TROOPS[st.tribe],origin=st.villages.find(v=>v.id===m.villageId),power=window.GSF_WAR.offense(m.army,defs,origin)*(window.GSF_CAMPAIGN?.attackBonus(st)||1);
  const resistance=ref?(ref.city.troops*27+18)*window.GSF_WAR.fortification(ref.city.walls):0;
  const won=Boolean(ref)&&power>=resistance*.85;
  const ratio=ref?(won?Math.min(.65,resistance/(power+resistance)*.72):Math.min(1,.50+resistance/(power+resistance)*.43)):0;
@@ -113,7 +114,7 @@ function turn(st,at){
     if(c.level%3===0)c.walls=Math.min(8,c.walls+1);
    }
    const affordable=Math.floor(Math.min(c.stock.wood/13,c.stock.iron/12,c.stock.crop/9));
-   const recruits=Math.min(Math.max(0,affordable),3+Math.floor(c.level/2),Math.max(0,300-c.troops));
+   const recruits=Math.min(Math.max(0,affordable),Math.max(1,Math.round((3+Math.floor(c.level/2))*(window.GSF_CAMPAIGN?.difficulty(st).recruit||1))),Math.max(0,300-c.troops));
    c.troops+=recruits;c.stock.wood-=recruits*13;c.stock.iron-=recruits*12;c.stock.crop-=recruits*9;
   }
   if(f.turns%12===0&&f.villages.length<3&&f.villages[0]?.level>=4){
@@ -123,10 +124,10 @@ function turn(st,at){
     log(st,`${f.icon} ${f.name} fundou uma aldeia em (${p.x}|${p.y}).`,'army');}
   }
   // Trégua inicial de cinco turnos para um novo comandante.
-  if(attacksEnabled(st)&&!(f.treatyUntil>ai.turn)&&ai.turn>5&&ai.turn%(index+4)===0&&ai.movements.filter(m=>m.factionId===f.id).length<2){
+  if(attacksEnabled(st)&&!window.GSF_CAMPAIGN?.isAlly(st,f.id)&&!(f.treatyUntil>ai.turn)&&ai.turn>5&&ai.turn%(index+4)===0&&ai.movements.filter(m=>m.factionId===f.id).length<2){
    const source=f.villages.filter(c=>c.troops>=36).sort((a,b)=>b.troops-a.troops)[0];
    const target=st.villages.slice().sort((a,b)=>Math.hypot(source?.x-a.x||100,source?.y-a.y||100)-Math.hypot(source?.x-b.x||100,source?.y-b.y||100))[0];
-   if(source&&target&&rand(index+34,ai.turn)<f.aggression){
+   if(source&&target&&rand(index+34,ai.turn)<Math.min(.98,f.aggression*(window.GSF_CAMPAIGN?.difficulty(st).aggression||1))){
     const troops=Math.min(Math.floor(source.troops*.37),34+source.level*5);
     if(troops>=12){source.troops-=troops;
      const duration=Math.max(20000,Math.round(Math.hypot(source.x-target.x,source.y-target.y)*240000/(st.speed*1.5)));
@@ -183,6 +184,7 @@ function negotiate(st,factionId){
  if(!D.RES.every(k=>village.resources[k]>=price[k]))return {ok:false,error:'Recursos insuficientes para a oferta diplomática.'};
  D.RES.forEach(k=>village.resources[k]-=price[k]);
  f.treatyUntil=st.ai.turn+12;
+ window.GSF_CAMPAIGN?.onTruce(st,f.id);
  for(const m of st.ai.movements.slice().filter(m=>m.factionId===f.id&&m.phase==='outbound')){
   const origin=f.villages.find(c=>c.id===m.sourceId);
   if(origin)origin.troops=Math.min(300,origin.troops+m.troops);

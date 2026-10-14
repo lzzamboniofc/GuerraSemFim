@@ -5,7 +5,7 @@ const window={addEventListener:()=>{},GSF_RECOVERED_BACKUP:false};
 const document={querySelector:s=>s==='#app'?dom:null,addEventListener:(event,callback)=>events[event]=callback,body:{appendChild:()=>{}},createElement:()=>({setAttribute:()=>{},remove:()=>{}})};
 const ctx={window,document,localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},Date,Math,JSON,console,setInterval:()=>0,setTimeout:()=>0};
 vm.createContext(ctx);
-for(const f of ['data','war','ai','engine'])vm.runInContext(fs.readFileSync(path.join(dir,'js',f+'.js'),'utf8'),ctx,{filename:f});
+for(const f of ['data','war','ai','campaign','engine'])vm.runInContext(fs.readFileSync(path.join(dir,'js',f+'.js'),'utf8'),ctx,{filename:f});
 const game=window.GSF.newGame();
 vm.runInContext(fs.readFileSync(path.join(dir,'js/app.js'),'utf8'),ctx,{filename:'app.js'});
 const click=dataset=>events.click({target:{closest:()=>({dataset})}});

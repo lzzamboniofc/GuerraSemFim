@@ -54,12 +54,12 @@
 - Caravanas entre aldeias próprias com tempo de viagem e estoque de destino.
 - Três artefatos equipáveis do herói com bônus econômicos, obtidos por aventuras.
 
-## Próximo passo — v0.6: Reinos e Campanhas
+## Entregue: v0.6 — Reinos e Campanhas
 
-- Diplomacia mais profunda (alianças formais, reputação e comércio com NPCs).
-- Herói com inventário ampliado e habilidades de combate.
-- Colonizadores e pontos de cultura mais próximos dos sistemas clássicos de estratégia.
-- Missões por capítulos, objetivos de vitória e múltiplas dificuldades.
+- Diplomacia mais profunda: reputação, presentes, tratados, alianças permanentes e invasões canceladas para aliados.
+- Herói: atributo ofensivo aplicável em batalhas e simulador; itens ampliados permanecem para versão futura.
+- Pontos de cultura contabilizados e exibidos; colonizadores clássicos continuam planejados.
+- Três capítulos, dois finais de campanha (militar e diplomático), três dificuldades; manutenção do controle de invasões da v0.5.
 
 ## Fase 4 — Herói, facções e profundidade estratégica
 
