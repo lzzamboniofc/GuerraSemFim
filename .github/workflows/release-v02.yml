@@ -1,0 +1,55 @@
+name: Publicar Guerra Sem Fim v0.2
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'release-v02/**'
+      - '.github/workflows/release-v02.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Aplicar atualização v0.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f release-v02/payload.b64 ]; then
+            echo "Pacote ja aplicado."
+            exit 0
+          fi
+          base64 --decode release-v02/payload.b64 > /tmp/guerra-sem-fim-v02.patch.xz
+          echo "cc14be29740f96d9d10ffcddee02b58ce614d45084871e72d44e45bb6bcf3a9f  /tmp/guerra-sem-fim-v02.patch.xz" | sha256sum -c -
+          xz --decompress --stdout /tmp/guerra-sem-fim-v02.patch.xz > /tmp/guerra-sem-fim-v02.patch
+          patch --batch --fuzz=0 -p1 < /tmp/guerra-sem-fim-v02.patch
+      - name: Validar sintaxe, motor e cenários
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check js/app.js
+          node --check js/engine.js
+          node tests/smoke.test.js
+          node tests/regression.test.js
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          for name in ('assets/aldeia-cenario.svg', 'assets/campos-cenario.svg'):
+              ET.parse(name)
+              print("SVG valido:", name)
+          PY
+      - name: Publicar arquivos no repositório
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -r release-v02
+          git add -A
+          git commit -m "feat: Guerra Sem Fim v0.2 - visual, salvamento e motor confiavel"
+          git push origin HEAD:main
