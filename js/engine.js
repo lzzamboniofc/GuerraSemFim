@@ -418,7 +418,94 @@ function resolveAdventure(st){st.hero.inventory ||= [];st.hero.adventures++;st.h
 function equipHero(st,itemId){if(itemId!==null&&(!HERO_ARTIFACTS[itemId]||!(st.hero.inventory||[]).includes(itemId)))return {ok:false,error:'Artefato não encontrado no inventário.'};st.hero.equipped=itemId;save(st);return {ok:true};}
 function spendHero(st,kind){if(!['attack','resources'].includes(kind)||st.hero.points<1)return {ok:false,error:'Sem pontos de atributo disponíveis.'};st.hero.points--;st.hero[kind]++;save(st);return {ok:true};}
 function healHero(st){const v=active(st);const price=[100,100,100,100];if(st.hero.hp>=100)return {ok:false,error:'O herói já está saudável.'};if(!pay(v,price))return {ok:false,error:'Recursos insuficientes.'};st.hero.hp=Math.min(100,st.hero.hp+45);save(st);return {ok:true};}
-function trade(st,v,from,to,amount){amount=Math.floor(Number(amount));if(!D.RES.includes(from)||!D.RES.includes(to)||from===to||!Number.isFinite(amount)||amount<100)return {ok:false,error:'Troca inválida (mínimo 100).'};
+// v1.1 — mercadores com carga mista, viagens de ida/volta e rotas automáticas.
+const MERCHANT_CAPACITY={romans:500,gauls:750,teutons:1000};
+const emptyCargo=()=>({wood:0,clay:0,iron:0,crop:0});
+function merchantCapacity(st){return MERCHANT_CAPACITY[st.tribe]||500;}
+function merchantsTotal(v){return buildLevel(v,'marketplace')?Math.min(80,5+2*(buildLevel(v,'marketplace')-1)):0;}
+function merchantsBusy(st,v){return st.movements.filter(m=>m.mode==='merchant'&&m.villageId===v.id).reduce((n,m)=>n+(m.merchants||0),0);}
+function merchantsFree(st,v){return Math.max(0,merchantsTotal(v)-merchantsBusy(st,v));}
+function cleanCargo(cargo){
+ if(!cargo||typeof cargo!=='object'||Array.isArray(cargo))return null;
+ const clean=emptyCargo();for(const k of D.RES){const n=Number(cargo[k]||0);if(!Number.isSafeInteger(n)||n<0||n>1000000000)return null;clean[k]=n;}
+ return clean;
+}
+function sendMerchantCargo(st,from,targetId,cargo,at=now(),automatic=false){
+ const target=st.villages.find(v=>v.id===targetId);
+ if(!target||target.id===from?.id)return {ok:false,error:'Escolha outra aldeia do seu império.'};
+ if(!from||!st.villages.includes(from)||!merchantsTotal(from))return {ok:false,error:'Construa um Mercado na aldeia de origem.'};
+ const c=cleanCargo(cargo),total=c&&D.RES.reduce((n,k)=>n+c[k],0);
+ if(!c||total<50)return {ok:false,error:'Envie pelo menos 50 unidades no total.'};
+ if(D.RES.some(k=>c[k]>from.resources[k]+0.000001))return {ok:false,error:'Não há recursos suficientes para este carregamento.'};
+ const qty=Math.ceil(total/merchantCapacity(st));if(qty>merchantsFree(st,from))return {ok:false,error:`São necessários ${qty} mercadores e há ${merchantsFree(st,from)} disponíveis.`};
+ if(st.movements.length>=490)return {ok:false,error:'Há muitas marchas em andamento.'};
+ if(D.RES.some(k=>c[k]>Math.max(0,capacity(target,k)-target.resources[k])))return {ok:false,error:'O carregamento ultrapassa o espaço livre no depósito de destino.'};
+ D.RES.forEach(k=>from.resources[k]-=c[k]);
+ const seconds=Math.max(10,Math.ceil(distance(from,target)*240/st.speed));
+ st.movements.push({id:id(st),villageId:from.id,targetVillageId:target.id,mode:'merchant',phase:'going',army:{},cargo:c,merchants:qty,startedAt:at,endsAt:at+seconds*1000,x:target.x,y:target.y});
+ log(st,`${qty} mercador(es) de ${from.name} partiram para ${target.name} com ${total} recursos${automatic?' pela rota automática':''}.`,'trade');
+ if(!automatic)save(st);return {ok:true,merchants:qty,seconds,cargo:c};
+}
+function routes(v){return v.tradeRoutes||(v.tradeRoutes=[]);}
+function addTradeRoute(st,v,targetId,cargo,interval=60){
+ const target=st.villages.find(t=>t.id===targetId),c=cleanCargo(cargo),n=c&&D.RES.reduce((a,k)=>a+c[k],0);
+ const minutes=Number(interval);
+ if(!target||target.id===v.id)return {ok:false,error:'Escolha outra aldeia.'};
+ if(!merchantsTotal(v))return {ok:false,error:'Construa Mercado na aldeia.'};
+ if(!c||n<50||n>merchantCapacity(st)*merchantsTotal(v))return {ok:false,error:'Carga fora da capacidade da frota.'};
+ if(![15,30,60,180,360,720,1440].includes(minutes))return {ok:false,error:'Intervalo inválido.'};
+ if(routes(v).length>=5)return {ok:false,error:'Máximo de 5 rotas por aldeia.'};
+ const route={id:id(st),targetVillageId:targetId,cargo:c,interval:minutes,nextAt:now()+minutes*60000,enabled:true};
+ routes(v).push(route);log(st,`Rota automática de ${v.name} até ${target.name} criada.`,'trade');save(st);return {ok:true,route};
+}
+function removeTradeRoute(st,v,routeId){const list=routes(v),index=list.findIndex(r=>r.id===routeId);if(index<0)return {ok:false,error:'Rota não encontrada.'};list.splice(index,1);save(st);return {ok:true};}
+function toggleTradeRoute(st,v,routeId){const route=routes(v).find(r=>r.id===routeId);if(!route)return {ok:false,error:'Rota não encontrada.'};route.enabled=!route.enabled;if(route.enabled)route.nextAt=now()+route.interval*60000;save(st);return {ok:true,enabled:route.enabled};}
+function processTradeRoutes(st,at){
+ let acted=false;
+ for(const v of st.villages)for(const route of routes(v)){
+  if(!route.enabled||route.nextAt>at)continue;
+  // Cada execução tem limite de 1 tentativa por rota, com agendamento futuro estável.
+  route.nextAt=at+route.interval*60000;
+  const r=sendMerchantCargo(st,v,route.targetVillageId,route.cargo,at,true);
+  if(r.ok)acted=true;
+ }
+ return acted;
+}
+function canFestival(st,v){
+ if(buildLevel(v,'townhall')<1)return {ok:false,error:'Construa uma Prefeitura.'};
+ if(v.festivalQueue)return {ok:false,error:'Já há uma celebração em andamento.'};
+ const price=[750,800,600,650];if(!canPay(v,price))return {ok:false,error:'A celebração exige 750 madeira, 800 barro, 600 ferro e 650 cereal.'};
+ return {ok:true,price};
+}
+function startFestival(st,v){const c=canFestival(st,v);if(!c.ok)return c;pay(v,c.price);const at=now(),seconds=Math.max(60,Math.ceil(3600/st.speed));v.festivalQueue={startedAt:at,endsAt:at+seconds*1000};log(st,`Celebração iniciada na Prefeitura de ${v.name}.`,'quest');save(st);return {ok:true,seconds};}
+function starvation(st,v,shortage,at){
+ let amount=Math.min(100000,Math.ceil(shortage/6));if(amount<=0)return;
+ for(const u of troopDefs(st)){
+  const have=v.troops[u.id]||0;if(!have||!amount)continue;
+  const kill=Math.min(have,amount);v.troops[u.id]-=kill;amount-=kill;
+  v.famineLosses=(v.famineLosses||0)+kill;
+  if(!amount)break;
+ }
+ if(v.famineLosses&&(at-(v.lastFamineAt||0)>3600000)){
+  log(st,`Fome em ${v.name}: cereal insuficiente e tropas perdidas.`,'army');
+  report(st,'Fome no exército',`O celeiro de ${v.name} ficou sem cereal; até agora ${v.famineLosses} tropas morreram de fome.`,'defeat');
+  v.lastFamineAt=at;
+ }
+}
+function produceSegment(st,v,hours,at){
+ const r=production(st,v),cropStart=v.resources.crop;
+ D.RES.forEach(k=>v.resources[k]=clamp(v.resources[k]+r[k]*hours,0,capacity(v,k)));
+ if(r.crop<0&&cropStart+r.crop*hours<0)starvation(st,v,-(cropStart+r.crop*hours),at);
+}
+function maxExchangeOffer(v,from,to){
+ if(!D.RES.includes(from)||!D.RES.includes(to)||from===to)return 0;
+ const available=Math.max(0,Math.floor(v.resources[from]));
+ const free=Math.max(0,Math.floor(capacity(v,to)-v.resources[to]));
+ let left=0,right=available;
+ while(left<right){const mid=Math.ceil((left+right)/2);if(Math.floor(mid*.75)<=free)left=mid;else right=mid-1;}
+ return left>=100?left:0;
+}
+function trade(st,v,from,to,amount){amount=Number(amount);if(!Number.isSafeInteger(amount)||!D.RES.includes(from)||!D.RES.includes(to)||from===to||amount<100)return {ok:false,error:'Troca inválida (mínimo 100).'};
  if(buildLevel(v,'marketplace')<1)return {ok:false,error:'Construa o Mercado.'};
  const received=Math.floor(amount*.75);if(v.resources[from]<amount)return {ok:false,error:'Recursos insuficientes.'};if(v.resources[to]+received>capacity(v,to))return {ok:false,error:'Sem espaço no armazém de destino.'};
  v.resources[from]-=amount;v.resources[to]+=received;log(st,`Mercado: ${amount} ${D.RESOURCE[from].name} por ${received} ${D.RESOURCE[to].name}.`,'trade');save(st);return {ok:true,received};}
@@ -586,6 +673,7 @@ function resolveDue(st,at){
   }
   v.trainingQueue=v.trainingQueue.filter(q=>q.endsAt>at);
   if(v.administratorQueue&&v.administratorQueue.endsAt<=at){v.administrators=(v.administrators||0)+1;v.administratorQueue=null;log(st,`${administratorName(st)} pronto em ${v.name}.`,'army');resolved=true;}
+  if(v.festivalQueue&&v.festivalQueue.endsAt<=at){v.festivalQueue=null;v.festivalPoints=(v.festivalPoints||0)+150;log(st,`Celebração em ${v.name}: +150 pontos de cultura!`,'quest');report(st,'Celebração encerrada',`A Prefeitura de ${v.name} gerou 150 pontos de cultura.`,'victory');resolved=true;}
   if(v.research?.queue&&v.research.queue.endsAt<=at){
    const unitId=v.research.queue.unitId,unit=troopDefs(st).find(u=>u.id===unitId);
    if(!v.research.unlocked.includes(unitId))v.research.unlocked.push(unitId);
@@ -596,7 +684,16 @@ function resolveDue(st,at){
  }
  for(const m of st.movements.slice()){
   if(m.endsAt>at)continue;
-  if(m.phase==='going'&&m.mode==='trade'){
+  if(m.mode==='merchant'&&m.phase==='going'){
+   const dest=st.villages.find(v=>v.id===m.targetVillageId);
+   if(dest){addResources(dest,m.cargo);log(st,`Mercadores chegaram a ${dest.name} com carga de ${D.RES.reduce((n,k)=>n+m.cargo[k],0)} recursos.`,'trade');}
+   m.phase='returning';m.startedAt=at;m.endsAt=at+Math.max(10000,(m.endsAt-m.startedAt)||10000);
+   const origin=st.villages.find(v=>v.id===m.villageId);
+   m.endsAt=at+Math.max(10000,Math.ceil(distance(origin||dest||{x:0,y:0},dest||origin||{x:0,y:0})*240/st.speed)*1000);
+  }else if(m.mode==='merchant'&&m.phase==='returning'){
+   st.movements.splice(st.movements.indexOf(m),1);
+   log(st,`Mercadores regressaram à aldeia de origem.`,'trade');
+  }else if(m.phase==='going'&&m.mode==='trade'){
    const dest=st.villages.find(v=>v.id===m.targetVillageId);if(dest){addResources(dest,m.cargo);log(st,`Caravana recebida por ${dest.name}.`,'trade');}
    st.movements.splice(st.movements.indexOf(m),1);
   }else if(m.phase==='going'&&m.mode==='reinforce'){
@@ -609,6 +706,7 @@ function resolveDue(st,at){
   resolved=true;
  }
  if(st.hero.adventure&&st.hero.adventure.endsAt<=at){resolveAdventure(st);resolved=true;}
+ if(processTradeRoutes(st,at))resolved=true;
  if(window.GSF_AI?.resolveDue(st,at))resolved=true;
  return resolved;
 }
@@ -624,17 +722,17 @@ function advance(st,time=now()){
  while(resolveDue(st,cursor)&&++steps<10000){}
  while(cursor<time&&steps++<10000){
   const next=[];
-  st.villages.forEach(v=>{v.buildQueue.forEach(q=>{if(q.endsAt>cursor)next.push(q.endsAt);});v.trainingQueue.forEach(q=>{if(q.endsAt>cursor)next.push(q.endsAt);});if(v.administratorQueue?.endsAt>cursor)next.push(v.administratorQueue.endsAt);if(v.research?.queue?.endsAt>cursor)next.push(v.research.queue.endsAt);});
+  st.villages.forEach(v=>{v.buildQueue.forEach(q=>{if(q.endsAt>cursor)next.push(q.endsAt);});v.trainingQueue.forEach(q=>{if(q.endsAt>cursor)next.push(q.endsAt);});if(v.administratorQueue?.endsAt>cursor)next.push(v.administratorQueue.endsAt);if(v.research?.queue?.endsAt>cursor)next.push(v.research.queue.endsAt);if(v.festivalQueue?.endsAt>cursor)next.push(v.festivalQueue.endsAt);for(const r of routes(v))if(r.enabled&&r.nextAt>cursor)next.push(r.nextAt);});
   st.movements.forEach(m=>{if(m.endsAt>cursor)next.push(m.endsAt);});
   if(st.hero.adventure?.endsAt>cursor)next.push(st.hero.adventure.endsAt);
   if(window.GSF_AI)next.push(...window.GSF_AI.nextEvents(st,cursor));
   const end=Math.min(time,...next),hours=Math.max(0,end-cursor)/3600000;
-  st.villages.forEach(v=>{const rates=production(st,v);D.RES.forEach(k=>v.resources[k]=clamp(v.resources[k]+rates[k]*hours,0,capacity(v,k)));});
+  st.villages.forEach(v=>produceSegment(st,v,hours,end));
   cursor=end;
   while(resolveDue(st,cursor)&&++steps<10000){}
  }
  // Em um save com filas anormalmente grandes, conclui o avanço sem travar o navegador.
- if(cursor<time){const hours=(time-cursor)/3600000;st.villages.forEach(v=>{const rates=production(st,v);D.RES.forEach(k=>v.resources[k]=clamp(v.resources[k]+rates[k]*hours,0,capacity(v,k)));});}
+ if(cursor<time){const hours=(time-cursor)/3600000;st.villages.forEach(v=>produceSegment(st,v,hours,time));}
  st.lastTick=time;runPlanned(st);return st;
 }
 const BACKUP_KEY=KEY+'-backup';
@@ -672,6 +770,10 @@ function validateState(st){
    (v.settlers!==undefined&&(!Number.isSafeInteger(v.settlers)||v.settlers<0||v.settlers>3))||
    (v.administrators!==undefined&&(!Number.isSafeInteger(v.administrators)||v.administrators<0||v.administrators>3))||
    (v.administratorQueue!==undefined&&v.administratorQueue!==null&&(!plain(v.administratorQueue)||!validNumber(v.administratorQueue.startedAt)||!validNumber(v.administratorQueue.endsAt)||v.administratorQueue.endsAt<=v.administratorQueue.startedAt))||
+   (v.tradeRoutes!==undefined&&(!validArray(v.tradeRoutes,5)||!v.tradeRoutes.every(r=>plain(r)&&typeof r.id==='string'&&typeof r.targetVillageId==='string'&&validRes(r.cargo)&&Number.isSafeInteger(r.interval)&&[15,30,60,180,360,720,1440].includes(r.interval)&&validNumber(r.nextAt)&&typeof r.enabled==='boolean')))||
+   (v.festivalQueue!==undefined&&v.festivalQueue!==null&&(!plain(v.festivalQueue)||!validNumber(v.festivalQueue.startedAt)||!validNumber(v.festivalQueue.endsAt)||v.festivalQueue.endsAt<=v.festivalQueue.startedAt))||
+   (v.festivalPoints!==undefined&&(!Number.isSafeInteger(v.festivalPoints)||v.festivalPoints<0||v.festivalPoints>1000000000))||
+   (v.famineLosses!==undefined&&(!Number.isSafeInteger(v.famineLosses)||v.famineLosses<0||v.famineLosses>1000000000))||
    (v.conqueredFrom!==undefined&&(!['corvos','aurora','espinhos'].includes(v.conqueredFrom)))||
    !plain(v.buildings)||!plain(v.buildingSlots)||!validArmy(v.troops,st.tribe)||
    (v.militaryTech!==undefined&&(!plain(v.militaryTech)||!Object.entries(v.militaryTech).every(([k,l])=>D.TROOPS[st.tribe].some(u=>u.id===k)&&Number.isSafeInteger(l)&&l>=0&&l<=10)))||
@@ -686,6 +788,7 @@ function validateState(st){
   if(!v.trainingQueue.every(q=>plain(q)&&validNumber(q.endsAt)&&Number.isSafeInteger(q.qty)&&q.qty>=1&&q.qty<=MAX_TRAIN_BATCH&&D.TROOPS[st.tribe].some(t=>t.id===q.unitId)))return false;
  }
  if(!ids.has(st.activeVillageId))return false;
+ for(const v of st.villages)if(v.tradeRoutes?.some(r=>!ids.has(r.targetVillageId)||r.targetVillageId===v.id||D.RES.reduce((n,k)=>n+r.cargo[k],0)<50))return false;
  if(st.villages.filter(v=>buildLevel(v,'palace')>0||v.buildQueue.some(q=>q.type==='building'&&q.ref==='palace')).length>1)return false;
  if(st.ai&&window.GSF_AI&&!window.GSF_AI.validate(st.ai,st))return false;
  if(window.GSF_CAMPAIGN&&!window.GSF_CAMPAIGN.validate(st.campaign))return false;
@@ -700,6 +803,7 @@ function validateState(st){
   validArmy(m.army,st.tribe)&&(!m.loot||validRes(m.loot))&&
   (m.administrators===undefined||(Number.isSafeInteger(m.administrators)&&m.administrators>=0&&m.administrators<=1))&&
   (m.mode!=='conquer'||m.administrators===0||m.administrators===1)&&
+  (m.mode!=='merchant'||(ids.has(m.targetVillageId)&&m.targetVillageId!==m.villageId&&validRes(m.cargo)&&Number.isSafeInteger(m.merchants)&&m.merchants>=1&&m.merchants<=80))&&
   (m.mode!=='trade'||(ids.has(m.targetVillageId)&&m.targetVillageId!==m.villageId&&validRes(m.cargo)&&D.RES.reduce((n,k)=>n+m.cargo[k],0)>=50))&&
   (m.mode!=='reinforce'||(ids.has(m.targetVillageId)&&m.targetVillageId!==m.villageId))))return false;
  return st.reports.every(r=>plain(r)&&typeof r.title==='string'&&typeof r.body==='string'&&validNumber(r.at))&&
@@ -747,5 +851,5 @@ function importSave(text){
  if(!save(st))return {ok:false,error:'Não foi possível salvar a partida neste navegador.'};
  return {ok:true,state:st};
 }
-window.GSF={maxTrainable,capital,isCapital,setCapital,fieldMax,administratorName,canTrainAdministrator,trainAdministrator,sendConquest,conquerRival,researchRule,researchPrice,canResearch,startResearch,unitUnlocked,initResearch,viewMode,setViewMode,fieldMix,tileProfile,oasisResource,oasisCount,oasisLimit,captureOasis,releaseOasis,heroFocus,heroTargets,heroBonus,setHeroFocus,setHeroTargets,plans,planBuild,removePlan,movePlan,runPlanned,KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
+window.GSF={maxExchangeOffer,merchantCapacity,merchantsTotal,merchantsFree,sendMerchantCargo,addTradeRoute,removeTradeRoute,toggleTradeRoute,routes,canFestival,startFestival,maxTrainable,capital,isCapital,setCapital,fieldMax,administratorName,canTrainAdministrator,trainAdministrator,sendConquest,conquerRival,researchRule,researchPrice,canResearch,startResearch,unitUnlocked,initResearch,viewMode,setViewMode,fieldMix,tileProfile,oasisResource,oasisCount,oasisLimit,captureOasis,releaseOasis,heroFocus,heroTargets,heroBonus,setHeroFocus,setHeroTargets,plans,planBuild,removePlan,movePlan,runPlanned,KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
 })();

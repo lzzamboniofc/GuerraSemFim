@@ -17,7 +17,7 @@ function init(st,requested='normal'){
 }
 function info(st){return init(st);}
 function isAlly(st,id){return Boolean(st.campaign?.allies?.includes(id));}
-function culture(st){return st.villages.reduce((total,v)=>total+Object.values(v.buildings).reduce((n,l)=>n+l,0)+v.fields.reduce((n,f)=>n+f.level,0),0);}
+function culture(st){return st.villages.reduce((total,v)=>total+Object.values(v.buildings).reduce((n,l)=>n+l,0)+v.fields.reduce((n,f)=>n+f.level,0)+(v.festivalPoints||0),0);}
 function militaryWin(st){return IDS.every(id=>st.ai?.factions.some(f=>f.id===id&&f.defeated));}
 function diplomaticWin(st){return st.villages.length>=2 && IDS.every(id=>isAlly(st,id));}
 function chapters(st){const c=info(st),base=st.villages[0];
