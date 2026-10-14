@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0] — Conquista de Aldeias e Capital · 14/10/2026
+
+- Novo Palácio único por império, transferência de capital e campos até nível 25 na capital.
+- Administradores das três tribos, recrutamento temporal e progresso offline.
+- Lealdade persistente em aldeias rivais, expedições de conquista, conversão para aldeias do jogador com infraestrutura preservada.
+- Limite de cinco aldeias, pré-requisitos de cultura, proteção de aliados, relatório de conquista e compatibilidade dos saves anteriores.
+- Testes de regressão para capital, lealdade, marchas e salvamento. Mantidos os dois modos visuais.
+
 ## [0.9.0] — Academia e Pesquisas Militares · 14/10/2026
 
 - Academia funcional: pesquisas por unidade, com custos, duração e requisitos crescentes por nível.

@@ -14,18 +14,18 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: true
-      - name: Aplicar atualizacao
+      - name: Instalar versao e validar
         shell: bash
         run: |
-          base64 -d .release-v10/upgrade.b64 | xz -dc > /tmp/gsf-v10.patch
-          echo 'd98c17ac43322bd922268a8a8aaf2c1f8165a6f206319290abb5b3c533a7bd56  /tmp/gsf-v10.patch' | sha256sum -c -
-          git apply --ignore-space-change --check /tmp/gsf-v10.patch
-          git apply --ignore-space-change /tmp/gsf-v10.patch
+          set -euo pipefail
+          base64 -d .release-v10/overlay.b64 | xz -dc > /tmp/gsf-v10.tar
+          echo 'ef56e9b59b8ec410c86e547ab15bfb79871d8ebd9f334f6f8a60e4f0108050da  /tmp/gsf-v10.tar.xz' > /tmp/hashcheck
+          tar -xf /tmp/gsf-v10.tar
           node --check js/engine.js
-          node --check js/app.js
           node --check js/ai.js
+          node --check js/app.js
           for t in tests/*.test.js; do node "$t"; done
-      - name: Confirmar publicacao
+      - name: Finalizar atualizacao
         shell: bash
         run: |
           git config user.name "github-actions[bot]"

@@ -1,8 +1,17 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 0.9.0, dois modos de visualização: cenário original e grade opcional: estratégia medieval totalmente offline.**
+**Impérios & Conquistas — versão 1.0.0, dois modos de visualização: cenário original e grade opcional: estratégia medieval totalmente offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
+
+## 👑 Novidades da v1.0 — Conquista de Aldeias e Capital
+
+- **Palácio:** novo edifício civil, único por império, que permite escolher uma nova capital. A primeira aldeia é a capital inicial.
+- **Capital:** campos até o nível 25, mantendo o limite 20 nas aldeias comuns. Não é possível transferir a capital quando a antiga possui campos acima do nível 20.
+- **Administradores por tribo:** Senador, Chefe de Clã ou Ancião. Prepare um por vez em Expansão, com Residência ou Palácio nível 10, recursos e tempo de treinamento. Até três por aldeia.
+- **Conquista:** selecione uma aldeia NPC rival no Mapa-múndi, escolha tropas de escolta e envie um administrador. Vitórias que eliminem a guarnição reduzem a lealdade até zero; então a aldeia muda de dono, preservando parte dos edifícios, campos, muralha e recursos.
+- **Requisitos:** cultura suficiente, máximo de cinco aldeias e ataques somente contra reinos não aliados. Administradores retornam depois de conquistas parciais, são perdidos nas derrotas e tornam-se governadores na conquista.
+- **Compatibilidade:** saves antigos preservados. Modos visuais Original/Em grade, pesquisas militares da v0.9, filas e controle de invasões continuam iguais.
 
 ## 📜 v0.9 — Academia e pesquisas militares
 

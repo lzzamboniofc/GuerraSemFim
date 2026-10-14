@@ -116,3 +116,12 @@ html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
 .academy-meta{display:flex;gap:5px 9px;flex-wrap:wrap;color:#665742;font:11px Arial,sans-serif}
 .academy-item>.btn{white-space:normal;min-width:0}
 @media(max-width:640px){.academy-item{grid-template-columns:minmax(0,1fr) minmax(105px,auto);gap:8px;padding:10px}.academy-meta{grid-column:1/-1;grid-row:2}.academy-item>.btn{grid-column:2;grid-row:1}.academy-unit strong{font-size:12px}}
+
+/* v1.0 — capital e conquista; preserva o visual clássico */
+.realm-status{margin:0 0 12px;padding:9px 13px;border:1px solid #d4c7a8;border-radius:8px;background:#f4ecd8;color:#645435;font:700 12px Arial,sans-serif}
+.realm-panel{border-top:3px solid #b49555}
+.realm-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+.realm-stats>div{display:grid;gap:5px;min-width:0;background:#f9f1df;border:1px solid #deceb0;border-radius:7px;padding:12px}
+.realm-stats small{font-size:11px;color:#86745b}.realm-stats strong{font-size:16px;color:#40563b;overflow-wrap:anywhere}.realm-stats span{font-size:11px;color:#73614c}
+.conquer-button{background:linear-gradient(#ad8d52,#78623f);border-color:#655034}
+@media(max-width:700px){.realm-stats{grid-template-columns:1fr}.realm-panel .btn-row>*{max-width:100%;white-space:normal}}
