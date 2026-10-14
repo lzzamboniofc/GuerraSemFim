@@ -14,7 +14,9 @@ html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
 .masthead .resource-meter{width:100%}
 
 
-/* A grade de cartões atua apenas quando o jogador a ativa. */
+/* Modo de cartões: somente quando ativado nas Configurações. */
+/* A antiga paisagem absoluta era a causa das sobreposições dos edifícios.
+   Agora cada espaço tem a própria área clicável dentro de uma grade fluida. */
 .view-compact .scene.town-board, .view-compact .scene.field-board{
   width:100%;height:auto;min-height:0;display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -23,7 +25,14 @@ html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
   background:linear-gradient(155deg,#dce7b9 0%,#afc999 40%,#86ac80 100%);
   border:3px solid #c2ab7f;border-radius:13px;
   isolation:isolate;
-}.view-compact .scene.town-board:before, .view-compact .scene.field-board:before{opacity:.13}.view-compact .scene.town-board:after, .view-compact .scene.field-board:after{display:none}.view-compact .scene .board-intro{grid-column:1/-1;z-index:2;position:relative;display:flex;gap:4px 16px;flex-wrap:wrap;align-items:baseline;padding:4px 6px 12px;border-bottom:1px solid #71976750}.view-compact .scene .board-intro strong{font:700 16px Georgia,serif;color:#345135}.view-compact .scene .board-intro small{font:12px Arial,sans-serif;color:#4d6044}.view-compact .scene.town-board .town-road, .view-compact .scene.town-board .town-water, .view-compact .scene .town-tree, .view-compact .scene.field-board .field-hamlet{display:none}.view-compact .scene .town-slot, .view-compact .scene .field-slot{
+}
+.view-compact .scene.town-board:before, .view-compact .scene.field-board:before{opacity:.13}
+.view-compact .scene.town-board:after, .view-compact .scene.field-board:after{display:none}
+.view-compact .scene .board-intro{grid-column:1/-1;z-index:2;position:relative;display:flex;gap:4px 16px;flex-wrap:wrap;align-items:baseline;padding:4px 6px 12px;border-bottom:1px solid #71976750}
+.view-compact .scene .board-intro strong{font:700 16px Georgia,serif;color:#345135}
+.view-compact .scene .board-intro small{font:12px Arial,sans-serif;color:#4d6044}
+.view-compact .scene.town-board .town-road, .view-compact .scene.town-board .town-water, .view-compact .scene .town-tree, .view-compact .scene.field-board .field-hamlet{display:none}
+.view-compact .scene .town-slot, .view-compact .scene .field-slot{
   position:relative!important;left:auto!important;top:auto!important;
   transform:none!important;margin:0;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -33,24 +42,86 @@ html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
   background:linear-gradient(160deg,#fff8e5eF,#eadcbaeb);
   color:#3c3d29;box-shadow:0 3px 8px #344a2729;
   transition:transform .14s,border-color .14s,box-shadow .14s;
-}.view-compact .scene .town-slot:hover, .view-compact .scene .town-slot.selected, .view-compact .scene .field-slot:hover, .view-compact .scene .field-slot.selected{
+}
+.view-compact .scene .town-slot:hover, .view-compact .scene .town-slot.selected, .view-compact .scene .field-slot:hover, .view-compact .scene .field-slot.selected{
   transform:translateY(-2px)!important;outline:2px solid #c2a661;outline-offset:0;
   background:linear-gradient(150deg,#fffce9,#ede4c4);box-shadow:0 5px 11px #2a4a3345;
-}.view-compact .scene .town-slot:focus-visible, .view-compact .scene .field-slot:focus-visible{outline:3px solid #5d743f!important;outline-offset:2px}.view-compact .scene .town-slot .building-art{font-size:clamp(27px,3vw,36px);width:58px;height:49px;line-height:1;background:transparent;filter:drop-shadow(0 2px 1px #344b322a)}.view-compact .scene .town-slot.empty .building-art{width:52px;height:46px;border:2px dashed #a79b78;border-radius:8px;background:#f5e8c7;font-size:24px}.view-compact .scene .town-slot .slot-name{
+}
+.view-compact .scene .town-slot:focus-visible, .view-compact .scene .field-slot:focus-visible{outline:3px solid #5d743f!important;outline-offset:2px}
+.view-compact .scene .town-slot .building-art{font-size:clamp(27px,3vw,36px);width:58px;height:49px;line-height:1;background:transparent;filter:drop-shadow(0 2px 1px #344b322a)}
+.view-compact .scene .town-slot.empty .building-art{width:52px;height:46px;border:2px dashed #a79b78;border-radius:8px;background:#f5e8c7;font-size:24px}
+.view-compact .scene .town-slot .slot-name{
   display:block;max-width:100%;width:100%;text-align:center;
   font:700 12px/1.3 Arial,sans-serif;white-space:normal;overflow-wrap:anywhere;
   color:#41513b;text-shadow:none;background:transparent;box-shadow:none;
-}.view-compact .scene .town-slot .slot-level{position:absolute;top:5px;right:5px;left:auto;transform:none;min-width:25px;height:23px;display:grid;place-items:center;border-radius:10px;background:#486345;color:white;font:700 12px Arial,sans-serif}.view-compact .scene .field-slot{border-width:1px;min-height:110px;gap:5px}.view-compact .scene .field-slot .icon{font-size:31px;line-height:1.2}.view-compact .scene .field-slot .field-name{font:700 12px/1.2 Arial,sans-serif;text-align:center;color:#394b35;overflow-wrap:anywhere}.view-compact .scene .field-slot small{font-size:11px}.view-compact .scene .field-slot.queued:after{content:'⏳';position:absolute;right:6px;top:6px;font-size:15px}.view-compact .map-area{overflow:visible;padding:14px}.view-compact .map-view-hint{margin:4px 0 9px;font:12px/1.4 Arial,sans-serif;color:#63724e}.view-compact .map-area .map-grid{
+}
+.view-compact .scene .town-slot .slot-level{position:absolute;top:5px;right:5px;left:auto;transform:none;min-width:25px;height:23px;display:grid;place-items:center;border-radius:10px;background:#486345;color:white;font:700 12px Arial,sans-serif}
+.view-compact .scene .field-slot{border-width:1px;min-height:110px;gap:5px}
+.view-compact .scene .field-slot .icon{font-size:31px;line-height:1.2}
+.view-compact .scene .field-slot .field-name{font:700 12px/1.2 Arial,sans-serif;text-align:center;color:#394b35;overflow-wrap:anywhere}
+.view-compact .scene .field-slot small{font-size:11px}
+.view-compact .scene .field-slot.queued:after{content:"⏳";position:absolute;right:6px;top:6px;font-size:15px}
+
+/* Mapa adaptativo: 5x5 / 7x7 / 9x9 / 11x11 conforme a largura. */
+.view-compact .map-area{overflow:visible;padding:14px}
+.view-compact .map-view-hint{margin:4px 0 9px;font:12px/1.4 Arial,sans-serif;color:#63724e}
+.view-compact .map-area .map-grid{
   display:grid;grid-template-columns:repeat(var(--map-columns,9),minmax(0,1fr));
   gap:clamp(2px,.5vw,5px);padding:clamp(4px,.9vw,11px);
   width:100%;max-width:100%;overflow:hidden;min-width:0;
   background:linear-gradient(145deg,#9bad86,#799c78);
-}.view-compact .map-area .map-tile{width:100%;min-width:0;aspect-ratio:1;min-height:0;touch-action:manipulation}.view-compact .map-area .map-tile .glyph{font-size:clamp(18px,2.5vw,30px);line-height:1.1}.view-compact .map-area .map-tile .coord{font:9px Arial,sans-serif;bottom:2px;left:2px;opacity:.85}.view-compact .map-area .map-controls{display:grid;grid-template-columns:minmax(0,1fr);gap:9px}.view-compact .map-area .map-controls>.btn-row{width:100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.view-compact .map-area .map-controls .btn{min-width:0;width:100%;font-size:clamp(10px,1.05vw,12px);padding:9px 3px;line-height:1.25}.view-compact .map-area .legend{display:flex;flex-wrap:wrap;gap:10px 14px}@media(max-width:1450px){.view-compact .scene.town-board, .view-compact .scene.field-board{grid-template-columns:repeat(4,minmax(0,1fr))}
-}@media(max-width:1000px){.view-compact .scene.town-board, .view-compact .scene.field-board{grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;padding:12px}
-}@media(max-width:900px){.masthead .resource-bar{flex:unset;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.view-compact .scene.town-board, .view-compact .scene.field-board{grid-template-columns:repeat(3,minmax(0,1fr))}.view-compact .scene .town-slot, .view-compact .scene .field-slot{min-height:100px}.sidebar .nav-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;overflow:visible;scroll-snap-type:none}.sidebar .nav-item{min-width:0;width:100%;padding:9px 5px;text-align:center;justify-content:center;flex-direction:column;gap:4px;min-height:54px;white-space:normal;font:11px/1.2 Arial,sans-serif}.sidebar .nav-ico{font-size:17px;width:auto}
-}@media(max-width:650px){.masthead .resource-bar{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.masthead .resource-pill{min-height:66px;padding:8px 10px;gap:9px;justify-content:start}.masthead .resource-pill strong{font-size:16px}.masthead .resource-label{font-size:10px}.masthead .resource-pill small{font-size:10px}.view-compact .scene.town-board, .view-compact .scene.field-board{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:10px}.view-compact .scene .town-slot, .view-compact .scene .field-slot{min-height:100px;padding:10px 5px}.view-compact .scene .town-slot .slot-name{font-size:11px}.view-compact .scene .field-slot .field-name{font-size:11px}.view-compact .map-area .map-controls>.btn-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.view-compact .map-area .map-controls .btn{font-size:11px;padding:10px 5px}.view-compact .map-area .map-tile .glyph{font-size:clamp(20px,5vw,28px)}.view-compact .map-area .map-tile .coord{font-size:8px}.sidebar .nav-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:7px}.sidebar .nav-item{min-height:49px;padding:7px 4px}.sidebar .nav-ico{font-size:16px}
-}@media(max-width:375px){.view-compact .map-area{padding:8px}.view-compact .map-area .map-grid{gap:2px;padding:4px}.view-compact .map-area .map-tile .glyph{font-size:19px}.view-compact .map-area .map-tile .coord{font-size:7px;left:1px}.view-compact .scene .town-slot, .view-compact .scene .field-slot{min-height:96px}.view-compact .scene .town-slot .building-art{font-size:27px}.masthead .resource-pill{gap:5px;padding:6px}.masthead .resource-pill .ico{font-size:20px}
-}@media(prefers-reduced-motion:reduce){.view-compact .scene .town-slot, .view-compact .scene .field-slot{transition:none}}
+}
+.view-compact .map-area .map-tile{width:100%;min-width:0;aspect-ratio:1;min-height:0;touch-action:manipulation}
+.view-compact .map-area .map-tile .glyph{font-size:clamp(18px,2.5vw,30px);line-height:1.1}
+.view-compact .map-area .map-tile .coord{font:9px Arial,sans-serif;bottom:2px;left:2px;opacity:.85}
+.view-compact .map-area .map-controls{display:grid;grid-template-columns:minmax(0,1fr);gap:9px}
+.view-compact .map-area .map-controls>.btn-row{width:100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.view-compact .map-area .map-controls .btn{min-width:0;width:100%;font-size:clamp(10px,1.05vw,12px);padding:9px 3px;line-height:1.25}
+.view-compact .map-area .legend{display:flex;flex-wrap:wrap;gap:10px 14px}
+
+@media (max-width:1450px){
+ .view-compact .scene.town-board, .view-compact .scene.field-board{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media (max-width:1000px){
+ .view-compact .scene.town-board, .view-compact .scene.field-board{grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;padding:12px}
+}
+@media (max-width:900px){
+ .masthead .resource-bar{flex:unset;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+ .view-compact .scene.town-board, .view-compact .scene.field-board{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .view-compact .scene .town-slot, .view-compact .scene .field-slot{min-height:100px}
+ .sidebar .nav-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;overflow:visible;scroll-snap-type:none}
+ .sidebar .nav-item{min-width:0;width:100%;padding:9px 5px;text-align:center;justify-content:center;flex-direction:column;gap:4px;min-height:54px;white-space:normal;font:11px/1.2 Arial,sans-serif}
+ .sidebar .nav-ico{font-size:17px;width:auto}
+}
+@media (max-width:650px){
+ .masthead .resource-bar{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .masthead .resource-pill{min-height:66px;padding:8px 10px;gap:9px;justify-content:start}
+ .masthead .resource-pill strong{font-size:16px}
+ .masthead .resource-label{font-size:10px}
+ .masthead .resource-pill small{font-size:10px}
+ .view-compact .scene.town-board, .view-compact .scene.field-board{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:10px}
+ .view-compact .scene .town-slot, .view-compact .scene .field-slot{min-height:100px;padding:10px 5px}
+ .view-compact .scene .town-slot .slot-name{font-size:11px}
+ .view-compact .scene .field-slot .field-name{font-size:11px}
+ .view-compact .map-area .map-controls>.btn-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .view-compact .map-area .map-controls .btn{font-size:11px;padding:10px 5px}
+ .view-compact .map-area .map-tile .glyph{font-size:clamp(20px,5vw,28px)}
+ .view-compact .map-area .map-tile .coord{font-size:8px}
+ .sidebar .nav-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:7px}
+ .sidebar .nav-item{min-height:49px;padding:7px 4px}
+ .sidebar .nav-ico{font-size:16px}
+}
+@media (max-width:375px){
+ .view-compact .map-area{padding:8px}
+ .view-compact .map-area .map-grid{gap:2px;padding:4px}
+ .view-compact .map-area .map-tile .glyph{font-size:19px}
+ .view-compact .map-area .map-tile .coord{font-size:7px;left:1px}
+ .view-compact .scene .town-slot, .view-compact .scene .field-slot{min-height:96px}
+ .view-compact .scene .town-slot .building-art{font-size:27px}
+ .masthead .resource-pill{gap:5px;padding:6px}
+ .masthead .resource-pill .ico{font-size:20px}
+}
+@media (prefers-reduced-motion:reduce){.view-compact .scene .town-slot, .view-compact .scene .field-slot{transition:none}}
 
 
 /* Acesso rápido: menus secundários recolhidos até que o jogador os peça. */
@@ -64,8 +135,7 @@ html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
  .sidebar .nav-item{min-height:54px}
 }
 
-
-/* Modo original: mantém o desenho das cenas do início do projeto. */
+/* Modo original: mantém os pontos no cenário da primeira versão. */
 .view-original .scene .board-intro,.view-original .scene .field-name{display:none}
 .view-original .scene.town-board,.view-original .scene.field-board{width:100%;max-width:100%;min-width:0;overflow:hidden}
 .view-original .map-area{min-width:0;max-width:100%;overflow:hidden}
@@ -73,6 +143,7 @@ html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
 .view-original .map-tile{min-width:0;width:100%;min-height:0}
 .view-original .map-controls{flex-wrap:wrap}
 .view-original .map-controls .btn-row{max-width:100%;flex-wrap:wrap}
+.view-original .view-switcher,.view-compact .view-switcher{max-width:100%}
 .view-switcher{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap;margin:0 0 12px;padding:8px 10px;background:linear-gradient(120deg,#f3ecd9,#e9dbb9);border:1px solid #c7b18a;border-radius:9px;font:12px/1.2 Arial,sans-serif;color:#4b5d41}
 .view-switcher>span{margin-right:auto;font-weight:700}
 .view-choice{border:1px solid #a4ad90;background:#fff9ea;color:#43553d;border-radius:6px;padding:8px 11px;font:700 12px Arial,sans-serif;min-height:36px}
@@ -105,7 +176,7 @@ html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
  .view-original .field-slot .icon{font-size:17px}
 }
 
-/* v0.9 — Academia: mantém intactas as opções visuais Original e Em grade. */
+/* v0.9 — Academia, sem modificar as disposições Original/Em grade. */
 .academy-panel{border-top:4px solid #8d7550}
 .academy-progress{padding:13px 15px;background:#f1e7cd;border:1px solid #cbb88d;border-radius:8px;margin:12px 0;display:grid;gap:8px}
 .academy-list{display:grid;gap:8px;margin:12px 0}
@@ -117,12 +188,14 @@ html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
 .academy-item>.btn{white-space:normal;min-width:0}
 @media(max-width:640px){.academy-item{grid-template-columns:minmax(0,1fr) minmax(105px,auto);gap:8px;padding:10px}.academy-meta{grid-column:1/-1;grid-row:2}.academy-item>.btn{grid-column:2;grid-row:1}.academy-unit strong{font-size:12px}}
 
-/* v1.0 — capital e conquista; preserva o visual clássico */
+/* v1.0 — capital e conquista, sem trocar o tema clássico */
 .realm-status{margin:0 0 12px;padding:9px 13px;border:1px solid #d4c7a8;border-radius:8px;background:#f4ecd8;color:#645435;font:700 12px Arial,sans-serif}
 .realm-panel{border-top:3px solid #b49555}
 .realm-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
 .realm-stats>div{display:grid;gap:5px;min-width:0;background:#f9f1df;border:1px solid #deceb0;border-radius:7px;padding:12px}
-.realm-stats small{font-size:11px;color:#86745b}.realm-stats strong{font-size:16px;color:#40563b;overflow-wrap:anywhere}.realm-stats span{font-size:11px;color:#73614c}
+.realm-stats small{font-size:11px;color:#86745b}
+.realm-stats strong{font-size:16px;color:#40563b;overflow-wrap:anywhere}
+.realm-stats span{font-size:11px;color:#73614c}
 .conquer-button{background:linear-gradient(#ad8d52,#78623f);border-color:#655034}
 @media(max-width:700px){.realm-stats{grid-template-columns:1fr}.realm-panel .btn-row>*{max-width:100%;white-space:normal}}
 
@@ -154,3 +227,14 @@ html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
 .legacy-caravan .form-grid{margin-top:10px}
 @media(max-width:780px){.merchant-cargo{grid-template-columns:repeat(2,minmax(0,1fr))}.route-item{flex-wrap:wrap}.route-item .btn-row{width:100%}}
 @media(max-width:480px){.market-presets .btn{min-width:0;flex:1 1 27%;padding:8px 4px;font-size:11px}.route-item .btn-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.merchant-cargo{gap:8px}}
+
+/* v1.2 — inventário e aventuras responsivos */
+.hero-slot-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 20px}
+.hero-slot{min-width:0;display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:9px;border:1px solid #cfbf9f;background:#fff9e9;color:#4f473a}
+.hero-slot>span{overflow-wrap:anywhere}.hero-slot small{color:#6d6457}.hero-slot .btn{align-self:start}
+.hero-adventure-panel{border:1px solid #d0c09e;padding:13px;border-radius:10px;margin:12px 0;background:#f8f0dc}
+.hero-adventure-panel h3{margin:0 0 5px}.hero-adventure-panel p{font-size:.88rem;margin:5px 0 10px}
+.hero-adventure-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.hero-adventure-actions .form-field{flex:1 1 180px;min-width:0;margin:0}
+.hero-adventure-actions .btn{flex:0 1 auto}
+@media(max-width:450px){.hero-slot-grid{grid-template-columns:minmax(0,1fr)}.hero-adventure-actions .btn{width:100%}}

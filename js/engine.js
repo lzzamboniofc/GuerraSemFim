@@ -2,7 +2,24 @@
 'use strict';
 const D = window.GSF_DATA;
 const KEY = 'guerra-sem-fim-save-v1';
-const HERO_ARTIFACTS={axe:{name:'Machado do Lenhador',icon:'🪓',text:'+10% madeira',type:'wood',bonus:.10},horn:{name:'Chifre da Colheita',icon:'🌾',text:'+10% cereal',type:'crop',bonus:.10},crown:{name:'Coroa do Reino',icon:'👑',text:'+5% em todos os recursos',type:'all',bonus:.05}};
+const HERO_ARTIFACTS={
+ axe:{name:'Machado do Lenhador',icon:'🪓',text:'+10% madeira',type:'wood',bonus:.10,slot:'charm'},
+ horn:{name:'Chifre da Colheita',icon:'🌾',text:'+10% cereal',type:'crop',bonus:.10,slot:'charm'},
+ crown:{name:'Coroa do Reino',icon:'👑',text:'+5% em todos os recursos',type:'all',bonus:.05,slot:'charm'},
+ sword:{name:'Espada do Guardião',icon:'⚔️',text:'+45 poder na luta por oásis',slot:'weapon',power:45},
+ spear:{name:'Lança da Aurora',icon:'🗡️',text:'+70 poder na luta por oásis',slot:'weapon',power:70},
+ shield:{name:'Escudo de Ferro',icon:'🛡️',text:'-5 dano em aventuras e oásis',slot:'armor',protection:5},
+ armor:{name:'Armadura de Guarda',icon:'🥋',text:'-9 dano em aventuras e oásis',slot:'armor',protection:9},
+ horse:{name:'Cavalo de Campanha',icon:'🐴',text:'-25% tempo das aventuras',slot:'mount',speed:.25},
+ charger:{name:'Corcel Veloz',icon:'🐎',text:'-40% tempo das aventuras',slot:'mount',speed:.40}
+};
+const HERO_SLOTS={weapon:'Arma',armor:'Armadura',mount:'Montaria',charm:'Amuleto'};
+const HERO_REWARDS=['axe','horn','crown','sword','shield','horse','spear','armor','charger'];
+function heroEquipment(st){const h=st.hero;return {...{weapon:null,armor:null,mount:null,charm:h.equipped||null},...(h.equipment||{})};}
+function initHeroGear(st){const h=st.hero;h.inventory ||= [];h.potions ??= 0;h.equipment=heroEquipment(st);h.equipped=h.equipment.charm;return h.equipment;}
+function heroGearBonus(st,stat){return Object.values(heroEquipment(st)).reduce((sum,id)=>sum+(HERO_ARTIFACTS[id]?.[stat]||0),0);}
+function oasisWildlife(t){if(t.kind!=='oasis')return 0;return 6+Math.floor(random(t.x+26,t.y-41,471)*17);}
+
 const now = () => Date.now();
 const clamp = (x,a,b) => Math.min(b,Math.max(a,x));
 const sum = arr => arr.reduce((a,b)=>a+b,0);
@@ -28,11 +45,21 @@ function captureOasis(st,v,x,y){
  if(st.hero.hp<25)return {ok:false,error:'O herói precisa de pelo menos 25 de vida.'};
  const warriors=troopDefs(st).filter(u=>!u.scout&&!u.siege).reduce((sum,u)=>sum+(v.troops[u.id]||0),0);
  if(warriors<20)return {ok:false,error:'Deixe 20 soldados de infantaria ou cavalaria na aldeia.'};
+ const wildlife=oasisWildlife(t);
+ const troopPower=troopDefs(st).filter(u=>!u.scout&&!u.siege).reduce((n,u)=>n+(v.troops[u.id]||0)*u.attack,0);
+ const defense=wildlife*26,power=troopPower+st.hero.attack*6+heroGearBonus(st,'power');
+ if(power<defense)return {ok:false,error:`Há ${wildlife} animais defendendo o oásis. Reúna tropas mais fortes antes da ocupação.`};
  const price=[250,250,250,250];if(!canPay(v,price))return {ok:false,error:'A ocupação exige 250 unidades de cada recurso.'};
- pay(v,price);st.hero.hp-=15;t.ownerVillageId=v.id;t.oasisType=oasisResource(t);
+ const losses=Math.min(warriors-1,Math.max(1,Math.floor(wildlife*defense/(power+defense)*.7)));
+ let remaining=losses;
+ for(const u of troopDefs(st).filter(u=>!u.scout&&!u.siege)){
+  const killed=Math.min(v.troops[u.id]||0,remaining);v.troops[u.id]-=killed;remaining-=killed;if(!remaining)break;
+ }
+ const injury=Math.max(3,15-Math.floor(heroGearBonus(st,'protection')/2));
+ pay(v,price);st.hero.hp=Math.max(0,st.hero.hp-injury);t.ownerVillageId=v.id;t.oasisType=oasisResource(t);
  log(st,`Oásis de ${D.RESOURCE[t.oasisType].name} conquistado por ${v.name} (${x}|${y}).`,'build');
- report(st,'Oásis conquistado',`${v.name} conquistou um oásis em (${x}|${y}), obtendo +25% de produção de ${D.RESOURCE[t.oasisType].name.toLowerCase()}.`,'victory');
- save(st);return {ok:true,resource:t.oasisType};
+ report(st,'Oásis conquistado',`${v.name} derrotou ${wildlife} animais em (${x}|${y}), perdeu ${losses} soldados e obteve +25% de produção de ${D.RESOURCE[t.oasisType].name.toLowerCase()}.`,'victory');
+ save(st);return {ok:true,resource:t.oasisType,wildlife,losses};
 }
 function releaseOasis(st,v,x,y){const t=st.world.tiles.find(t=>t.x===x&&t.y===y&&t.kind==='oasis'&&t.ownerVillageId===v.id);if(!t)return {ok:false,error:'Oásis não pertence à aldeia atual.'};delete t.ownerVillageId;log(st,`Oásis (${x}|${y}) foi abandonado.`,'build');save(st);return {ok:true};}
 function heroTargets(st){
@@ -57,7 +84,7 @@ function village(st,name,x,y,starter=false,profile='balanced') {
 function newGame(options={}) {
  const tribe = D.TRIBES[options.tribe]?options.tribe:'romans';
  const st={version:1,nextId:1,player:(options.player||'Comandante').trim().slice(0,25)||'Comandante',tribe,speed:clamp(Number(options.speed)||12,1,100),
-  villages:[],activeVillageId:null,capitalVillageId:null,preferences:{enemyAttacks:options.enemyAttacks!==false,extraBuildSlots:1,viewMode:'original'},hero:{name:'Guardião',level:1,xp:0,hp:100,attack:4,resources:0,points:0,adventure:null,adventures:0,inventory:[],equipped:null,productionFocus:'wood',productionTargets:['wood']},
+  villages:[],activeVillageId:null,capitalVillageId:null,preferences:{enemyAttacks:options.enemyAttacks!==false,extraBuildSlots:1,viewMode:'original'},hero:{name:'Guardião',level:1,xp:0,hp:100,attack:4,resources:0,points:0,adventure:null,adventures:0,inventory:[],equipped:null,equipment:{weapon:null,armor:null,mount:null,charm:null},potions:0,productionFocus:'wood',productionTargets:['wood']},
   world:{seed:37,tiles:[]},movements:[],reports:[],events:[],questsClaimed:[],tutorialDismissed:false,createdAt:now(),lastTick:now()};
  const home=village(st,(options.village||'Nova Esperança').trim().slice(0,28)||'Nova Esperança',0,0,true);
  st.villages=[home];st.activeVillageId=home.id;st.capitalVillageId=home.id;
@@ -152,7 +179,7 @@ function population(v){let n=2;for(const [k,l] of Object.entries(v.buildings))n+
 function upkeep(st,v){return troopDefs(st).reduce((a,t)=>a+(v.troops[t.id]||0)*t.upkeep,0);}
 function production(st,v){const base={wood:0,clay:0,iron:0,crop:0};v.fields.forEach(f=>{base[f.type]+=f.level?Math.round(5*Math.pow(1.68,f.level-1)):0;});
  const out={};const bonus={wood:'sawmill',clay:'brickyard',iron:'ironworks',crop:'mill'};
- D.RES.forEach(k=>{const item=HERO_ARTIFACTS[st.hero.equipped];const gearBonus=st.villages[0].id===v.id&&(item?.type===k||item?.type==='all')?item.bonus:0;out[k]=Math.floor(base[k]*(1+0.05*buildLevel(v,bonus[k])+gearBonus)*st.speed);});
+ D.RES.forEach(k=>{const item=HERO_ARTIFACTS[heroEquipment(st).charm];const gearBonus=st.villages[0].id===v.id&&(item?.type===k||item?.type==='all')?item.bonus:0;out[k]=Math.floor(base[k]*(1+0.05*buildLevel(v,bonus[k])+gearBonus)*st.speed);});
  const oases=st.world.tiles.filter(t=>t.kind==='oasis'&&t.ownerVillageId===v.id);
  for(const t of oases){const key=oasisResource(t);out[key]+=Math.floor(base[key]*.25*st.speed);}
  for(const key of D.RES)out[key]+=heroBonus(st,key,v);
@@ -409,13 +436,51 @@ function returnArmy(st,m){const v=st.villages.find(q=>q.id===m.villageId);if(!v)
  if(m.loot)addResources(v,m.loot);
  if(m.administrators)v.administrators=(v.administrators||0)+m.administrators;
  log(st,`As tropas voltaram a ${v.name}${m.loot?' com recursos saqueados':''}.`,'army');}
-function startAdventure(st){if(st.hero.adventure)return {ok:false,error:'O herói já está em uma aventura.'};if(st.hero.hp<20)return {ok:false,error:'Seu herói precisa recuperar a saúde.'};
- const seconds=Math.max(10,Math.round(240/st.speed));st.hero.adventure={id:id(st),endsAt:now()+seconds*1000};log(st,'O herói partiu para explorar terras desconhecidas.','hero');save(st);return {ok:true};}
-function resolveAdventure(st){st.hero.inventory ||= [];st.hero.adventures++;st.hero.xp+=36+st.hero.level*6;st.hero.hp=Math.max(15,st.hero.hp-8);if(st.hero.adventures===2||st.hero.adventures===4||st.hero.adventures===6){const reward=st.hero.adventures===2?'axe':st.hero.adventures===4?'horn':'crown';if(!st.hero.inventory.includes(reward)){st.hero.inventory.push(reward);log(st,`Artefato encontrado: ${HERO_ARTIFACTS[reward].name}.`,'hero');}}const v=st.villages[0];const r={wood:110+st.hero.level*20,clay:110+st.hero.level*20,iron:110+st.hero.level*20,crop:110+st.hero.level*20};addResources(v,r);
- while(st.hero.xp>=st.hero.level*100){st.hero.xp-=st.hero.level*100;st.hero.level++;st.hero.points+=4;st.hero.hp=100;log(st,`Seu herói subiu para o nível ${st.hero.level}!`,'hero');}
- report(st,'Aventura concluída',`O herói retornou com recursos e experiência. Recompensa: ${r.wood} de cada recurso e experiência de combate.`,'victory');
- log(st,'Seu herói concluiu a aventura com sucesso.','hero');st.hero.adventure=null;}
-function equipHero(st,itemId){if(itemId!==null&&(!HERO_ARTIFACTS[itemId]||!(st.hero.inventory||[]).includes(itemId)))return {ok:false,error:'Artefato não encontrado no inventário.'};st.hero.equipped=itemId;save(st);return {ok:true};}
+function startAdventure(st,kind='explore'){
+ if(!['explore','supplies','hunt'].includes(kind))return {ok:false,error:'Escolha uma aventura válida.'};
+ if(st.hero.adventure)return {ok:false,error:'O herói já está em uma aventura.'};
+ const hpNeeded=kind==='hunt'?40:20;
+ if(st.hero.hp<hpNeeded)return {ok:false,error:`Seu herói precisa de pelo menos ${hpNeeded} pontos de saúde.`};
+ initHeroGear(st);
+ const base=kind==='hunt'?360:kind==='supplies'?270:240;
+ const bonus=Math.min(.4,heroGearBonus(st,'speed'));
+ const seconds=Math.max(10,Math.round(base*(1-bonus)/st.speed));
+ const at=now();st.hero.adventure={id:id(st),kind,startedAt:at,endsAt:at+seconds*1000};
+ log(st,`O herói partiu para uma aventura (${kind==='hunt'?'caçada':kind==='supplies'?'suprimentos':'exploração'}).`,'hero');save(st);return {ok:true,seconds};
+}
+function resolveAdventure(st){
+ const h=st.hero,kind=h.adventure?.kind||'explore';initHeroGear(st);
+ h.adventures++;const count=h.adventures,level=h.level,v=st.villages[0];
+ const protection=heroGearBonus(st,'protection'),strength=h.attack*5+heroGearBonus(st,'power');
+ const danger=kind==='hunt'?24:kind==='supplies'?10:15;
+ const damage=Math.max(1,danger+count%7-Math.floor(strength/45)-protection);
+ h.hp=Math.max(0,h.hp-damage);
+ const xp=(kind==='hunt'?60:kind==='supplies'?22:36)+level*6;
+ h.xp+=xp;
+ let description=`+${xp} EXP; -${damage} de saúde`;
+ const resBonus=kind==='supplies'?1.8:kind==='hunt'?.6:1;
+ const resourceAmount=Math.round((110+level*20)*resBonus);
+ const resourceKey=D.RES[count%4];
+ const reward=kind==='supplies'?Object.fromEntries(D.RES.map(k=>[k,resourceAmount])):kind==='hunt'?{[resourceKey]:resourceAmount}:{[resourceKey]:resourceAmount*2};
+ addResources(v,reward);
+ description+=`; suprimentos: ${D.RES.map(k=>`${D.RESOURCE[k].name} ${reward[k]||0}`).filter((x,i)=>(reward[D.RES[i]]||0)>0).join(', ')}`;
+ if(count%3===0||kind==='hunt'&&count%2===0){const gain=kind==='hunt'?2:1;h.potions=Math.min(99,h.potions+gain);description+=`; +${gain} poção(ões)`;}
+ const milestone={2:'axe',4:'horn',6:'crown',8:'sword',10:'shield',12:'horse',15:'spear',18:'armor',21:'charger'};
+ let itemId=milestone[count];
+ if(kind==='hunt'&&count>8&&count%5===0)itemId=HERO_REWARDS.find(key=>!h.inventory.includes(key));
+ if(itemId&&!h.inventory.includes(itemId)&&h.inventory.length<20){h.inventory.push(itemId);description+=`; equipamento: ${HERO_ARTIFACTS[itemId].name}`;log(st,`Item encontrado: ${HERO_ARTIFACTS[itemId].name}.`,'hero');}
+ while(h.xp>=h.level*100&&h.level<1000){h.xp-=h.level*100;h.level++;h.points+=4;h.hp=100;log(st,`Seu herói subiu para o nível ${h.level}!`,'hero');}
+ report(st,'Aventura concluída',`Expedição de ${kind==='hunt'?'caçada':kind==='supplies'?'suprimentos':'exploração'}: ${description}.`,'victory');
+ log(st,'Seu herói concluiu a aventura.','hero');h.adventure=null;
+}
+function equipHero(st,itemId){
+ const eq=initHeroGear(st);
+ if(itemId===null){eq.charm=null;st.hero.equipped=null;save(st);return {ok:true};}
+ const gear=HERO_ARTIFACTS[itemId];if(!gear||!st.hero.inventory.includes(itemId))return {ok:false,error:'Equipamento não encontrado no inventário.'};
+ eq[gear.slot]=itemId;st.hero.equipped=eq.charm;save(st);return {ok:true,slot:gear.slot};
+}
+function unequipHero(st,slot){if(!HERO_SLOTS[slot])return {ok:false,error:'Categoria de equipamento inválida.'};const eq=initHeroGear(st);eq[slot]=null;st.hero.equipped=eq.charm;save(st);return {ok:true};}
+function useHeroPotion(st){initHeroGear(st);if(!st.hero.potions)return {ok:false,error:'Seu herói não possui poções.'};if(st.hero.hp>=100)return {ok:false,error:'O herói já está totalmente recuperado.'};st.hero.potions--;st.hero.hp=Math.min(100,st.hero.hp+35);save(st);return {ok:true};}
 function spendHero(st,kind){if(!['attack','resources'].includes(kind)||st.hero.points<1)return {ok:false,error:'Sem pontos de atributo disponíveis.'};st.hero.points--;st.hero[kind]++;save(st);return {ok:true};}
 function healHero(st){const v=active(st);const price=[100,100,100,100];if(st.hero.hp>=100)return {ok:false,error:'O herói já está saudável.'};if(!pay(v,price))return {ok:false,error:'Recursos insuficientes.'};st.hero.hp=Math.min(100,st.hero.hp+45);save(st);return {ok:true};}
 // v1.1 — mercadores com carga mista, viagens de ida/volta e rotas automáticas.
@@ -753,8 +818,10 @@ function validateState(st){
  if(window.GSF_EXPANSION&&!window.GSF_EXPANSION.validate(st.expansion))return false;
  if(st.hero.productionFocus!==undefined&&!['wood','clay','iron','crop','all','custom'].includes(st.hero.productionFocus))return false;
  if(st.hero.productionTargets!==undefined&&(!validArray(st.hero.productionTargets,4)||!st.hero.productionTargets.length||new Set(st.hero.productionTargets).size!==st.hero.productionTargets.length||!st.hero.productionTargets.every(k=>D.RES.includes(k))))return false;
- if(st.hero.inventory!==undefined&&(!validArray(st.hero.inventory,3)||new Set(st.hero.inventory).size!==st.hero.inventory.length||!st.hero.inventory.every(id=>!!HERO_ARTIFACTS[id])))return false;
- if(st.hero.equipped!==undefined&&st.hero.equipped!==null&&(!HERO_ARTIFACTS[st.hero.equipped]||!st.hero.inventory?.includes(st.hero.equipped)))return false;
+ if(st.hero.inventory!==undefined&&(!validArray(st.hero.inventory,20)||new Set(st.hero.inventory).size!==st.hero.inventory.length||!st.hero.inventory.every(id=>!!HERO_ARTIFACTS[id])))return false;
+ if(st.hero.equipped!==undefined&&st.hero.equipped!==null&&(!HERO_ARTIFACTS[st.hero.equipped]||HERO_ARTIFACTS[st.hero.equipped].slot!=='charm'||!st.hero.inventory?.includes(st.hero.equipped)))return false;
+ if(st.hero.potions!==undefined&&(!Number.isSafeInteger(st.hero.potions)||st.hero.potions<0||st.hero.potions>99))return false;
+ if(st.hero.equipment!==undefined&&(!plain(st.hero.equipment)||Object.keys(st.hero.equipment).some(k=>!HERO_SLOTS[k])||Object.entries(st.hero.equipment).some(([slot,item])=>item!==null&&(!HERO_ARTIFACTS[item]||HERO_ARTIFACTS[item].slot!==slot||!st.hero.inventory?.includes(item)))))return false;
  if(!validNumber(st.hero.level,1,1000)||!validNumber(st.hero.hp,0,100)||
   !validNumber(st.hero.xp,0,1e8)||!validNumber(st.hero.attack,0,10000)||
   !validNumber(st.hero.resources,0,10000)||!validNumber(st.hero.points,0,10000)||
@@ -830,6 +897,7 @@ function load(){
    window.GSF_CAMPAIGN?.init(st);
    window.GSF_EXPANSION?.init(st);
    st.capitalVillageId ||= st.villages[0].id;
+   initHeroGear(st);
    st.villages.forEach(v=>initResearch(st,v));
    advance(st);
    // Não sobrescrever o backup recuperado até o jogador executar a próxima ação.
@@ -847,9 +915,10 @@ function importSave(text){
  window.GSF_CAMPAIGN?.init(st);
  window.GSF_EXPANSION?.init(st);
  st.capitalVillageId ||= st.villages[0].id;
+ initHeroGear(st);
  st.villages.forEach(v=>initResearch(st,v));
  if(!save(st))return {ok:false,error:'Não foi possível salvar a partida neste navegador.'};
  return {ok:true,state:st};
 }
-window.GSF={maxExchangeOffer,merchantCapacity,merchantsTotal,merchantsFree,sendMerchantCargo,addTradeRoute,removeTradeRoute,toggleTradeRoute,routes,canFestival,startFestival,maxTrainable,capital,isCapital,setCapital,fieldMax,administratorName,canTrainAdministrator,trainAdministrator,sendConquest,conquerRival,researchRule,researchPrice,canResearch,startResearch,unitUnlocked,initResearch,viewMode,setViewMode,fieldMix,tileProfile,oasisResource,oasisCount,oasisLimit,captureOasis,releaseOasis,heroFocus,heroTargets,heroBonus,setHeroFocus,setHeroTargets,plans,planBuild,removePlan,movePlan,runPlanned,KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
+window.GSF={HERO_SLOTS,heroEquipment,heroGearBonus,oasisWildlife,unequipHero,useHeroPotion,maxExchangeOffer,merchantCapacity,merchantsTotal,merchantsFree,sendMerchantCargo,addTradeRoute,removeTradeRoute,toggleTradeRoute,routes,canFestival,startFestival,maxTrainable,capital,isCapital,setCapital,fieldMax,administratorName,canTrainAdministrator,trainAdministrator,sendConquest,conquerRival,researchRule,researchPrice,canResearch,startResearch,unitUnlocked,initResearch,viewMode,setViewMode,fieldMix,tileProfile,oasisResource,oasisCount,oasisLimit,captureOasis,releaseOasis,heroFocus,heroTargets,heroBonus,setHeroFocus,setHeroTargets,plans,planBuild,removePlan,movePlan,runPlanned,KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
 })();

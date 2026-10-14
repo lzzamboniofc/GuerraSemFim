@@ -1,18 +1,29 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 1.1, economia e comércio avançados: estratégia medieval totalmente offline.**
+**Impérios & Conquistas — versão 1.2, conquista territorial e recrutamento máximo: estratégia medieval totalmente offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
 
-## 🚚 v1.1 — Comércio Avançado e Economia Viva
+## v1.2 — Herói, aventuras e oásis selvagens
 
-- **Trocas locais maiores:** botões para 100, 500, 1.000, 5.000, 10.000, 50.000 e **Máximo possível**, com prévia de quanto será recebido e respeito à capacidade disponível nos depósitos.
-- **Formulários preservados:** Mercado, recrutamento, Mapa e comandos militares mantêm os valores preenchidos ao atualizar painéis ou ao retornar à tela, por aldeia durante a sessão.
-- **Mercadores por tribo:** Romanos transportam 500 recursos, Gauleses 750 e Teutões 1.000 por mercador. Mercado nível 1 libera 5 mercadores; mais 2 por nível até o máximo de 80.
-- **Carga mista e retorno:** mercadores podem entregar os quatro recursos simultaneamente e ficam ocupados até voltar à origem. O modo de caravana simples continua disponível.
-- **Rotas automáticas:** configure até 5 rotas por aldeia, com envios periódicos offline, opção de pausar e excluir. Respeitam recursos disponíveis, capacidade dos depósitos e mercadores livres.
-- **Cultura e fome:** celebrações da Prefeitura concedem 150 pontos de cultura; quando acaba o cereal e a produção é negativa, soldados podem morrer de fome.
-- **Salvamentos:** mantida a compatibilidade de saves anteriores, pesquisas, conquista de aldeias, filas extras e os modos visuais Original e Em grade.
+- **Inventário com espaços separados:** arma, armadura, montaria e amuleto. O machado, o chifre e a coroa das versões anteriores permanecem válidos como amuletos.
+- **Aventuras com objetivos:** exploração, suprimentos e caçada; tempo, saúde e recompensas são diferentes conforme a escolha. A conclusão também funciona após retornar ao jogo offline.
+- **Novos itens:** espadas, lanças, escudos, armaduras e cavalos, desbloqueados progressivamente. Armas aumentam a força contra os animais dos oásis; armaduras reduzem ferimentos, montarias aceleram aventuras.
+- **Poções:** obtidas em aventuras e usadas para recuperar 35 pontos de saúde, até o limite de 99 no inventário.
+- **Oásis selvagens:** agora exibem o número de animais e exigem força militar suficiente para a conquista. Soldados podem morrer e os ferimentos são registrados no relatório. O bônus de +25% do recurso do oásis permanece.
+- **Salvamentos preservados:** campanhas anteriores são migradas para os quatro espaços de equipamentos sem perder os artefatos existentes. Os modos Original e Em grade permanecem disponíveis.
+
+
+## 🚚 v1.2 — Comércio Avançado e Economia Viva
+
+- **Trocas locais mais rápidas:** botões de 100, 500, 1.000, 5.000, 10.000, 50.000 ou **Máximo possível**, com prévia de quanto você receberá. O máximo leva em conta a reserva oferecida e a capacidade restante do depósito de destino. Não é preciso repetir o preenchimento após atualizar a interface.
+- **Formulários que preservam os valores:** recrutamento, Mercado, Mapa e comandos militares mantêm campos já preenchidos quando obras, filas, chegada de tropas ou outros eventos exigem atualização. Trocar de tela e voltar também preserva as quantidades digitadas por aldeia durante a sessão.
+- **Mercadores por tribo:** Romanos carregam 500 recursos por mercador, Gauleses 750 e Teutões 1.000. O Mercado nível 1 oferece 5 mercadores e cada nível seguinte adiciona 2 (até 80).
+- **Carga mista e viagem de ida e volta:** envie simultaneamente madeira, barro, ferro e cereal. Mercadores ficam ocupados até regressar; cargas acima da capacidade da frota ou dos depósitos são recusadas. Caravanas simples antigas continuam compatíveis.
+- **Rotas automáticas offline:** programe até 5 rotas por aldeia, com intervalos de 15 minutos a 24 horas. Cada envio respeita recursos disponíveis, mercadores livres e capacidade de armazenamento; rotas podem ser pausadas, retomadas ou excluídas.
+- **Celebrar na Prefeitura:** Prefeitura nível 1 pode organizar uma celebração que rende 150 pontos de cultura ao terminar; a cultura adicional conta para fundação e conquista.
+- **Fome:** se o cereal acabar e a produção ficar negativa, tropas podem morrer por falta de alimento durante a simulação offline. Os resultados entram no histórico.
+- **Saves:** partidas antigas continuam válidas; novas propriedades são opcionais. Modos visuais Original e Em grade preservados.
 
 ## 🛡️ v1.0.1 — Treinar o máximo de tropas
 
@@ -21,30 +32,13 @@ Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldei
 - O limite técnico por pedido foi ampliado de 500 para até 1.000.000 unidades, respeitando o limite de efetivo por tipo e as filas de treinamento. O total é recalculado após cada pedido, mesmo quando várias unidades compartilham recursos.
 - **Compatibilidade:** saves antigos continuam válidos, sem mudar o custo ou o tempo por unidade. O recurso funciona offline e nos dois modos visuais.
 
-## 👑 Novidades da v1.0 — Conquista de Aldeias e Capital
-
-- **Palácio:** novo edifício civil, único por império, que permite escolher uma nova capital. A primeira aldeia é a capital inicial.
-- **Capital:** campos até o nível 25, mantendo o limite 20 nas aldeias comuns. Não é possível transferir a capital quando a antiga possui campos acima do nível 20.
-- **Administradores por tribo:** Senador, Chefe de Clã ou Ancião. Prepare um por vez em Expansão, com Residência ou Palácio nível 10, recursos e tempo de treinamento. Até três por aldeia.
-- **Conquista:** selecione uma aldeia NPC rival no Mapa-múndi, escolha tropas de escolta e envie um administrador. Vitórias que eliminem a guarnição reduzem a lealdade até zero; então a aldeia muda de dono, preservando parte dos edifícios, campos, muralha e recursos.
-- **Requisitos:** cultura suficiente, máximo de cinco aldeias e ataques somente contra reinos não aliados. Administradores retornam depois de conquistas parciais, são perdidos nas derrotas e tornam-se governadores na conquista.
-- **Compatibilidade:** saves antigos preservados. Modos visuais Original/Em grade, pesquisas militares da v0.9, filas e controle de invasões continuam iguais.
-
-## 📜 v0.9 — Academia e pesquisas militares
-
-A **Academia** agora pesquisa e desbloqueia as unidades avançadas. Construa o Quartel, a Academia e, conforme a unidade, o Estábulo ou a Oficina. Acesse **Comando de Guerra → Academia** para pagar os recursos e iniciar a pesquisa. Cada aldeia possui seus próprios desbloqueios e uma pesquisa ativa por vez.
-
-O treinamento e o Ferreiro exigem a unidade previamente pesquisada. A primeira unidade de cada tribo está disponível desde a fundação. Pesquisas completam durante o avanço de tempo offline.
-
-**Compatibilidade:** salvamentos antigos preservam suas unidades e desbloqueios anteriores. Os modos Original e Em grade e demais preferências permanecem disponíveis. Faça um backup em Configurações antes de atualizar.
-
 ## 🎨 v0.8.6 — Dois modos de visualização (original como padrão)
 
-- Em **Aldeia**, **Recursos** e **Mapa-múndi**, escolha **Visualização → Original / Em grade** para alternar imediatamente.
-- **Original (padrão):** cena da aldeia e dos campos com os pontos de edifícios no cenário, como no início do projeto, e mapa tradicional. No celular, os nomes não se sobrepõem aos ícones: toque para abrir o modal.
-- **Em grade:** cartões da v0.8.5, para quem prefere listas organizadas.
-- Alterne também em **Configurações → Visualização de aldeia, recursos e mapa**. A escolha é guardada no save; partidas antigas começam no modo Original.
-- Nada muda na produção do herói, evolução dos edifícios, missões, tropas, construções, saves ou ataques inimigos.
+- Em **Aldeia**, **Recursos** e **Mapa-múndi**, use o seletor **Visualização → Original / Em grade** para trocar instantaneamente entre os dois estilos.
+- **Original (padrão)** recupera o cenário da aldeia e dos campos com as posições livres dos edifícios e a aparência clássica da primeira versão do projeto, mantendo o mapa simples de tiles. No celular, os nomes deixam de cobrir os ícones; toque em um edifício para ver seus detalhes.
+- **Em grade** mantém os cartões organizados da versão 0.8.5. Ambos os modos mantêm todos os botões de construção, evolução, conquista de oásis e seleção do mapa.
+- A opção também aparece em **Configurações → Visualização de aldeia, recursos e mapa** e é guardada no save de cada campanha. Saves antigos começam em **Original**, e o tipo de visual não interfere em produção, tropas nem cronômetros.
+- A interface conserva as correções de espaçamento do menu, modais e barra de recursos de versões anteriores. No celular, o mapa mostra uma área menor e navegável pelas setas, preservando a aparência clássica sem arrastar horizontalmente.
 
 ## v0.8.5 — Visão adaptativa de aldeia, recursos e mapa
 
@@ -126,6 +120,14 @@ Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não
 - **Dificuldade** Explorador, Equilibrado e Conquistador, configurável na criação ou durante a campanha.
 - **Pontos de ataque do herói** agora ampliam o poder ofensivo; recursos clicáveis no topo e modais de obras permanecem.
 - **Compatibilidade de saves:** arquivos v0.1–v0.5 continuam válidos e recebem a campanha automaticamente. Exporte o save antes de atualizar.
+
+## 📜 Novidades da v0.9 — Academia e pesquisas militares
+
+A **Academia agora pesquisa e libera novas unidades**. Primeiro, construa o Quartel e a Academia; para cavalaria, batedores montados e máquinas de cerco, também são necessários Estábulo e Oficina. Em **Comando de Guerra → Academia**, escolha uma unidade, pague os recursos e aguarde o tempo de pesquisa. Enquanto houver uma pesquisa em andamento, é preciso concluí-la para iniciar outra na mesma aldeia. Pesquisas avançam mesmo quando o navegador está fechado, junto das demais filas do jogo.
+
+A primeira unidade de infantaria de cada tribo já vem desbloqueada. Outras exigem níveis progressivos da Academia (até o nível 10 para catapultas). O Ferreiro continua responsável pelos bônus de ataque e defesa, mas só aprimora unidades pesquisadas.
+
+**Compatibilidade:** os saves antigos mantêm tropas, edifícios e melhorias. Ao carregar um save anterior, unidades anteriormente recrutáveis ficam pesquisadas naquela aldeia, sem custo adicional. A preferência **Original/Em grade** e as demais opções não mudaram. Recomenda-se exportar um backup em Configurações.
 
 ## 🎮 O que funciona na versão 0.8
 

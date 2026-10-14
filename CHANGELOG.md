@@ -1,13 +1,21 @@
 # Changelog
 
+## [1.2] — Inventário e Oásis Selvagens · 14/10/2026
+
+- Inventário com quatro espaços independentes de equipamento e compatibilidade com os artefatos antigos.
+- Exploração, suprimentos e caçada: aventuras com recompensas, duração e risco diferenciados; melhorias do herói funcionam offline.
+- Poções de cura, nove itens colecionáveis e progressão por aventuras.
+- Oásis passam a ter animais defensores, forças calculadas e baixas militares reportadas na conquista.
+- Verificação de migração e validação dos saves; telas do herói adaptadas para celular.
+
+
 ## [1.1.0] — Comércio Avançado e Economia Viva · 14/10/2026
 
-- Trocas locais com atalhos maiores e botão de máximo calculado pelo estoque e espaço do depósito.
-- Entradas de formulários preservadas durante atualizações e troca de telas.
-- Mercadores por tribo, carga mista, viagem de ida e volta e rotas automáticas offline por aldeia.
-- Celebrações da Prefeitura concedem cultura adicional; fome pode provocar perdas militares.
-- Novos testes de integração e migração compatível com saves e caravanas anteriores.
-
+- Trocas locais com valores rápidos até 50.000 e botão de máximo calculado pelo estoque/capacidade.
+- Formulários da interface preservam o que foi preenchido durante atualizações e troca de telas.
+- Mercadores por tribo, carga mista, ida e volta e rotas automáticas offline por aldeia.
+- Celebrações da Prefeitura concedem cultura acumulada; falta de cereal pode matar tropas.
+- Migração compatível com saves e caravanas anteriores, novos testes de integração.
 
 ## [1.0.1] — Recrutamento Máximo · 14/10/2026
 
@@ -16,30 +24,22 @@
 - Ampliado o limite por pedido de 500 para até 1.000.000 unidades, com validação de saves consistente.
 - Mantidos os modos Original/Em grade e compatibilidade com campanhas anteriores.
 
-## [1.0.0] — Conquista de Aldeias e Capital · 14/10/2026
-
-- Novo Palácio único por império, transferência de capital e campos até nível 25 na capital.
-- Administradores das três tribos, recrutamento temporal e progresso offline.
-- Lealdade persistente em aldeias rivais, expedições de conquista, conversão para aldeias do jogador com infraestrutura preservada.
-- Limite de cinco aldeias, pré-requisitos de cultura, proteção de aliados, relatório de conquista e compatibilidade dos saves anteriores.
-- Testes de regressão para capital, lealdade, marchas e salvamento. Mantidos os dois modos visuais.
-
 ## [0.9.0] — Academia e Pesquisas Militares · 14/10/2026
 
-- Academia funcional: pesquisas por unidade, com custos, duração e requisitos crescentes por nível.
-- Uma pesquisa ativa por aldeia; desbloqueios independentes e conclusão durante o avanço offline.
-- Recrutamento de unidades avançadas e Ferreiro exigem pesquisas concluídas.
-- Saves anteriores mantêm tropas, edifícios e desbloqueios disponíveis, sem gastos de migração.
-- Interface da Academia no Comando de Guerra, indicador de bloqueio no Exército e fila de pesquisa.
-- Os modos visuais Original/Em grade e outras configurações continuam preservados.
+- Academia funcional: pesquisa por unidade com custo, tempo de duração e requisito de nível; cada aldeia mantém os próprios desbloqueios.
+- Pesquisa integrada ao recrutamento; o Ferreiro exige que a unidade esteja liberada antes de aprimorá-la.
+- Um projeto de pesquisa ativo por aldeia e resolução cronológica durante o avanço offline, com relatório de conclusão.
+- Unidade inicial disponível desde a fundação; migração preserva desbloqueios de tropas já disponíveis em saves antigos.
+- Painel de Academia no Comando de Guerra, indicadores de bloqueio no Exército e fila visível na aldeia.
+- Mantidos os modos Original e Em grade, o controle de invasões, o planejador e o modo offline.
 
-## [0.8.6] — Visual original por padrão e grade opcional · 14/10/2026
+## [0.8.6] — Visual clássico opcional e persistente · 14/10/2026
 
-- Cenário clássico de aldeia, campos e mapa restaurado como padrão.
-- Grade de cartões da versão anterior preservada como visual alternativo.
-- Seletor nas três telas e em Configurações, com preferência persistente e compatibilidade dos saves antigos.
-- Ícones e mapa clássico adaptados para telas pequenas, sem arrasto horizontal, mantendo demais melhorias da interface.
-- Testes para modos, preferências e regressões de jogabilidade.
+- Restaurada a apresentação clássica da aldeia, dos campos de recursos e do mapa como modo **Original** e configuração inicial de todas as campanhas.
+- Mantida a grade adaptativa da v0.8.5 como modo **Em grade**, alternável por botão nas três telas ou em Configurações.
+- Escolha salva no jogo, com leitura de saves antigos sem converter/alterar mecânicas.
+- Refinado cenário original para telas pequenas com ícones clicáveis, sem nomes sobrepostos; mapa regional reduzido no celular sem necessidade de rolagem horizontal.
+- Novos testes de seleção, persistência e compatibilidade, além de regressão e browser.
 
 ## [0.8.5] — Telas adaptativas sem sobreposição · 14/10/2026
 

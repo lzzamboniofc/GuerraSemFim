@@ -1,0 +1,13 @@
+'use strict';
+const {strict:assert}=require('node:assert'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
+const root=path.join(__dirname,'..'),store=new Map(),events={},dom={innerHTML:''};const selected={value:'hunt'};
+const win={innerWidth:390,addEventListener:()=>{},scrollTo:()=>{}},doc={querySelector:s=>s==='#app'?dom:s==='#hero-adventure-kind'?selected:null,querySelectorAll:()=>[],addEventListener:(e,fn)=>events[e]=fn,body:{appendChild:()=>{}},createElement:()=>({setAttribute:()=>{},remove:()=>{}})};
+const ctx={window:win,document:doc,Date,Math,JSON,console,setInterval:()=>{},setTimeout:()=>{},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,String(v)),removeItem:k=>store.delete(k)}};vm.createContext(ctx);
+for(const f of ['data','war','ai','campaign','expansion','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',`${f}.js`),'utf8'),ctx,{filename:f});
+win.GSF.newGame();vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),ctx,{filename:'app'});
+const click=d=>events.click({target:{closest:()=>({dataset:d}),matches:()=>false}});
+click({nav:'hero'});
+for(const s of ['Inventário do herói','data-hero-potion','hero-adventure-kind','data-hero-target="wood"','Montaria','Armadura','Amuleto'])assert(dom.innerHTML.includes(s),s);
+click({adventure:''});assert.equal(win.GSF.load().hero.adventure.kind,'hunt');
+click({nav:'map'});assert(dom.innerHTML.includes('data-map-columns='));
+console.log('✓ v1.2 UI herói e mapa');
