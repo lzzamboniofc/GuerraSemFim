@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1] — Refino Visual da Aldeia e do Mapa · 14/10/2026
+
+- Redesign visual da tela de **Aldeia** com atmosfera mais próxima dos clássicos de estratégia: cenário muralhado, base artística mais rica, rótulos em estilo pergaminho e integração mais orgânica dos edifícios.
+- Redesign do **Mapa-múndi** com régua de coordenadas nas bordas, moldura aprimorada, grade mais legível, terrenos com texturas próprias e navegação regional mais clara.
+- Novos assets gráficos auxiliares para ambientação da aldeia e do mapa, mantendo o jogo totalmente offline.
+- Ajustes responsivos para preservar a legibilidade do novo visual em telas menores.
+
 ## [0.8.0] — Territórios e Gestão Imperial · 14/10/2026
 
 - Herói com seleção livre de 1 a 4 recursos para distribuição do bônus de produção; escolha salva na campanha e refletida nos modais do topo.

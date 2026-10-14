@@ -1,8 +1,14 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 0.8, Territórios e Gestão Imperial: estratégia medieval totalmente offline.**
+**Impérios & Conquistas — versão 0.8.1, refinamento visual do mapa e da aldeia: estratégia medieval totalmente offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
+
+## 🎨 Novidades da v0.8.1 — Refinamento visual do mapa e da aldeia
+
+- **Centro da aldeia redesenhado:** o cenário recebeu uma ambientação muralhada mais rica, melhor leitura dos pontos de construção e um visual mais próximo do espírito dos clássicos jogos de império.
+- **Mapa-múndi refinado:** novo enquadramento visual com coordenadas nas bordas, grade melhor destacada e terrenos com texturas próprias para planícies, florestas, montanhas, cereais e oásis.
+- **Polimento geral de interface:** painéis e elementos visuais ajustados para combinar melhor com o novo tema medieval.
 
 ## 🏞️ Novidades da v0.8 — Territórios e Gestão Imperial
 
