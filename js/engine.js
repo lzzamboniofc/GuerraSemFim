@@ -52,7 +52,7 @@ function village(st,name,x,y,starter=false,profile='balanced') {
  const buildings = {main:starter?3:1,warehouse:1,granary:1,rally:1};
  const troops = {};
  if(starter) troops[D.TROOPS[st.tribe][0].id]=12;
- return {id:id(st),name,x,y,fieldProfile:profile,planQueue:[],fields,buildings,resources:starter?{wood:1000,clay:1000,iron:1000,crop:1000}:{wood:650,clay:650,iron:650,crop:650},buildQueue:[],trainingQueue:[],troops,buildingSlots:{0:'main',1:'warehouse',2:'granary',3:'rally'},militaryTech:{},settlers:0,foundedAt:now()};
+ return {id:id(st),name,x,y,fieldProfile:profile,planQueue:[],fields,buildings,resources:starter?{wood:1000,clay:1000,iron:1000,crop:1000}:{wood:650,clay:650,iron:650,crop:650},buildQueue:[],trainingQueue:[],troops,buildingSlots:{0:'main',1:'warehouse',2:'granary',3:'rally'},militaryTech:{},research:{unlocked:[D.TROOPS[st.tribe][0].id],queue:null},settlers:0,foundedAt:now()};
 }
 function newGame(options={}) {
  const tribe = D.TRIBES[options.tribe]?options.tribe:'romans';
@@ -85,6 +85,55 @@ function cost(type,key,next) {const base=type==='field'?D.FIELDS[key].base:D.BUI
 function buildTime(st,v,type,key,next){const base=type==='field'?D.FIELDS[key].time:D.BUILDINGS[key].time;const main=buildLevel(v,'main');return Math.max(5,Math.round(base*Math.pow(1.23,next-1)*Math.pow(0.96,Math.max(0,main-1))/st.speed));}
 function capacity(v,key){return key==='crop'?Math.round(1200*Math.pow(1.52,Math.max(0,buildLevel(v,'granary')-1))):Math.round(1200*Math.pow(1.52,Math.max(0,buildLevel(v,'warehouse')-1)));}
 function troopDefs(st){return D.TROOPS[st.tribe];}
+// Academia: unidades básicas são gratuitas; as demais exigem uma pesquisa por aldeia.
+ // Pesquisas concluídas pertencem à aldeia e não são transferidas com reforços.
+ function researchRule(st,unit){
+  const defs=troopDefs(st),index=defs.findIndex(u=>u.id===unit.id);
+  if(index===0)return {academy:0,rank:0};
+  if(unit.siege)return {academy:unit.siege==='catapult'?10:7,rank:unit.siege==='catapult'?7:6};
+  if(unit.scout)return {academy:2,rank:3};
+  if(unit.cavalry)return {academy:5,rank:5};
+  return {academy:index===1?1:3,rank:index===1?1:2};
+ }
+ function initResearch(st,v){
+  if(v.research)return v.research;
+  // Migração de saves antigos: uma unidade já recrutável continua desbloqueada.
+  const eligible=troopDefs(st).filter((u,i)=>i===0||buildLevel(v,u.building)>0||(v.troops[u.id]||0)>0||v.trainingQueue.some(q=>q.unitId===u.id)||(v.militaryTech?.[u.id]||0)>0);
+  v.research={unlocked:eligible.map(u=>u.id),queue:null};
+  return v.research;
+ }
+ function unitUnlocked(st,v,unitId){
+  const unit=troopDefs(st).find(u=>u.id===unitId);if(!unit)return false;
+  if(!v.research)return troopDefs(st)[0].id===unitId||buildLevel(v,unit.building)>0||(v.troops[unitId]||0)>0||v.trainingQueue.some(q=>q.unitId===unitId)||(v.militaryTech?.[unitId]||0)>0;
+  return v.research.unlocked.includes(unitId);
+ }
+ function researchPrice(st,unitId){
+  const u=troopDefs(st).find(t=>t.id===unitId);if(!u)return null;
+  const {rank}=researchRule(st,u);return u.cost.map(n=>Math.ceil(n*(1.4+rank*.32)));
+ }
+ function canResearch(st,v,unitId){
+  const unit=troopDefs(st).find(t=>t.id===unitId);
+  if(!unit)return {ok:false,error:'Unidade desconhecida.'};
+  const {academy,rank}=researchRule(st,unit);
+  if(!academy)return {ok:false,error:'Esta unidade já está disponível desde o início.'};
+  if(unitUnlocked(st,v,unitId))return {ok:false,error:'Unidade já pesquisada nesta aldeia.'};
+  const queue=v.research?.queue;
+  if(queue)return {ok:false,error:'Uma pesquisa já está em andamento nesta aldeia.'};
+  if(buildLevel(v,'academy')<academy)return {ok:false,error:`Requer Academia nível ${academy}.`};
+  if(buildLevel(v,unit.building)<1)return {ok:false,error:`Requer ${D.BUILDINGS[unit.building].name}.`};
+  const price=researchPrice(st,unitId);
+  if(!canPay(v,price))return {ok:false,error:'Recursos insuficientes para pesquisar.'};
+  const seconds=Math.max(12,Math.ceil(unit.time*(3+rank*.5)/(st.speed*(1+.08*(buildLevel(v,'academy')-1)))));
+  return {ok:true,unit,price,seconds,academy};
+ }
+ function startResearch(st,v,unitId){
+  const c=canResearch(st,v,unitId);if(!c.ok)return c;
+  const research=initResearch(st,v);
+  pay(v,c.price);
+  research.queue={unitId,startedAt:now(),endsAt:now()+c.seconds*1000};
+  log(st,`Academia de ${v.name}: iniciada a pesquisa de ${c.unit.name}.`,'army');save(st);
+  return {ok:true,seconds:c.seconds};
+ }
 function population(v){let n=2;for(const [k,l] of Object.entries(v.buildings))n+=l*(D.BUILDINGS[k]?.pop||0);n+=v.fields.reduce((a,f)=>a+Math.ceil(f.level/3),0);return n;}
 function upkeep(st,v){return troopDefs(st).reduce((a,t)=>a+(v.troops[t.id]||0)*t.upkeep,0);}
 function production(st,v){const base={wood:0,clay:0,iron:0,crop:0};v.fields.forEach(f=>{base[f.type]+=f.level?Math.round(5*Math.pow(1.68,f.level-1)):0;});
@@ -168,6 +217,7 @@ function runPlanned(st){
  return started;
 }
 function canTrain(st,v,unitId,qty){const unit=troopDefs(st).find(t=>t.id===unitId);if(!unit)return {ok:false,error:'Unidade inválida.'};if(buildLevel(v,unit.building)<1)return {ok:false,error:`Requer ${D.BUILDINGS[unit.building].name}.`};
+ if(!unitUnlocked(st,v,unitId))return {ok:false,error:`Pesquise ${unit.name} na Academia antes de recrutar.`};
  qty=Math.floor(Number(qty));if(!Number.isFinite(qty)||qty<1||qty>500)return {ok:false,error:'Escolha entre 1 e 500 unidades.'};
  if(!canPay(v,unit.cost,qty))return {ok:false,error:'Recursos insuficientes.'};
  const seconds=Math.max(3,Math.floor(unit.time*Math.pow(.965,buildLevel(v,unit.building)-1)*qty/st.speed));return {ok:true,unit,qty,seconds};}
@@ -237,6 +287,7 @@ function upgradeMilitary(st,v,unitId){
  const unit=troopDefs(st).find(u=>u.id===unitId);if(!unit)return {ok:false,error:'Unidade inválida.'};
  const smithy=buildLevel(v,'smithy'),lv=window.GSF_WAR.tier(v,unitId);
  if(!smithy)return {ok:false,error:'Construa um Ferreiro.'};
+ if(!unitUnlocked(st,v,unitId))return {ok:false,error:'Pesquise esta unidade na Academia antes de aprimorá-la no Ferreiro.'};
  if(lv>=10||lv>=smithy)return {ok:false,error:'Eleve o nível do Ferreiro para pesquisar mais.'};
  const price=window.GSF_WAR.upgradeCost(unit,lv+1);
  if(!pay(v,price))return {ok:false,error:'Recursos insuficientes.'};
@@ -452,6 +503,13 @@ function resolveDue(st,at){
    log(st,`${q.qty} tropas terminaram o treinamento em ${v.name}.`,'army');resolved=true;
   }
   v.trainingQueue=v.trainingQueue.filter(q=>q.endsAt>at);
+  if(v.research?.queue&&v.research.queue.endsAt<=at){
+   const unitId=v.research.queue.unitId,unit=troopDefs(st).find(u=>u.id===unitId);
+   if(!v.research.unlocked.includes(unitId))v.research.unlocked.push(unitId);
+   v.research.queue=null;
+   log(st,`Academia de ${v.name}: pesquisa de ${unit.name} concluída!`,'army');
+   report(st,'Pesquisa concluída',`${v.name} desbloqueou ${unit.name} na Academia.`,'info');resolved=true;
+  }
  }
  for(const m of st.movements.slice()){
   if(m.endsAt>at)continue;
@@ -483,7 +541,7 @@ function advance(st,time=now()){
  while(resolveDue(st,cursor)&&++steps<10000){}
  while(cursor<time&&steps++<10000){
   const next=[];
-  st.villages.forEach(v=>{v.buildQueue.forEach(q=>{if(q.endsAt>cursor)next.push(q.endsAt);});v.trainingQueue.forEach(q=>{if(q.endsAt>cursor)next.push(q.endsAt);});});
+  st.villages.forEach(v=>{v.buildQueue.forEach(q=>{if(q.endsAt>cursor)next.push(q.endsAt);});v.trainingQueue.forEach(q=>{if(q.endsAt>cursor)next.push(q.endsAt);});if(v.research?.queue?.endsAt>cursor)next.push(v.research.queue.endsAt);});
   st.movements.forEach(m=>{if(m.endsAt>cursor)next.push(m.endsAt);});
   if(st.hero.adventure?.endsAt>cursor)next.push(st.hero.adventure.endsAt);
   if(window.GSF_AI)next.push(...window.GSF_AI.nextEvents(st,cursor));
@@ -530,6 +588,7 @@ function validateState(st){
    (v.settlers!==undefined&&(!Number.isSafeInteger(v.settlers)||v.settlers<0||v.settlers>3))||
    !plain(v.buildings)||!plain(v.buildingSlots)||!validArmy(v.troops,st.tribe)||
    (v.militaryTech!==undefined&&(!plain(v.militaryTech)||!Object.entries(v.militaryTech).every(([k,l])=>D.TROOPS[st.tribe].some(u=>u.id===k)&&Number.isSafeInteger(l)&&l>=0&&l<=10)))||
+   (v.research!==undefined&&(!plain(v.research)||!validArray(v.research.unlocked,D.TROOPS[st.tribe].length)||!v.research.unlocked.includes(D.TROOPS[st.tribe][0].id)||new Set(v.research.unlocked).size!==v.research.unlocked.length||!v.research.unlocked.every(id=>D.TROOPS[st.tribe].some(u=>u.id===id))||(v.research.queue!==null&&(!plain(v.research.queue)||!D.TROOPS[st.tribe].some(u=>u.id===v.research.queue.unitId)||v.research.unlocked.includes(v.research.queue.unitId)||!validNumber(v.research.queue.startedAt)||!validNumber(v.research.queue.endsAt)||v.research.queue.endsAt<=v.research.queue.startedAt))))||
    !validArray(v.fields,18)||v.fields.length!==18||!validArray(v.buildQueue,50)||!validArray(v.trainingQueue,500))return false;
   ids.add(v.id);positions.add(v.x+':'+v.y);
   if(!v.fields.every(f=>plain(f)&&D.FIELDS[f.type]&&Number.isSafeInteger(f.level)&&f.level>=0&&f.level<=20))return false;
@@ -576,6 +635,7 @@ function load(){
    window.GSF_RECOVERED_BACKUP=key===BACKUP_KEY;
    window.GSF_CAMPAIGN?.init(st);
    window.GSF_EXPANSION?.init(st);
+   st.villages.forEach(v=>initResearch(st,v));
    advance(st);
    // Não sobrescrever o backup recuperado até o jogador executar a próxima ação.
    return st;
@@ -591,8 +651,9 @@ function importSave(text){
  st.lastTick=now();
  window.GSF_CAMPAIGN?.init(st);
  window.GSF_EXPANSION?.init(st);
+ st.villages.forEach(v=>initResearch(st,v));
  if(!save(st))return {ok:false,error:'Não foi possível salvar a partida neste navegador.'};
  return {ok:true,state:st};
 }
-window.GSF={viewMode,setViewMode,fieldMix,tileProfile,oasisResource,oasisCount,oasisLimit,captureOasis,releaseOasis,heroFocus,heroTargets,heroBonus,setHeroFocus,setHeroTargets,plans,planBuild,removePlan,movePlan,runPlanned,KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
+window.GSF={researchRule,researchPrice,canResearch,startResearch,unitUnlocked,initResearch,viewMode,setViewMode,fieldMix,tileProfile,oasisResource,oasisCount,oasisLimit,captureOasis,releaseOasis,heroFocus,heroTargets,heroBonus,setHeroFocus,setHeroTargets,plans,planBuild,removePlan,movePlan,runPlanned,KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
 })();

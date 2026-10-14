@@ -104,3 +104,15 @@ html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
  .view-original .town-slot .building-art{width:28px;height:26px;font-size:19px}
  .view-original .field-slot .icon{font-size:17px}
 }
+
+/* v0.9 — Academia: mantém intactas as opções visuais Original e Em grade. */
+.academy-panel{border-top:4px solid #8d7550}
+.academy-progress{padding:13px 15px;background:#f1e7cd;border:1px solid #cbb88d;border-radius:8px;margin:12px 0;display:grid;gap:8px}
+.academy-list{display:grid;gap:8px;margin:12px 0}
+.academy-item{display:grid;grid-template-columns:minmax(120px,1.1fr) minmax(0,1.2fr) minmax(118px,auto);gap:12px;align-items:center;padding:12px;border-radius:8px;background:#f8f2e5;border:1px solid #dbcfb5}
+.academy-unit{display:grid;gap:4px;min-width:0}
+.academy-unit strong{font:700 13px Georgia,serif;color:#40503a}
+.academy-unit small{font:11px Arial,sans-serif;color:#817054;line-height:1.35}
+.academy-meta{display:flex;gap:5px 9px;flex-wrap:wrap;color:#665742;font:11px Arial,sans-serif}
+.academy-item>.btn{white-space:normal;min-width:0}
+@media(max-width:640px){.academy-item{grid-template-columns:minmax(0,1fr) minmax(105px,auto);gap:8px;padding:10px}.academy-meta{grid-column:1/-1;grid-row:2}.academy-item>.btn{grid-column:2;grid-row:1}.academy-unit strong{font-size:12px}}

@@ -1,8 +1,16 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 0.8.6, dois modos de visualização: cenário original e grade opcional: estratégia medieval totalmente offline.**
+**Impérios & Conquistas — versão 0.9.0, dois modos de visualização: cenário original e grade opcional: estratégia medieval totalmente offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
+
+## 📜 v0.9 — Academia e pesquisas militares
+
+A **Academia** agora pesquisa e desbloqueia as unidades avançadas. Construa o Quartel, a Academia e, conforme a unidade, o Estábulo ou a Oficina. Acesse **Comando de Guerra → Academia** para pagar os recursos e iniciar a pesquisa. Cada aldeia possui seus próprios desbloqueios e uma pesquisa ativa por vez.
+
+O treinamento e o Ferreiro exigem a unidade previamente pesquisada. A primeira unidade de cada tribo está disponível desde a fundação. Pesquisas completam durante o avanço de tempo offline.
+
+**Compatibilidade:** salvamentos antigos preservam suas unidades e desbloqueios anteriores. Os modos Original e Em grade e demais preferências permanecem disponíveis. Faça um backup em Configurações antes de atualizar.
 
 ## 🎨 v0.8.6 — Dois modos de visualização (original como padrão)
 

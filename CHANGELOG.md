@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.9.0] — Academia e Pesquisas Militares · 14/10/2026
+
+- Academia funcional: pesquisas por unidade, com custos, duração e requisitos crescentes por nível.
+- Uma pesquisa ativa por aldeia; desbloqueios independentes e conclusão durante o avanço offline.
+- Recrutamento de unidades avançadas e Ferreiro exigem pesquisas concluídas.
+- Saves anteriores mantêm tropas, edifícios e desbloqueios disponíveis, sem gastos de migração.
+- Interface da Academia no Comando de Guerra, indicador de bloqueio no Exército e fila de pesquisa.
+- Os modos visuais Original/Em grade e outras configurações continuam preservados.
+
 ## [0.8.6] — Visual original por padrão e grade opcional · 14/10/2026
 
 - Cenário clássico de aldeia, campos e mapa restaurado como padrão.
