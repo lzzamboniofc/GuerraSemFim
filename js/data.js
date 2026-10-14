@@ -29,6 +29,7 @@ const BUILDINGS = {
  ironworks: {name:'Fundição', icon:'⚒️', type:'economy', base:[200,450,510,120], time:190, desc:'Aumenta a produção de ferro.', max:5, req:{main:5}, pop:3},
  mill: {name:'Moinho', icon:'🌬️', type:'economy', base:[500,440,380,120], time:190, desc:'Aumenta a produção de cereal.', max:5, req:{main:5}, pop:3},
  embassy: {name:'Embaixada', icon:'🏰', type:'civil', base:[180,130,150,80], time:110, desc:'Marco diplomático e prestígio da aldeia.', max:20, req:{main:1}, pop:2},
+ palace: {name:'Palácio', icon:'🏯', type:'civil', base:[550,800,750,250], time:280, desc:'Sede real que permite transferir a capital e preparar administradores. Somente um Palácio por império.', max:20, req:{main:5}, pop:4},
  residence: {name:'Residência', icon:'👑', type:'civil', base:[580,460,350,180], time:240, desc:'Protege a aldeia e abre a futura colonização.', max:20, req:{main:5}, pop:3},
  heroMansion: {name:'Mansão do Herói', icon:'🏹', type:'civil', base:[700,670,750,300], time:290, desc:'Preparação para dominar oásis próximos.', max:20, req:{main:5,rally:1}, pop:2},
  townhall: {name:'Prefeitura', icon:'🏟️', type:'civil', base:[1250,1110,1260,600], time:380, desc:'Celebrações e cultura da cidade.', max:20, req:{main:10,academy:10}, pop:4},

@@ -27,7 +27,7 @@ function init(st,at=Date.now()){
  for(const f of SPECS){
   const site=findSite(st,...f.home,7);
   ai.factions.push({id:f.id,name:f.name,icon:f.icon,color:f.color,aggression:f.aggression,turns:0,defeated:false,
-    villages:site?[{id:f.id+'-capital',name:f.city,x:site.x,y:site.y,level:1,walls:1,troops:24,stock:{wood:220,clay:200,iron:160,crop:260}}]:[]});
+    villages:site?[{id:f.id+'-capital',name:f.city,x:site.x,y:site.y,level:1,walls:1,troops:24,loyalty:100,stock:{wood:220,clay:200,iron:160,crop:260}}]:[]});
  }
  return ai;
 }
@@ -36,7 +36,7 @@ function tileAt(st,x,y){
  for(const f of st.ai.factions){
   const city=f.villages.find(v=>v.x===x&&v.y===y);
   if(city)return {id:`rival:${coord(x,y)}`,kind:'rival',name:city.name,x,y,factionId:f.id,factionName:f.name,
-   banner:f.icon,color:f.color,power:city.troops,walls:city.walls,level:city.level};
+   banner:f.icon,color:f.color,power:city.troops,walls:city.walls,level:city.level,loyalty:city.loyalty??100};
  }
  return null;
 }
@@ -61,7 +61,7 @@ function resolveBattle(st,m,at){
  for(const t of defs){const before=m.army[t.id]||0;const dead=Math.min(before,Math.round(before*ratio));if(before){m.army[t.id]=before-dead;casualties+=dead;losses[t.id]=dead;carried+=(before-dead)*t.carry;}}
  const loot={wood:0,clay:0,iron:0,crop:0};
  if(ref){
-  const garrisonLoss=won?Math.max(1,Math.min(ref.city.troops,Math.ceil(power/31))):Math.min(ref.city.troops,Math.ceil(power/85));
+  const garrisonLoss=won?Math.min(ref.city.troops,Math.max(1,Math.ceil(power/31))):Math.min(ref.city.troops,Math.ceil(power/85));
   ref.city.troops-=garrisonLoss;
   if(won){
    if(m.mode==='attack'){
@@ -69,8 +69,16 @@ function resolveBattle(st,m,at){
     if(damage.wall||damage.building){ref.city.walls-=damage.wall;ref.city.level=Math.max(1,ref.city.level-damage.building);
      report(st,'Cerco a '+ref.city.name,`Aríetes reduziram ${damage.wall} nível(is) da muralha; catapultas destruíram ${damage.building} nível(is) de construções.`,'victory');}
    }
-   let capacity=Math.floor(carried);
-   for(const k of D.RES){const take=Math.min(capacity,Math.floor(ref.city.stock[k]*.4));loot[k]=take;capacity-=take;ref.city.stock[k]-=take;}
+   if(m.mode!=='conquer'){
+    let capacity=Math.floor(carried);
+    for(const k of D.RES){const take=Math.min(capacity,Math.floor(ref.city.stock[k]*.4));loot[k]=take;capacity-=take;ref.city.stock[k]-=take;}
+   }
+   if(m.mode==='conquer'&&ref.city.troops===0){
+    ref.city.loyalty=Math.max(0,(ref.city.loyalty??100)-(25+(window.GSF.buildLevel(origin,'palace')>=10?10:0)+(st.tribe==='romans'?5:0)));
+    if(ref.city.loyalty===0&&window.GSF.conquerRival(st,ref.f,ref.city,m)){
+     report(st,'Lealdade vencida',`O administrador assumiu o governo de ${ref.city.name}.`,'victory');
+    }else{report(st,'Lealdade reduzida',`${ref.city.name}: lealdade restante ${ref.city.loyalty}%. Outra marcha administrativa será necessária.`,'info');}
+   }
    if(m.mode==='attack'&&ref.city.troops===0){
     ref.f.villages.splice(ref.f.villages.indexOf(ref.city),1);
     if(!ref.f.villages.length){ref.f.defeated=true;log(st,`${ref.f.name} foi derrotado!`,'army');}
@@ -78,6 +86,7 @@ function resolveBattle(st,m,at){
    }
   }
  }
+ if(m.mode==='conquer'&&ref&&!won)m.administrators=0;
  m.phase='returning';m.loot=loot;m.endsAt=at+Math.max(5000,at-m.startedAt);
  report(st,won?`Vitória contra ${ref.f.name}`:`Derrota em (${m.x}|${m.y})`,ref?`O ataque a ${ref.city.name} ${won?'foi bem-sucedido':'foi repelido'}. Baixas: ${casualties}. Sobreviventes: ${Object.values(m.army).reduce((a,b)=>a+b,0)}.`:'O assentamento rival já havia sido abandonado. As tropas estão retornando.',won?'victory':ref?'defeat':'info',{losses,loot});
  log(st,won?`Vitória contra ${ref.f.name} em (${m.x}|${m.y}).`:`Ataque encerrado em (${m.x}|${m.y}).`);
@@ -109,6 +118,7 @@ function turn(st,at){
   if(f.defeated)continue;
   f.turns++;
   for(const c of f.villages){
+   if(c.loyalty!==undefined&&c.loyalty<100)c.loyalty=Math.min(100,c.loyalty+1);
    for(const k of D.RES)c.stock[k]=Math.min(9000,c.stock[k]+Math.ceil((55+c.level*22)*(.8+rand(index+9,ai.turn)*.4)));
    if(c.stock.wood>150+c.level*50&&c.stock.clay>100+c.level*30&&f.turns%3===index%3){
     c.stock.wood-=120+c.level*30;c.stock.clay-=95+c.level*25;c.level=Math.min(15,c.level+1);
@@ -121,7 +131,7 @@ function turn(st,at){
   if(f.turns%12===0&&f.villages.length<3&&f.villages[0]?.level>=4){
    const base=f.villages[0];const direction=[[2,1],[-2,1],[-1,-2],[1,-2]][(ai.turn+index)%4];
    const p=findSite(st,base.x+direction[0],base.y+direction[1],4);
-   if(p){f.villages.push({id:`${f.id}-v${f.turns}`,name:`Posto ${f.villages.length+1} de ${f.name}`,x:p.x,y:p.y,level:1,walls:0,troops:12,stock:{wood:100,clay:120,iron:100,crop:160}});
+   if(p){f.villages.push({id:`${f.id}-v${f.turns}`,name:`Posto ${f.villages.length+1} de ${f.name}`,x:p.x,y:p.y,level:1,walls:0,troops:12,loyalty:100,stock:{wood:100,clay:120,iron:100,crop:160}});
     log(st,`${f.icon} ${f.name} fundou uma aldeia em (${p.x}|${p.y}).`,'army');}
   }
   // Trégua inicial de cinco turnos para um novo comandante.
@@ -205,7 +215,7 @@ function validate(ai,st){
   if(!spec||f.name!==spec.name||f.icon!==spec.icon||f.color!==spec.color||!num(f.aggression,0,1)||!Array.isArray(f.villages)||f.villages.length>3||!Number.isSafeInteger(f.turns))return false;
   if(f.treatyUntil!==undefined&&(!Number.isSafeInteger(f.treatyUntil)||f.treatyUntil<0||f.treatyUntil>1e9))return false;
   for(const v of f.villages){
-   if(typeof v.id!=='string'||typeof v.name!=='string'||v.name.length>80||!Number.isSafeInteger(v.x)||!Number.isSafeInteger(v.y)||Math.abs(v.x)>8||Math.abs(v.y)>8||!num(v.level,1,15)||!num(v.walls,0,8)||!num(v.troops,0,300)||!v.stock)return false;
+   if(typeof v.id!=='string'||typeof v.name!=='string'||v.name.length>80||!Number.isSafeInteger(v.x)||!Number.isSafeInteger(v.y)||Math.abs(v.x)>8||Math.abs(v.y)>8||!num(v.level,1,15)||!num(v.walls,0,8)||!num(v.troops,0,300)||(v.loyalty!==undefined&&!num(v.loyalty,0,100))||!v.stock)return false;
    if(occupiedTiles.has(coord(v.x,v.y)))return false;occupiedTiles.add(coord(v.x,v.y));
    if(!D.RES.every(k=>num(v.stock[k],0,9000)))return false;
   }
