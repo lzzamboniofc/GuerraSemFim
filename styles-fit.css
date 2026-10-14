@@ -125,3 +125,11 @@ html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
 .realm-stats small{font-size:11px;color:#86745b}.realm-stats strong{font-size:16px;color:#40563b;overflow-wrap:anywhere}.realm-stats span{font-size:11px;color:#73614c}
 .conquer-button{background:linear-gradient(#ad8d52,#78623f);border-color:#655034}
 @media(max-width:700px){.realm-stats{grid-template-columns:1fr}.realm-panel .btn-row>*{max-width:100%;white-space:normal}}
+
+/* v1.0.1 — quantidade máxima por tipo de tropa, sem estreitar o recrutamento. */
+.troop-quantity{display:flex;gap:5px;align-items:stretch;min-width:0}
+.troop-quantity input{flex:1 1 auto;min-width:0;width:100%}
+.troop-quantity .troop-max{flex:0 0 auto;min-width:48px;padding:7px 9px;white-space:nowrap}
+.troop-cost-note{margin:-6px 0 10px 60px;overflow-wrap:anywhere;line-height:1.5}
+@media(min-width:921px){.troop-row{grid-template-columns:minmax(0,1.8fr) 76px minmax(140px,1fr) 105px;gap:9px}}
+@media(max-width:580px){.troop-row{grid-template-columns:minmax(0,1fr) minmax(150px,1.15fr)!important;gap:8px}.troop-row>.btn{min-width:0}.troop-cost-note{margin:0 0 12px 0}.troop-quantity .troop-max{min-width:45px;padding:7px}}

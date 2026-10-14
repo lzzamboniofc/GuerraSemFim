@@ -1,8 +1,15 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 1.0.0, dois modos de visualização: cenário original e grade opcional: estratégia medieval totalmente offline.**
+**Impérios & Conquistas — versão 1.0.1, conquista territorial e recrutamento máximo: estratégia medieval totalmente offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
+
+## 🛡️ v1.0.1 — Treinar o máximo de tropas
+
+- Em **Exército & Quartel**, cada unidade pesquisada e com edifício de treinamento disponível ganhou o botão **Máx.**; ele preenche a quantidade exata que pode ser paga **com os recursos que estão na aldeia naquele instante**.
+- Clique em **Recrutar** para confirmar o pedido. O cálculo compara madeira, barro, ferro e cereal, e leva em conta tropas já presentes e na fila. Se não houver recursos ou o tipo de tropa estiver bloqueado, não será possível usar o botão.
+- O limite técnico por pedido foi ampliado de 500 para até 1.000.000 unidades, respeitando o limite de efetivo por tipo e as filas de treinamento. O total é recalculado após cada pedido, mesmo quando várias unidades compartilham recursos.
+- **Compatibilidade:** saves antigos continuam válidos, sem mudar o custo ou o tempo por unidade. O recurso funciona offline e nos dois modos visuais.
 
 ## 👑 Novidades da v1.0 — Conquista de Aldeias e Capital
 

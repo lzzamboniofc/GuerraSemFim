@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1] — Recrutamento Máximo · 14/10/2026
+
+- Botão **Máx.** para cada tipo de tropa liberada no Exército/Quartel; calcula a quantidade pagável com os recursos atuais da aldeia e preenche o campo para confirmação.
+- Respeita edifício, pesquisa da Academia, tropas existentes e filas de recrutamento; atualiza o cálculo após gastar recursos.
+- Ampliado o limite por pedido de 500 para até 1.000.000 unidades, com validação de saves consistente.
+- Mantidos os modos Original/Em grade e compatibilidade com campanhas anteriores.
+
 ## [1.0.0] — Conquista de Aldeias e Capital · 14/10/2026
 
 - Novo Palácio único por império, transferência de capital e campos até nível 25 na capital.

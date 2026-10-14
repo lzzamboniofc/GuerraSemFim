@@ -232,9 +232,20 @@ function runPlanned(st){
  }
  return started;
 }
+const MAX_TRAIN_BATCH=1000000;
+function maxTrainable(st,v,unitId){
+ const unit=troopDefs(st).find(t=>t.id===unitId);
+ if(!v||!unit||buildLevel(v,unit.building)<1||!unitUnlocked(st,v,unitId))return 0;
+ const queued=v.trainingQueue.filter(q=>q.unitId===unitId).reduce((total,q)=>total+q.qty,0);
+ const availableSlots=Math.max(0,1000000-(v.troops[unitId]||0)-queued);
+ const affordable=D.RES.map((k,i)=>unit.cost[i]>0?Math.floor((v.resources[k]+0.000001)/unit.cost[i]):MAX_TRAIN_BATCH);
+ return Math.max(0,Math.min(MAX_TRAIN_BATCH,availableSlots,...affordable));
+}
 function canTrain(st,v,unitId,qty){const unit=troopDefs(st).find(t=>t.id===unitId);if(!unit)return {ok:false,error:'Unidade inválida.'};if(buildLevel(v,unit.building)<1)return {ok:false,error:`Requer ${D.BUILDINGS[unit.building].name}.`};
  if(!unitUnlocked(st,v,unitId))return {ok:false,error:`Pesquise ${unit.name} na Academia antes de recrutar.`};
- qty=Math.floor(Number(qty));if(!Number.isFinite(qty)||qty<1||qty>500)return {ok:false,error:'Escolha entre 1 e 500 unidades.'};
+ qty=Math.floor(Number(qty));if(!Number.isFinite(qty)||qty<1||qty>MAX_TRAIN_BATCH)return {ok:false,error:'Escolha entre 1 e 1.000.000 de unidades.'};
+ const queued=v.trainingQueue.filter(q=>q.unitId===unitId).reduce((total,q)=>total+q.qty,0);
+ if((v.troops[unitId]||0)+queued+qty>1000000)return {ok:false,error:'Limite de um milhão de tropas por unidade nesta aldeia.'};
  if(!canPay(v,unit.cost,qty))return {ok:false,error:'Recursos insuficientes.'};
  const seconds=Math.max(3,Math.floor(unit.time*Math.pow(.965,buildLevel(v,unit.building)-1)*qty/st.speed));return {ok:true,unit,qty,seconds};}
 function train(st,v,unitId,qty){const c=canTrain(st,v,unitId,qty);if(!c.ok)return c;pay(v,c.unit.cost,c.qty);
@@ -672,7 +683,7 @@ function validateState(st){
   if(!Object.entries(v.buildingSlots).every(([slot,k])=>/^(?:[0-9]|1[0-9])$/.test(slot)&&!!D.BUILDINGS[k]))return false;
   if(!v.buildQueue.every(q=>plain(q)&&validNumber(q.endsAt)&&Number.isSafeInteger(q.level)&&q.level>=1&&q.level<=(q.type==='field'?fieldMax(st,v):20)&&
    (q.type==='field'?(Number.isSafeInteger(q.ref)&&q.ref>=0&&q.ref<18):(q.type==='building'&&!!D.BUILDINGS[q.ref]&&Number.isSafeInteger(q.slot)&&q.slot>=0&&q.slot<20))))return false;
-  if(!v.trainingQueue.every(q=>plain(q)&&validNumber(q.endsAt)&&Number.isSafeInteger(q.qty)&&q.qty>=1&&q.qty<=500&&D.TROOPS[st.tribe].some(t=>t.id===q.unitId)))return false;
+  if(!v.trainingQueue.every(q=>plain(q)&&validNumber(q.endsAt)&&Number.isSafeInteger(q.qty)&&q.qty>=1&&q.qty<=MAX_TRAIN_BATCH&&D.TROOPS[st.tribe].some(t=>t.id===q.unitId)))return false;
  }
  if(!ids.has(st.activeVillageId))return false;
  if(st.villages.filter(v=>buildLevel(v,'palace')>0||v.buildQueue.some(q=>q.type==='building'&&q.ref==='palace')).length>1)return false;
@@ -736,5 +747,5 @@ function importSave(text){
  if(!save(st))return {ok:false,error:'Não foi possível salvar a partida neste navegador.'};
  return {ok:true,state:st};
 }
-window.GSF={capital,isCapital,setCapital,fieldMax,administratorName,canTrainAdministrator,trainAdministrator,sendConquest,conquerRival,researchRule,researchPrice,canResearch,startResearch,unitUnlocked,initResearch,viewMode,setViewMode,fieldMix,tileProfile,oasisResource,oasisCount,oasisLimit,captureOasis,releaseOasis,heroFocus,heroTargets,heroBonus,setHeroFocus,setHeroTargets,plans,planBuild,removePlan,movePlan,runPlanned,KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
+window.GSF={maxTrainable,capital,isCapital,setCapital,fieldMax,administratorName,canTrainAdministrator,trainAdministrator,sendConquest,conquerRival,researchRule,researchPrice,canResearch,startResearch,unitUnlocked,initResearch,viewMode,setViewMode,fieldMix,tileProfile,oasisResource,oasisCount,oasisLimit,captureOasis,releaseOasis,heroFocus,heroTargets,heroBonus,setHeroFocus,setHeroTargets,plans,planBuild,removePlan,movePlan,runPlanned,KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
 })();
