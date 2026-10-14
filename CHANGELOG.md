@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.8.3] — Layout adaptativo e correções de espaço · 14/10/2026
+
+- Menu lateral e conteúdo deixam de competir por espaço em telas intermediárias; o conselheiro passa para baixo do conteúdo quando necessário.
+- Barra superior com recursos em linha própria quando a largura não comporta todos os elementos.
+- Navegação horizontal em tablets e celulares, preservando a posição ao mudar de tela.
+- Aldeia, campos e mapa ganham rolagem horizontal **dentro do painel** em telas estreitas, evitando botões e edifícios espremidos.
+- Cartões, configurações, tropas, formulários, modais e painéis financeiros mais responsivos.
+- Sem mudanças nas mecânicas, salvamentos e aparência clássica do mapa e dos edifícios.
+
 ## [0.8.2] — Restauração do design clássico · 14/10/2026
 
 - Retorno da aldeia, dos campos, dos edifícios e do mapa ao design anterior às reformas gráficas.

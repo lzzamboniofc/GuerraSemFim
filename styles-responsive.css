@@ -1,0 +1,135 @@
+/* Guerra Sem Fim v0.8.3 — layout adaptativo. Preserva o tema clássico.
+   Apenas a apresentação muda: não interfere no motor nem nos salvamentos. */
+
+html,body,#app,.game-shell{max-width:100%;min-width:0}
+#app{overflow-x:clip}
+.game-shell{width:100%}
+.masthead-inner,.app-frame{box-sizing:border-box;max-width:1780px}
+.masthead-inner>*{min-width:0}
+.brand{flex-shrink:0}
+.resource-bar{min-width:0}
+.resource-pill{min-width:0;max-width:none;flex:1 1 0}
+.resource-detail{min-width:0}
+.resource-pill small{white-space:normal;line-height:1.3}
+.account-pill{flex-shrink:0;min-width:0}
+.content,.sidebar,.inspector,.panel,.paper-card,.page-head,.page-head>div,.stats-strip,.stat{min-width:0}
+.panel-title,.page-head{min-width:0}
+.panel-title h3,.page-head h2,.section-note{overflow-wrap:break-word}
+.page-head p,.inspector-body,.panel p{overflow-wrap:anywhere}
+.page-head select{max-width:100%;min-width:0}
+.btn-row,.map-controls{flex-wrap:wrap}
+.btn-row>.btn,.map-controls .btn{white-space:normal}
+input,select,textarea{max-width:100%}
+.card,.setting-card,.faction-card,.npc-offer,.imperial-card,.chapter-card,.artifact-row{min-width:0}
+.settings-grid,.faction-grid,.npc-offers,.imperial-grid,.diplomacy-grid,.expansion-stats,.forecast-grid,.war-summary{min-width:0}
+.plan-row,.troop-row,.research-row{min-width:0}
+.plan-name,.troop-info,.research-row>div{min-width:0}
+.plan-name strong,.plan-name small,.troop-info strong,.troop-info small{overflow-wrap:anywhere}
+.production-highlight,.production-rows>div,.footer-stat{min-width:0}
+.production-highlight>*,.production-rows>div>*{min-width:0;overflow-wrap:anywhere}
+
+/* Em telas médias o conselheiro fica embaixo do conteúdo, não apertando o jogo. */
+@media(max-width:1599px){
+  .app-frame{grid-template-columns:210px minmax(0,1fr);gap:16px;padding:18px}
+  .sidebar{grid-column:1;grid-row:1 / span 2}
+  .content{grid-column:2;grid-row:1}
+  .inspector{grid-column:2;grid-row:2;position:static;min-height:0}
+  .inspector .inspector-body{padding:15px 18px}
+  .inspector .big-icon{display:none}
+  .inspector .inspector-head{padding:11px 18px}
+  .inspector .inspector-body p{margin:4px 0}
+}
+@media(min-width:1600px){
+  .app-frame{grid-template-columns:215px minmax(0,1fr) 285px;gap:18px;padding:20px}
+}
+
+/* A barra de recursos ganha sua própria linha quando não há espaço suficiente. */
+@media(max-width:1279px){
+  .masthead-inner{flex-wrap:wrap;column-gap:16px;row-gap:8px;padding:10px 18px}
+  .brand{min-width:0;flex:1 1 auto}
+  .account-pill{flex:0 0 auto}
+  .resource-bar{order:3;flex:1 1 100%;width:100%;gap:8px}
+  .resource-pill{max-width:none;justify-content:center;min-height:54px}
+  .resource-pill small{white-space:nowrap}
+}
+
+/* Celular e tablets estreitos: conteúdo com largura inteira e menu deslizável. */
+@media(max-width:959px){
+  .app-frame{display:flex;flex-direction:column;gap:12px;padding:12px}
+  .sidebar{position:static;width:100%;max-width:100%;display:block}
+  .side-heading,.side-sub,.sidebar-footer{display:none}
+  .nav-list{display:flex;flex-direction:row;gap:4px;padding:8px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;overscroll-behavior-x:contain;scroll-snap-type:x proximity}
+  .nav-item{flex:0 0 auto;width:auto;min-height:41px;padding:9px 12px;scroll-snap-align:start;white-space:nowrap}
+  .content,.inspector{width:100%;flex:0 0 auto;min-width:0}
+  .inspector{margin-top:0}
+  .page-head{gap:10px}
+  .stats-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .settings-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:719px){
+  .masthead-inner{padding:9px 12px;gap:8px}
+  .resource-bar{gap:5px}
+  .resource-pill{padding:8px 6px;gap:5px;min-width:0}
+  .resource-pill .ico{font-size:20px}
+  .resource-pill strong{font-size:14px}
+  .resource-pill small{font-size:10px;white-space:normal}
+  .page-head{flex-wrap:wrap;align-items:start}
+  .page-head>div:first-child{flex:1 1 100%}
+  .page-head>.pill,.page-head>select{max-width:100%}
+  .page-head h2{font-size:clamp(22px,5vw,28px)}
+  .panel-title{align-items:flex-start;flex-wrap:wrap;gap:5px}
+  .panel-title .section-note{flex:1 1 100%;text-align:left}
+  .setting-card,.panel{max-width:100%}
+  .settings-grid,.faction-grid,.npc-offers,.expansion-stats,.diplomacy-grid,.imperial-grid{grid-template-columns:1fr}
+  .chapter-card,.artifact-row{flex-wrap:wrap}
+  .chapter-card>*{min-width:0}
+  .forecast-grid{grid-template-columns:1fr}
+  .hero-resource-choices{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .modal-inspector .build-cost{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .production-highlight{flex-wrap:wrap;gap:8px}
+  .resource-tabs{flex-wrap:wrap}
+  .resource-tabs>*{flex:1 1 42%}
+  .troop-row{grid-template-columns:minmax(0,1fr) minmax(65px,85px);gap:8px}
+  .troop-row .troop-data{display:none}
+  .troop-row>.btn{min-width:0;padding:9px 6px}
+  .plan-actions{flex-wrap:wrap;justify-content:flex-end}
+  .map-controls .btn-row{justify-content:flex-start}
+  .btn-row>.btn{max-width:100%}
+}
+
+/* Mapas e cenários mantêm proporções clicáveis; somente eles rolam na horizontal. */
+.scene-scroll,.map-scroll{max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.scene-scroll:focus-visible,.map-scroll:focus-visible{outline:2px solid #b18a3a;outline-offset:2px}
+.scene-scroll .scene,.map-scroll .map-grid{width:100%}
+@media(max-width:699px){
+  .scene-scroll .town-board{min-width:570px;height:470px}
+  .scene-scroll .field-board{min-width:535px;height:440px}
+  .map-scroll .map-grid{min-width:535px;gap:3px;padding:5px}
+  .scene-scroll .town-slot .building-art{width:48px;height:41px}
+  .scene-scroll .town-slot .slot-name{max-width:86px;font-size:10px}
+  .scene-scroll .town-slot{min-width:56px}
+  .scene-scroll .field-slot{min-width:48px}
+}
+@media(max-width:419px){
+  .masthead .brand h1{font-size:14px;letter-spacing:1px}
+  .masthead .brand small{letter-spacing:1px}
+  .brand-seal{width:40px;height:40px}
+  .account-pill strong{font-size:11px}
+  .account-pill small{font-size:9px}
+  .resource-pill .ico{font-size:17px}
+  .resource-pill strong{font-size:12px}
+  .resource-pill small{font-size:9px}
+  .app-frame{padding:8px}
+  .panel{padding:12px}
+  .stats-strip{gap:7px}
+  .stat{padding:9px}
+  .hero-focus-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* Evita que o cabeçalho force o perfil para uma linha desconexa no celular. */
+@media(max-width:419px){
+  .account-pill>div:first-child{display:none}
+  .account-pill{margin-left:auto;justify-content:flex-end}
+  .account-pill .avatar{width:38px;height:38px;font-size:19px}
+}
