@@ -1,0 +1,36 @@
+name: Publicar Guerra Sem Fim v1.0
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.release-v10/**'
+      - '.github/workflows/upgrade-v10.yml'
+permissions:
+  contents: write
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Aplicar atualizacao
+        shell: bash
+        run: |
+          base64 -d .release-v10/upgrade.b64 | xz -dc > /tmp/gsf-v10.patch
+          echo 'd98c17ac43322bd922268a8a8aaf2c1f8165a6f206319290abb5b3c533a7bd56  /tmp/gsf-v10.patch' | sha256sum -c -
+          git apply --ignore-space-change --check /tmp/gsf-v10.patch
+          git apply --ignore-space-change /tmp/gsf-v10.patch
+          node --check js/engine.js
+          node --check js/app.js
+          node --check js/ai.js
+          for t in tests/*.test.js; do node "$t"; done
+      - name: Confirmar publicacao
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -rf .release-v10 .github/workflows/upgrade-v10.yml
+          git add -A
+          git commit -m "feat: v1.0 palacio, capital e conquista de aldeias"
+          git push origin HEAD:main
