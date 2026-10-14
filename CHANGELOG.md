@@ -1,5 +1,18 @@
 # Histórico de versões — Guerra Sem Fim
 
+## v0.4 — Era das Guerras (14/10/2026)
+
+- Novo menu Comando de Guerra: tecnologias, transferências de reforços, simulador e orientação tática.
+- Batedores de cada tribo, espionagem de acampamentos e cidades rivais com relatórios e interceptações.
+- Ferreiro funcional: pesquisas por unidade até nível 10, com bônus de 6% por nível no ataque e na defesa.
+- Oficina e duas unidades de cerco por tribo: aríetes para muralhas e catapultas para fortificações rivais.
+- Diferenciação de defesa contra infantaria e cavalaria, muralhas com bônus de 7,5% por nível e esconderijos que dificultam saques NPC.
+- Envio seguro de tropas entre aldeias próprias, com viagem e transferência sem duplicação.
+- Simulador de combate aproximado, sem movimentação ou custo de recursos.
+- Conservados saves v0.1–v0.3; 13 testes militares e smoke de interface adicionados.
+
+
+
 ## v0.3 — Mundo Vivo (14/10/2026)
 
 - Três reinos rivais com capital, bandeira, nível de desenvolvimento, muralhas, guarnição e economia locais.

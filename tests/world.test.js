@@ -2,7 +2,7 @@
 const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');
 const root=path.resolve(__dirname,'..');const memory=new Map();
 const ctx={window:{},Date,Math,JSON,console,localStorage:{getItem:k=>memory.get(k)||null,setItem:(k,v)=>memory.set(k,v),removeItem:k=>memory.delete(k)}};
-vm.createContext(ctx);for(const file of ['data','ai','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',file+'.js'),'utf8'),ctx,{filename:file});
+vm.createContext(ctx);for(const file of ['data','war','ai','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',file+'.js'),'utf8'),ctx,{filename:file});
 const E=ctx.window.GSF,AI=ctx.window.GSF_AI;
 function test(name,fn){fn();console.log('✓ '+name);}
 let s,v,city;

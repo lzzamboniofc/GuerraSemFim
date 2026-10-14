@@ -59,3 +59,18 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 @media(max-width:1200px){.faction-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.faction-grid{grid-template-columns:1fr}.rivals-intro{flex-direction:column;align-items:stretch;padding:15px}.rivals-intro h3{font-size:19px}.rival-summary{min-width:0}}
 @media(prefers-reduced-motion:reduce){.map-tile.rival .glyph{animation:none}}
+
+/* Versão 0.4 — centro militar */
+.war-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.war-summary>div{background:linear-gradient(155deg,#fffdf8,#ede7d7);border:1px solid #d4c39f;border-radius:13px;padding:18px;display:flex;flex-direction:column;gap:7px}
+.war-summary strong{font-size:27px;color:#4d482f}.war-summary small,.war-summary span{color:#766c56}
+.research-row{display:flex;align-items:center;flex-wrap:wrap;gap:12px;border-top:1px solid #e5ddca;padding:13px 0}
+.research-row>div:first-child{flex:1;min-width:145px;display:flex;flex-direction:column;gap:5px}
+.research-row small{color:#776d5b}.research-price{display:flex;flex-wrap:wrap;gap:6px 10px;font-size:12px}
+.reinforce-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}
+.reinforce-grid label{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px}
+.reinforce-grid input{max-width:86px;min-width:55px;padding:7px;border:1px solid #cfc2a7;border-radius:7px;background:#fffcf6}
+.war-hints p{color:#625843;line-height:1.6;margin:10px 0}
+@media(max-width:720px){.war-summary{grid-template-columns:1fr}.reinforce-grid{grid-template-columns:1fr}.research-row>.research-price{width:100%}}
+
+.sim-report{margin-top:15px;padding:12px;border-radius:9px;border:1px solid #bdb49c}.sim-report p{line-height:1.6;margin:8px 0}.sim-report small{font-size:12px}

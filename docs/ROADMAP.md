@@ -39,6 +39,13 @@
 - IA NPC: melhorar escolhas de alvos, reação a cercos, diplomacia, dificuldade ajustável e coordenação de exércitos.
 - Registro de combates detalhado, predileção de alvos e regras para vitória/derrota da campanha.
 
+## Entregue: v0.4 — Era das Guerras
+
+- Batedores e espionagem de reinos NPC; melhorias por unidade no Ferreiro.
+- Reforços internos e simulação aproximada de combates.
+- Aríetes, catapultas, muralhas, esconderijo e perfis diferenciados de defesa.
+- Próximos aprimoramentos militares: alvos específicos para catapultas, pesquisa com tempo de espera, apoio a aliados e IA com unidades de cerco.
+
 ## Fase 4 — Herói, facções e profundidade estratégica
 
 - Herói equipado, inventário, recompensas variadas, missões especiais e atributos completos.

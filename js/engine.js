@@ -14,7 +14,7 @@ function village(st,name,x,y,starter=false) {
  const buildings = {main:starter?3:1,warehouse:1,granary:1,rally:1};
  const troops = {};
  if(starter) troops[D.TROOPS[st.tribe][0].id]=12;
- return {id:id(st),name,x,y,fields,buildings,resources:starter?{wood:1000,clay:1000,iron:1000,crop:1000}:{wood:650,clay:650,iron:650,crop:650},buildQueue:[],trainingQueue:[],troops,buildingSlots:{0:'main',1:'warehouse',2:'granary',3:'rally'},foundedAt:now()};
+ return {id:id(st),name,x,y,fields,buildings,resources:starter?{wood:1000,clay:1000,iron:1000,crop:1000}:{wood:650,clay:650,iron:650,crop:650},buildQueue:[],trainingQueue:[],troops,buildingSlots:{0:'main',1:'warehouse',2:'granary',3:'rally'},militaryTech:{},foundedAt:now()};
 }
 function newGame(options={}) {
  const tribe = D.TRIBES[options.tribe]?options.tribe:'romans';
@@ -90,7 +90,7 @@ function send(st,v,x,y,army,mode='raid'){
  if(!target||!['enemy','rival'].includes(target.kind))return {ok:false,error:'Escolha um acampamento ou reino rival no mapa.'};
  if(buildLevel(v,'rally')<1)return {ok:false,error:'Construa o Ponto de Reunião.'};
  if(!army||typeof army!=='object'||Array.isArray(army))return {ok:false,error:'Seleção de tropas inválida.'};
- if(!['raid','attack'].includes(mode))return {ok:false,error:'Tipo de missão inválido.'};
+ if(!['raid','attack','scout'].includes(mode))return {ok:false,error:'Tipo de missão inválido.'};
  const chosen={};let count=0,speed=Infinity,power=0;
  const defs=troopDefs(st),allowed=new Set(defs.map(t=>t.id));
  for(const unitId of Object.keys(army)){
@@ -105,16 +105,73 @@ function send(st,v,x,y,army,mode='raid'){
  }
  if(count<=0)return {ok:false,error:'Selecione tropas disponíveis.'};
  if(count>20000)return {ok:false,error:'Limite de 20.000 unidades por marcha.'};
+ if(mode==='scout'&&defs.some(t=>chosen[t.id]&&!t.scout))return {ok:false,error:'Envie somente batedores para espionagem.'};
+ if(mode!=='scout'&&!defs.some(t=>chosen[t.id]&&!t.scout))return {ok:false,error:'Envie unidades de combate para atacar.'};
  const startedAt=now(),seconds=Math.max(5,Math.ceil(distance(v,target)*120/(speed*st.speed)));
  for(const [k,n] of Object.entries(chosen))v.troops[k]-=n;
  st.movements.push({id:id(st),villageId:v.id,targetId:target.id,x,y,army:chosen,mode,phase:'going',endsAt:startedAt+seconds*1000,startedAt,power});
  log(st,`Exército enviado para ${target.name} (${x}|${y}).`,'army');save(st);return {ok:true,seconds};
 }
+// Transferência de tropas: entre aldeias próprias, sem duplicar unidades.
+// Previsão aproximada: não altera a campanha nem executa a batalha.
+function simulate(st,v,x,y,army){
+ const target=tileAt(st,x,y),defs=troopDefs(st);
+ if(!target||!['rival','enemy'].includes(target.kind))return {ok:false,error:'Escolha um alvo hostil.'};
+ if(!army||typeof army!=='object'||Array.isArray(army))return {ok:false,error:'Tropas inválidas.'};
+ let count=0;for(const [key,value] of Object.entries(army)){
+  if(!defs.some(u=>u.id===key)||!Number.isSafeInteger(Number(value))||Number(value)<0||Number(value)>(v.troops[key]||0))return {ok:false,error:'Quantidade inválida.'};count+=Number(value);
+ }
+ if(!count)return {ok:false,error:'Selecione tropas para simular.'};
+ const power=window.GSF_WAR.offense(army,defs,v),defense=target.kind==='rival'?(target.power*27+18)*window.GSF_WAR.fortification(target.walls||0):target.power*32+10;
+ const wins=target.kind==='rival'?power>=defense*.85:power>=defense*.72;
+ const ratio=wins?Math.min(.65,defense/(power+defense)*.72):Math.min(1,.50+defense/(power+defense)*.43);
+ return {ok:true,power:Math.round(power),defense:Math.round(defense),wins,losses:Math.round(count*ratio),units:count,warning:'Estimativa simplificada; resultados reais podem variar conforme tropas e fortificações.'};
+}
+function reinforce(st,from,targetVillageId,army){
+ const target=st.villages.find(v=>v.id===targetVillageId);
+ if(!target||target.id===from.id)return {ok:false,error:'Selecione outra aldeia sua.'};
+ if(!army||typeof army!=='object'||Array.isArray(army))return {ok:false,error:'Seleção inválida.'};
+ const defs=troopDefs(st),known=new Set(defs.map(u=>u.id));
+ if(Object.keys(army).some(k=>!known.has(k)||!Number.isSafeInteger(Number(army[k]))||Number(army[k])<0))return {ok:false,error:'Quantidades inválidas.'};
+ const chosen={};let speed=Infinity,count=0;
+ for(const u of defs){const qty=Number(army[u.id]||0);if(qty>(from.troops[u.id]||0))return {ok:false,error:'Tropas insuficientes.'};if(qty){chosen[u.id]=qty;count+=qty;speed=Math.min(speed,u.speed);}}
+ if(count<1||count>20000)return {ok:false,error:'Escolha entre 1 e 20.000 soldados.'};
+ const startedAt=now(),seconds=Math.max(5,Math.ceil(distance(from,target)*120/(speed*st.speed)));
+ for(const [unit,qty] of Object.entries(chosen))from.troops[unit]-=qty;
+ st.movements.push({id:id(st),villageId:from.id,targetVillageId:target.id,targetId:target.id,x:target.x,y:target.y,army:chosen,mode:'reinforce',phase:'going',endsAt:startedAt+seconds*1000,startedAt,power:0});
+ log(st,`Reforços enviados de ${from.name} para ${target.name}.`,'army');save(st);return {ok:true,seconds};
+}
+function upgradeMilitary(st,v,unitId){
+ const unit=troopDefs(st).find(u=>u.id===unitId);if(!unit)return {ok:false,error:'Unidade inválida.'};
+ const smithy=buildLevel(v,'smithy'),lv=window.GSF_WAR.tier(v,unitId);
+ if(!smithy)return {ok:false,error:'Construa um Ferreiro.'};
+ if(lv>=10||lv>=smithy)return {ok:false,error:'Eleve o nível do Ferreiro para pesquisar mais.'};
+ const price=window.GSF_WAR.upgradeCost(unit,lv+1);
+ if(!pay(v,price))return {ok:false,error:'Recursos insuficientes.'};
+ v.militaryTech??={};v.militaryTech[unitId]=lv+1;
+ log(st,`Ferreiro: ${unit.name} aprimorado para nível ${lv+1}.`,'army');save(st);return {ok:true,level:lv+1};
+}
+function resolveScouting(st,m,at){
+ const target=tileAt(st,m.x,m.y);
+ const spies=troopDefs(st).reduce((n,u)=>n+(u.scout?(m.army[u.id]||0):0),0);
+ let strength=0,intel='';
+ if(target?.kind==='rival'){
+  const ref=st.ai?.factions.flatMap(f=>f.villages.map(v=>({f,v}))).find(o=>o.v.x===m.x&&o.v.y===m.y);
+  if(ref){strength=ref.v.walls+Math.floor(ref.v.level/2);intel=`Guarnição: ${ref.v.troops} · Muralha: nível ${ref.v.walls} · Fortaleza: nível ${ref.v.level} · Recursos: ${D.RES.map(k=>k+' '+ref.v.stock[k]).join(', ')}.`;}
+ }else if(target?.kind==='enemy'){
+  strength=Math.floor(target.power/3);intel=`Inimigos estimados: ${target.power} · Recursos: ${D.RES.map(k=>k+' '+target.resources[k]).join(', ')}.`;
+ }
+ const success=spies>strength;
+ if(!success){for(const u of troopDefs(st)){if(u.scout)m.army[u.id]=Math.floor((m.army[u.id]||0)*.5);} }
+ report(st,success?'Espionagem bem-sucedida':'Batedores descobertos',success?`Relatório de (${m.x}|${m.y}): ${intel}`:`Os defensores detectaram os batedores em (${m.x}|${m.y}). Algumas unidades foram perdidas.` ,success?'victory':'defeat');
+ m.loot=null;m.phase='returning';m.endsAt=at+Math.max(5000,at-m.startedAt);
+}
 function report(st,title,body,type='info',details=null){st.reports.unshift({id:id(st),title,body,type,details,at:now(),read:false});if(st.reports.length>100)st.reports.length=100;}
 function log(st,message,type='info'){st.events.unshift({id:id(st),message,type,at:now()});if(st.events.length>45)st.events.length=45;}
 function resolveBattle(st,m,arrivedAt){
+ if(m.mode==='scout')return resolveScouting(st,m,arrivedAt);
  if(window.GSF_AI?.isRivalTarget(st,m))return window.GSF_AI.resolveBattle(st,m,arrivedAt);const v=st.villages.find(q=>q.id===m.villageId),t=st.world.tiles.find(q=>q.id===m.targetId);if(!v||!t){m.phase='returning';m.endsAt=arrivedAt+5000;return;}
- const defs=troopDefs(st);const atk=sum(defs.map(u=>(m.army[u.id]||0)*u.attack));const def=t.power*32+10;
+ const defs=troopDefs(st);const atk=window.GSF_WAR.offense(m.army,defs,v);const def=t.power*32+10;
  const win=atk>=def*0.72;const fraction=win?clamp((def/(atk+def))*0.55,0.02,0.58):clamp(def/(atk+def)*0.9,.4,1);
  const survivors={};const losses={};defs.forEach(u=>{const n=m.army[u.id]||0;const killed=Math.min(n,Math.round(n*fraction));if(n){survivors[u.id]=n-killed;losses[u.id]=killed;}});
  let loot={wood:0,clay:0,iron:0,crop:0};if(win){const carry=sum(defs.map(u=>(survivors[u.id]||0)*u.carry));const per=Math.floor(carry/4);D.RES.forEach(k=>{loot[k]=Math.min(per,t.resources[k]);t.resources[k]-=loot[k];});
@@ -176,7 +233,12 @@ function resolveDue(st,at){
  }
  for(const m of st.movements.slice()){
   if(m.endsAt>at)continue;
-  if(m.phase==='going')resolveBattle(st,m,m.endsAt);
+  if(m.phase==='going'&&m.mode==='reinforce'){
+   const destination=st.villages.find(v=>v.id===m.targetVillageId);
+   if(destination){for(const [unit,qty] of Object.entries(m.army))destination.troops[unit]=(destination.troops[unit]||0)+qty;
+    log(st,`Reforços chegaram a ${destination.name}.`,'army');st.movements.splice(st.movements.indexOf(m),1);}
+   else {m.phase='returning';m.endsAt=at+5000;}
+  }else if(m.phase==='going')resolveBattle(st,m,m.endsAt);
   else {returnArmy(st,m);st.movements.splice(st.movements.indexOf(m),1);}
   resolved=true;
  }
@@ -233,6 +295,7 @@ function validateState(st){
    !Number.isSafeInteger(v.x)||!Number.isSafeInteger(v.y)||Math.abs(v.x)>8||Math.abs(v.y)>8||
    ids.has(v.id)||positions.has(v.x+':'+v.y)||!validRes(v.resources)||
    !plain(v.buildings)||!plain(v.buildingSlots)||!validArmy(v.troops,st.tribe)||
+   (v.militaryTech!==undefined&&(!plain(v.militaryTech)||!Object.entries(v.militaryTech).every(([k,l])=>D.TROOPS[st.tribe].some(u=>u.id===k)&&Number.isSafeInteger(l)&&l>=0&&l<=10)))||
    !validArray(v.fields,18)||v.fields.length!==18||!validArray(v.buildQueue,50)||!validArray(v.trainingQueue,500))return false;
   ids.add(v.id);positions.add(v.x+':'+v.y);
   if(!v.fields.every(f=>plain(f)&&D.FIELDS[f.type]&&Number.isSafeInteger(f.level)&&f.level>=0&&f.level<=20))return false;
@@ -250,7 +313,8 @@ function validateState(st){
   (t.resources===null||validRes(t.resources))))return false;
  if(!st.movements.every(m=>plain(m)&&ids.has(m.villageId)&&
   ['going','returning'].includes(m.phase)&&validNumber(m.endsAt)&&validNumber(m.startedAt)&&
-  validArmy(m.army,st.tribe)&&(!m.loot||validRes(m.loot))))return false;
+  validArmy(m.army,st.tribe)&&(!m.loot||validRes(m.loot))&&
+  (m.mode!=='reinforce'||(ids.has(m.targetVillageId)&&m.targetVillageId!==m.villageId))))return false;
  return st.reports.every(r=>plain(r)&&typeof r.title==='string'&&typeof r.body==='string'&&validNumber(r.at))&&
   st.events.every(e=>plain(e)&&typeof e.message==='string'&&validNumber(e.at));
 }
@@ -288,5 +352,5 @@ function importSave(text){
  if(!save(st))return {ok:false,error:'Não foi possível salvar a partida neste navegador.'};
  return {ok:true,state:st};
 }
-window.GSF={KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY};
+window.GSF={KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY};
 })();

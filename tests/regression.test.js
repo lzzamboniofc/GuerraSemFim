@@ -5,7 +5,7 @@ const db=new Map();
 const localStorage={getItem:k=>db.get(k)??null,setItem:(k,v)=>db.set(k,String(v)),removeItem:k=>db.delete(k)};
 const ctx={window:{},console,Date,Math,JSON,localStorage};
 vm.createContext(ctx);
-for(const file of ['data','engine'])vm.runInContext(fs.readFileSync(path.join(__dirname,'..','js',file+'.js'),'utf8'),ctx,{filename:file});
+for(const file of ['data','war','engine'])vm.runInContext(fs.readFileSync(path.join(__dirname,'..','js',file+'.js'),'utf8'),ctx,{filename:file});
 const E=ctx.window.GSF;
 let tests=0;
 function test(label,fn){fn();tests++;console.log('✓ '+label);}

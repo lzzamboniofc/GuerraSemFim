@@ -1,6 +1,6 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — jogo de estratégia medieval para navegador, com execução offline.**
+**Impérios & Conquistas — versão 0.4, Era das Guerras: estratégia medieval offline para navegador.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
 
@@ -35,7 +35,8 @@ Abra **http://localhost:8000**. Este é um servidor apenas na sua máquina, não
 | Economia | 4 recursos, 18 campos (4/4/4/6), produção por hora, bônus econômicos, armazém, celeiro e consumo de cereal |
 | Aldeia | 20 espaços, edifícios com custos escalonados, pré-requisitos, níveis e tempos de construção |
 | Filas | Uma construção de cada categoria para Romanos; uma por vez para outras tribos; cancelamento com devolução de 75% |
-| Tropas | Quatro tipos por tribo, recrutamento e manutenção de cereal |
+| Tropas | Infantaria, cavalaria, batedores e unidades de cerco por tribo, recrutamento e manutenção de cereal |
+| Guerra v0.4 | Espionagem, reforços entre aldeias próprias, Ferreiro por unidade, muralhas operacionais, aríetes, catapultas e simulador aproximado |
 | Mapa | Região 17×17 com visualização 11×11, aldeias, vales, oásis, acampamentos e reinos rivais |
 | Mundo Vivo | 3 facções NPC com recursos, desenvolvimento, recrutamento, expansão, ataques, saques e conquistas de território |
 | Combates | Ataques e saques simulados, deslocamento, baixas, capacidade de carga, saque e retorno das tropas |
@@ -69,9 +70,12 @@ GuerraSemFim/
 ├── js/
 │   ├── ai.js                 # Reinos rivais, economia, turnos e ataques NPC
 │   ├── data.js               # Tribos, edifícios, tropas, custo, posições
+│   ├── war.js                # Cálculos militares compartilhados (v0.4)
+│   ├── ai.js                 # Economia e ações das facções NPC (v0.3)
 │   ├── engine.js             # Estado, economia, tempo, filas, batalhas, save
 │   └── app.js                # Interface, navegação e interações
 ├── docs/
+│   ├── ERA_DAS_GUERRAS.md    # Mecânicas militares da versão 0.4
 │   ├── ANALISE_TRAVIAN.md    # Inventário de mecânicas e diferenças
 │   ├── ROADMAP.md            # Próximas etapas de desenvolvimento
 │   └── PUBLICACAO_GITHUB.md # Como subir para o GitHub
@@ -101,6 +105,10 @@ Se tiver Node.js instalado:
 node tests/smoke.test.js
 node tests/regression.test.js
 node tests/world.test.js
+node tests/war.test.js
+node tests/ui.test.js
+node tests/regression.test.js
+node tests/world.test.js
 node tests/regression.test.js
 ```
 
@@ -110,7 +118,7 @@ Os testes cobrem criação de mundo, tribos, produção, filas, construção, ex
 
 Esta é uma versão inicial funcional — **não é uma reprodução integral do Travian**. A fórmula de combate é simplificada; não há jogadores reais, alianças, mercado entre jogadores, modo multijogador, Natares, maravilhas do mundo, eventos de servidor, herói equipado, cerco operacional, rotas comerciais, colonizadores nem pontos de cultura. As tropas de exploração ainda não executam espionagem especial; os confrontos agora incluem guarnições de reinos NPC locais. A IA usa decisões heurísticas e ainda não possui diplomacia, cerco ou conquista de aldeias próprias do jogador. Oásis aparecem no mapa, mas sua anexação ainda não foi implementada.
 
-Veja o [inventário completo](docs/ANALISE_TRAVIAN.md), o [roteiro de expansão](docs/ROADMAP.md) e o [guia de publicação no GitHub](docs/PUBLICACAO_GITHUB.md).
+Veja o [manual da Era das Guerras](docs/ERA_DAS_GUERRAS.md), o [inventário completo](docs/ANALISE_TRAVIAN.md), o [roteiro de expansão](docs/ROADMAP.md) e o [guia de publicação no GitHub](docs/PUBLICACAO_GITHUB.md).
 
 ## 📜 Licença
 

@@ -69,5 +69,32 @@ const TOWN_LAYOUT = [
  [49,49],[36,36],[63,36],[26,50],[73,52],[39,62],[61,62],[50,24],
  [22,30],[78,30],[19,70],[81,70],[35,18],[65,18],[50,79],[24,83],[76,84],[10,49],[90,49],[51,93]
 ];
+// Unidades especiais originais, disponíveis após edifícios adequados.
+const EXTRA = {
+ romans:[{id:'speculator',name:'Batedor',icon:'👁️',building:'stable',cost:[180,180,150,80],time:105,attack:0,defense:10,speed:16,carry:0,upkeep:2,scout:true}],
+ gauls:[],
+ teutons:[{id:'scout',name:'Vigia',icon:'👁️',building:'stable',cost:[160,130,140,70],time:100,attack:0,defense:10,speed:16,carry:0,upkeep:2,scout:true}]
+};
+for(const [tribe,units] of Object.entries(EXTRA)){
+ TROOPS[tribe].push(...units);
+ const finder=TROOPS[tribe].find(t=>t.id==='pathfinder');if(finder){finder.scout=true;finder.attack=0;finder.carry=0;}
+ TROOPS[tribe].push(
+  {id:'ram',name:'Aríete',icon:'🪵',building:'workshop',cost:[500,400,350,180],time:320,attack:35,defense:25,speed:4,carry:0,upkeep:3,siege:'ram'},
+  {id:'catapult',name:'Catapulta',icon:'💥',building:'workshop',cost:[620,580,640,250],time:410,attack:50,defense:20,speed:3,carry:0,upkeep:6,siege:'catapult'}
+ );
+}
+// Defesa diferenciada contra infantaria e cavalaria.
+const SPECIAL_DEFENSE={
+ praetorian:[85,35],phalanx:[40,65],spear:[25,90],legionary:[40,55],haeduan:[55,100],paladin:[85,115]
+};
+for(const unit of Object.values(TROOPS).flat()){
+ const [inf,cav]=SPECIAL_DEFENSE[unit.id]||[unit.defense,unit.defense];
+ unit.defInf=inf;unit.defCav=cav;
+ unit.cavalry=['equites','haeduan','paladin','speculator','scout','pathfinder'].includes(unit.id);
+}
+BUILDINGS.smithy.desc='Pesquise melhorias permanentes de ataque e defesa por unidade.';
+BUILDINGS.academy.desc='Permite construir ferreiro, estábulo e oficina de cerco.';
+BUILDINGS.workshop.desc='Treina aríetes que quebram muralhas e catapultas que atacam fortificações.';
+BUILDINGS.wall.desc='Melhora a defesa em 7,5% por nível contra invasões.';
 window.GSF_DATA = {RES,RESOURCE,TRIBES,BUILDINGS,FIELDS,TROOPS,FIELD_LAYOUT,TOWN_LAYOUT};
 })();

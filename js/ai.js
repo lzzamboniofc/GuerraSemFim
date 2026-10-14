@@ -51,8 +51,8 @@ function log(st,message,type='army'){
 function cityAt(st,x,y){for(const f of st.ai.factions){const city=f.villages.find(v=>v.x===x&&v.y===y);if(city)return {f,city};}return null;}
 function resolveBattle(st,m,at){
  const ref=cityAt(st,m.x,m.y);
- const defs=D.TROOPS[st.tribe],power=defs.reduce((n,t)=>n+(m.army[t.id]||0)*t.attack,0);
- const resistance=ref?ref.city.troops*27+ref.city.walls*80:0;
+ const defs=D.TROOPS[st.tribe],origin=st.villages.find(v=>v.id===m.villageId),power=window.GSF_WAR.offense(m.army,defs,origin);
+ const resistance=ref?(ref.city.troops*27+18)*window.GSF_WAR.fortification(ref.city.walls):0;
  const won=Boolean(ref)&&power>=resistance*.85;
  const ratio=ref?(won?Math.min(.65,resistance/(power+resistance)*.72):Math.min(1,.50+resistance/(power+resistance)*.43)):0;
  let carried=0,casualties=0;const losses={};
@@ -62,6 +62,11 @@ function resolveBattle(st,m,at){
   const garrisonLoss=won?Math.max(1,Math.min(ref.city.troops,Math.ceil(power/31))):Math.min(ref.city.troops,Math.ceil(power/85));
   ref.city.troops-=garrisonLoss;
   if(won){
+   if(m.mode==='attack'){
+    const damage=window.GSF_WAR.siegeDamage(m.army,defs,ref.city.walls);
+    if(damage.wall||damage.building){ref.city.walls-=damage.wall;ref.city.level=Math.max(1,ref.city.level-damage.building);
+     report(st,'Cerco a '+ref.city.name,`Aríetes reduziram ${damage.wall} nível(is) da muralha; catapultas destruíram ${damage.building} nível(is) de construções.`,'victory');}
+   }
    let capacity=Math.floor(carried);
    for(const k of D.RES){const take=Math.min(capacity,Math.floor(ref.city.stock[k]*.4));loot[k]=take;capacity-=take;ref.city.stock[k]-=take;}
    if(m.mode==='attack'&&ref.city.troops===0){
@@ -81,7 +86,7 @@ function battleDefense(st,m,at){
  const source=origin?.villages.find(v=>v.id===m.sourceId);
  if(!target){m.phase='returning';m.endsAt=at+m.duration;return;}
  const defenders=D.TROOPS[st.tribe];
- const def=defenders.reduce((v,u)=>v+(target.troops[u.id]||0)*u.defense,0)+(target.buildings.wall||0)*60+18;
+ const def=(window.GSF_WAR.defense(target.troops,defenders,target)+18)*window.GSF_WAR.fortification(target.buildings.wall||0);
  const atk=m.troops*35;
  const win=atk>def*.9;
  const ratio=win?Math.min(.85,atk/(def+atk)*.50):Math.min(1,def/(def+atk)*.82);
@@ -89,7 +94,7 @@ function battleDefense(st,m,at){
  for(const u of defenders){const n=target.troops[u.id]||0,dead=Math.min(n,Math.floor(n*ratio));if(n){target.troops[u.id]-=dead;deaths[u.id]=dead;lost+=dead;}}
  const attackerLost=Math.min(m.troops,Math.max(1,Math.ceil(m.troops*(win?.26:.78))));m.troops-=attackerLost;
  const loot={wood:0,clay:0,iron:0,crop:0};
- if(win){let capacity=m.troops*15;for(const k of D.RES){const take=Math.min(capacity,Math.floor(target.resources[k]*.20));loot[k]=take;target.resources[k]-=take;capacity-=take;}}
+ if(win){let capacity=m.troops*15;for(const k of D.RES){const protectedStock=window.GSF_WAR.hide(target);const take=Math.min(capacity,Math.max(0,Math.floor(target.resources[k]*.20)-protectedStock));loot[k]=take;target.resources[k]-=take;capacity-=take;}}
  m.loot=loot;m.phase='returning';m.endsAt=at+m.duration;
  report(st,(win?'Ataque inimigo!':'Defesa vitoriosa!')+` — ${origin?.name||'Rival'}`,`A aldeia ${target.name} ${win?'foi saqueada':'repeliu os invasores'}. Baixas próprias: ${lost}. ${win?'Recursos saqueados: '+D.RES.map(k=>k+' '+loot[k]).join(', '):'Os inimigos recuaram.'}`,win?'defeat':'victory',{losses:deaths,loot});
  log(st,`${origin?.icon||'⚔️'} ${origin?.name||'Inimigos'} ${win?'saquearam':'atacaram sem sucesso'} ${target.name}.`);
