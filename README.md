@@ -1,8 +1,16 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 0.8.5, telas de aldeia, campos e mapa adaptadas sem sobreposições: estratégia medieval totalmente offline.**
+**Impérios & Conquistas — versão 0.8.6, dois modos de visualização: cenário original e grade opcional: estratégia medieval totalmente offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
+
+## 🎨 v0.8.6 — Dois modos de visualização (original como padrão)
+
+- Em **Aldeia**, **Recursos** e **Mapa-múndi**, escolha **Visualização → Original / Em grade** para alternar imediatamente.
+- **Original (padrão):** cena da aldeia e dos campos com os pontos de edifícios no cenário, como no início do projeto, e mapa tradicional. No celular, os nomes não se sobrepõem aos ícones: toque para abrir o modal.
+- **Em grade:** cartões da v0.8.5, para quem prefere listas organizadas.
+- Alterne também em **Configurações → Visualização de aldeia, recursos e mapa**. A escolha é guardada no save; partidas antigas começam no modo Original.
+- Nada muda na produção do herói, evolução dos edifícios, missões, tropas, construções, saves ou ataques inimigos.
 
 ## v0.8.5 — Visão adaptativa de aldeia, recursos e mapa
 

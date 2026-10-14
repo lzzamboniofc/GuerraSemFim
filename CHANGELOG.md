@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.6] — Visual original por padrão e grade opcional · 14/10/2026
+
+- Cenário clássico de aldeia, campos e mapa restaurado como padrão.
+- Grade de cartões da versão anterior preservada como visual alternativo.
+- Seletor nas três telas e em Configurações, com preferência persistente e compatibilidade dos saves antigos.
+- Ícones e mapa clássico adaptados para telas pequenas, sem arrasto horizontal, mantendo demais melhorias da interface.
+- Testes para modos, preferências e regressões de jogabilidade.
+
 ## [0.8.5] — Telas adaptativas sem sobreposição · 14/10/2026
 
 - Grade fluida de edifícios e campos com seleção e melhorias nos mesmos modais.

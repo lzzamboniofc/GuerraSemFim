@@ -57,7 +57,7 @@ function village(st,name,x,y,starter=false,profile='balanced') {
 function newGame(options={}) {
  const tribe = D.TRIBES[options.tribe]?options.tribe:'romans';
  const st={version:1,nextId:1,player:(options.player||'Comandante').trim().slice(0,25)||'Comandante',tribe,speed:clamp(Number(options.speed)||12,1,100),
-  villages:[],activeVillageId:null,preferences:{enemyAttacks:options.enemyAttacks!==false,extraBuildSlots:1},hero:{name:'Guardião',level:1,xp:0,hp:100,attack:4,resources:0,points:0,adventure:null,adventures:0,inventory:[],equipped:null,productionFocus:'wood',productionTargets:['wood']},
+  villages:[],activeVillageId:null,preferences:{enemyAttacks:options.enemyAttacks!==false,extraBuildSlots:1,viewMode:'original'},hero:{name:'Guardião',level:1,xp:0,hp:100,attack:4,resources:0,points:0,adventure:null,adventures:0,inventory:[],equipped:null,productionFocus:'wood',productionTargets:['wood']},
   world:{seed:37,tiles:[]},movements:[],reports:[],events:[],questsClaimed:[],tutorialDismissed:false,createdAt:now(),lastTick:now()};
  const home=village(st,(options.village||'Nova Esperança').trim().slice(0,28)||'Nova Esperança',0,0,true);
  st.villages=[home];st.activeVillageId=home.id;
@@ -100,6 +100,13 @@ function pay(v,price,count=1){if(!canPay(v,price,count))return false;D.RES.forEa
 function addResources(v,rewards){D.RES.forEach(k=>v.resources[k]=clamp(v.resources[k]+(rewards[k]||0),0,capacity(v,k)));}
 function unmet(v,key){const req=D.BUILDINGS[key].req;return Object.entries(req).filter(([k,l])=>buildLevel(v,k)<l).map(([k,l])=>`${D.BUILDINGS[k].name} nível ${l}`);}
 const MAX_EXTRA_BUILD_SLOTS=8;
+function viewMode(st){return st?.preferences?.viewMode==='compact'?'compact':'original';}
+function setViewMode(st,mode){
+ if(!st||!['original','compact'].includes(mode))return {ok:false,error:'Modo de visualização inválido.'};
+ st.preferences??={enemyAttacks:true,extraBuildSlots:1};
+ st.preferences.viewMode=mode;
+ return {ok:true};
+}
 function extraBuildSlots(st){const x=st.preferences?.extraBuildSlots;return Number.isSafeInteger(x)?clamp(x,0,MAX_EXTRA_BUILD_SLOTS):1;}
 function buildQueueCapacity(st){return (st.tribe==='romans'?2:1)+extraBuildSlots(st);}
 function setBuildSlots(st,value){const n=Number(value);if((typeof value!=='string'&&typeof value!=='number')||String(value).trim()===''||!Number.isSafeInteger(n)||n<0||n>MAX_EXTRA_BUILD_SLOTS)return {ok:false,error:'Selecione entre 0 e 8 vagas extras.'};
@@ -502,7 +509,7 @@ function validateState(st){
   !validArray(st.villages,5)||st.villages.length===0||!plain(st.world)||!validArray(st.world.tiles,1000)||
   !validArray(st.movements,500)||!validArray(st.reports,100)||!validArray(st.events,100)||
   !validArray(st.questsClaimed,1000)||!st.questsClaimed.every(q=>typeof q==='string'&&q.length<=100)||new Set(st.questsClaimed).size!==st.questsClaimed.length||!plain(st.hero))return false;
- if(st.preferences!==undefined&&(!plain(st.preferences)||typeof st.preferences.enemyAttacks!=='boolean'||(st.preferences.extraBuildSlots!==undefined&&(!Number.isSafeInteger(st.preferences.extraBuildSlots)||st.preferences.extraBuildSlots<0||st.preferences.extraBuildSlots>MAX_EXTRA_BUILD_SLOTS))))return false;
+ if(st.preferences!==undefined&&(!plain(st.preferences)||typeof st.preferences.enemyAttacks!=='boolean'||(st.preferences.extraBuildSlots!==undefined&&(!Number.isSafeInteger(st.preferences.extraBuildSlots)||st.preferences.extraBuildSlots<0||st.preferences.extraBuildSlots>MAX_EXTRA_BUILD_SLOTS))||(st.preferences.viewMode!==undefined&&!['original','compact'].includes(st.preferences.viewMode))))return false;
  if(window.GSF_EXPANSION&&!window.GSF_EXPANSION.validate(st.expansion))return false;
  if(st.hero.productionFocus!==undefined&&!['wood','clay','iron','crop','all','custom'].includes(st.hero.productionFocus))return false;
  if(st.hero.productionTargets!==undefined&&(!validArray(st.hero.productionTargets,4)||!st.hero.productionTargets.length||new Set(st.hero.productionTargets).size!==st.hero.productionTargets.length||!st.hero.productionTargets.every(k=>D.RES.includes(k))))return false;
@@ -587,5 +594,5 @@ function importSave(text){
  if(!save(st))return {ok:false,error:'Não foi possível salvar a partida neste navegador.'};
  return {ok:true,state:st};
 }
-window.GSF={fieldMix,tileProfile,oasisResource,oasisCount,oasisLimit,captureOasis,releaseOasis,heroFocus,heroTargets,heroBonus,setHeroFocus,setHeroTargets,plans,planBuild,removePlan,movePlan,runPlanned,KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
+window.GSF={viewMode,setViewMode,fieldMix,tileProfile,oasisResource,oasisCount,oasisLimit,captureOasis,releaseOasis,heroFocus,heroTargets,heroBonus,setHeroFocus,setHeroTargets,plans,planBuild,removePlan,movePlan,runPlanned,KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
 })();
