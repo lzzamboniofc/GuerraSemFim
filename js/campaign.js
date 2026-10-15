@@ -12,7 +12,7 @@ const chapterDefinitions=[
 function init(st,requested='normal'){
  if(st.campaign)return st.campaign;
  const difficulty=LEVELS[requested]?requested:'normal';
- st.campaign={version:1,difficulty,chaptersClaimed:[],reputation:{corvos:0,aurora:0,espinhos:0},lastOffer:{},allies:[],offersMade:0,trucesSigned:0,victory:null};
+ st.campaign={version:1,difficulty,chaptersClaimed:[],reputation:{corvos:0,aurora:0,espinhos:0},lastOffer:{},brokenUntil:{},allies:[],offersMade:0,trucesSigned:0,victory:null};
  return st.campaign;
 }
 function info(st){return init(st);}
@@ -55,6 +55,7 @@ function ally(st,id){const c=info(st),f=st.ai?.factions.find(f=>f.id===id);
  if(!f||f.defeated||isAlly(st,id))return {ok:false,error:'Esta facção não pode assinar a aliança.'};
  const v=findEmbassy(st,3);if(!v)return {ok:false,error:'Aliança requer Embaixada nível 3.'};
  if(c.reputation[id]<40)return {ok:false,error:'É necessário alcançar 40 pontos de reputação.'};
+ if((c.brokenUntil?.[id]||0)>st.ai.turn)return {ok:false,error:'Aguarde três turnos para restabelecer uma aliança rompida.'};
  const price={wood:220,clay:180,iron:180,crop:240};
  if(!D.RES.every(k=>v.resources[k]>=price[k]))return {ok:false,error:'Recursos insuficientes para a aliança.'};
  D.RES.forEach(k=>v.resources[k]-=price[k]);c.allies.push(id);
@@ -66,6 +67,17 @@ function ally(st,id){const c=info(st),f=st.ai?.factions.find(f=>f.id===id);
  note(st,'Aliança diplomática',`${f.name} assinou uma aliança permanente com seu império. Suas forças não atacarão umas às outras.`);
  return {ok:true};
 }
+function breakAlliance(st,id){
+ const c=info(st),f=st.ai?.factions.find(x=>x.id===id);
+ if(!f||!isAlly(st,id))return {ok:false,error:'Não há aliança ativa com este reino.'};
+ if(!findEmbassy(st,1))return {ok:false,error:'Uma Embaixada é necessária para comunicar o rompimento.'};
+ c.allies=c.allies.filter(x=>x!==id);
+ c.reputation[id]=Math.max(0,c.reputation[id]-25);
+ // A reconciliação exige novos emissários, mas capítulos já reivindicados ficam intactos.
+ c.brokenUntil??={};c.brokenUntil[id]=st.ai.turn+3;
+ note(st,'Aliança rompida',`O pacto com ${f.name} foi encerrado. A reputação caiu para ${c.reputation[id]}/100. Os exércitos agora podem se enfrentar.`);
+ return {ok:true,reputation:c.reputation[id]};
+}
 function onTruce(st,id){const c=info(st);c.trucesSigned++;c.reputation[id]=Math.min(100,c.reputation[id]+10);}
 function difficulty(st){return LEVELS[st.campaign?.difficulty]||LEVELS.normal;}
 function setDifficulty(st,value){if(!LEVELS[value])return {ok:false,error:'Dificuldade inválida.'};info(st).difficulty=value;return {ok:true};}
@@ -74,9 +86,10 @@ function validate(c){if(c===undefined)return true;
  if(!c||c.version!==1||!LEVELS[c.difficulty]||!Array.isArray(c.chaptersClaimed)||c.chaptersClaimed.length>3||new Set(c.chaptersClaimed).size!==c.chaptersClaimed.length||!c.chaptersClaimed.every(id=>chapterDefinitions.some(ch=>ch.id===id)))return false;
  if(!c.reputation||!IDS.every(id=>Number.isSafeInteger(c.reputation[id])&&c.reputation[id]>=0&&c.reputation[id]<=100))return false;
  if(!Array.isArray(c.allies)||c.allies.length>3||new Set(c.allies).size!==c.allies.length||!c.allies.every(id=>IDS.includes(id)))return false;
+ if(c.brokenUntil!==undefined&&(!c.brokenUntil||!Object.entries(c.brokenUntil).every(([id,turn])=>IDS.includes(id)&&Number.isSafeInteger(turn)&&turn>=0&&turn<=1e9)))return false;
  if(!c.lastOffer||!Object.entries(c.lastOffer).every(([id,turn])=>IDS.includes(id)&&Number.isSafeInteger(turn)&&turn>=0&&turn<=1e9))return false;
  if(!Number.isSafeInteger(c.offersMade)||c.offersMade<0||c.offersMade>1e9||!Number.isSafeInteger(c.trucesSigned)||c.trucesSigned<0||c.trucesSigned>1e9)return false;
  return c.victory===null||Boolean(c.victory&&['militar','diplomatica'].includes(c.victory.type)&&Number.isFinite(c.victory.at)&&c.victory.at>0&&c.chaptersClaimed.includes('legado'));
 }
-window.GSF_CAMPAIGN={init,info,chapters,claimChapter,offer,ally,onTruce,isAlly,culture,militaryWin,diplomaticWin,difficulty,setDifficulty,attackBonus,validate,LEVELS};
+window.GSF_CAMPAIGN={init,info,chapters,claimChapter,offer,ally,breakAlliance,onTruce,isAlly,culture,militaryWin,diplomaticWin,difficulty,setDifficulty,attackBonus,validate,LEVELS};
 })();

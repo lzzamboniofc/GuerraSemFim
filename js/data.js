@@ -20,6 +20,7 @@ const BUILDINGS = {
  barracks: {name:'Quartel', icon:'⚔️', type:'military', base:[210,140,260,120], time:120, desc:'Treina unidades de infantaria.', max:20, req:{main:3,rally:1}, pop:2},
  stable: {name:'Estábulo', icon:'🐎', type:'military', base:[260,170,240,140], time:160, desc:'Treina a cavalaria de sua tribo.', max:20, req:{barracks:3,academy:5}, pop:3},
  academy: {name:'Academia', icon:'📜', type:'military', base:[220,160,120,100], time:140, desc:'Centro de pesquisa militar e tática.', max:20, req:{main:3,barracks:3}, pop:3},
+ hospital: {name:'Hospital', icon:'🏥', type:'military', base:[310,230,290,180], time:190, desc:'Recebe feridos em combate e permite recuperar soldados com suprimentos.', max:20, req:{academy:1,main:5}, pop:3},
  smithy: {name:'Ferreiro', icon:'🔨', type:'military', base:[180,250,180,130], time:140, desc:'Aprimora o potencial de combate das tropas.', max:20, req:{academy:1,main:3}, pop:2},
  wall: {name:'Muralha', icon:'🛡️', type:'military', base:[70,90,170,70], time:120, desc:'Reforça a defesa da aldeia contra invasores.', max:20, req:{main:1}, pop:0},
  marketplace: {name:'Mercado', icon:'⚖️', type:'economy', base:[80,70,120,70], time:105, desc:'Troca recursos diretamente na aldeia (offline).', max:20, req:{main:3,warehouse:1}, pop:2},

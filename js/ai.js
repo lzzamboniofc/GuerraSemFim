@@ -2,6 +2,7 @@
 (function () {
 'use strict';
 const D = window.GSF_DATA;
+const PLANS={corvos:{role:'Saqueadores',strategy:'raid',waves:2,threshold:28},aurora:{role:'Guardiões',strategy:'fortify',waves:1,threshold:52},espinhos:{role:'Expansionistas',strategy:'expand',waves:2,threshold:38}};
 const SPECS = [
  {id:'corvos', name:'Clã dos Corvos', icon:'🦅', color:'#7a3433', aggression:0.84, home:[-6,-5], city:'Ninho de Ferro'},
  {id:'aurora', name:'Ordem da Aurora', icon:'🛡️', color:'#b29042', aggression:0.56, home:[6,-4], city:'Alvorada'},
@@ -87,6 +88,7 @@ function resolveBattle(st,m,at){
   }
  }
  if(m.mode==='conquer'&&ref&&!won)m.administrators=0;
+ m.woundedLosses=losses;
  m.phase='returning';m.loot=loot;m.endsAt=at+Math.max(5000,at-m.startedAt);
  report(st,won?`Vitória contra ${ref.f.name}`:`Derrota em (${m.x}|${m.y})`,ref?`O ataque a ${ref.city.name} ${won?'foi bem-sucedido':'foi repelido'}. Baixas: ${casualties}. Sobreviventes: ${Object.values(m.army).reduce((a,b)=>a+b,0)}.`:'O assentamento rival já havia sido abandonado. As tropas estão retornando.',won?'victory':ref?'defeat':'info',{losses,loot});
  log(st,won?`Vitória contra ${ref.f.name} em (${m.x}|${m.y}).`:`Ataque encerrado em (${m.x}|${m.y}).`);
@@ -97,17 +99,19 @@ function battleDefense(st,m,at){
  const source=origin?.villages.find(v=>v.id===m.sourceId);
  if(!target){m.phase='returning';m.endsAt=at+m.duration;return;}
  const defenders=D.TROOPS[st.tribe];
- const def=(window.GSF_WAR.defense(target.troops,defenders,target)+18)*window.GSF_WAR.fortification(target.buildings.wall||0);
+ const defenseStyle=window.GSF.DEFENSE_MODES[window.GSF.defenseMode(target)];
+ const def=(window.GSF_WAR.defense(target.troops,defenders,target)+18)*window.GSF_WAR.fortification(target.buildings.wall||0)*defenseStyle.bonus;
  const atk=m.troops*35;
  const win=atk>def*.9;
  const ratio=win?Math.min(.85,atk/(def+atk)*.50):Math.min(1,def/(def+atk)*.82);
  const deaths={};let lost=0;
  for(const u of defenders){const n=target.troops[u.id]||0,dead=Math.min(n,Math.floor(n*ratio));if(n){target.troops[u.id]-=dead;deaths[u.id]=dead;lost+=dead;}}
+ const saved=window.GSF.recordWounded(st,target,deaths);
  const attackerLost=Math.min(m.troops,Math.max(1,Math.ceil(m.troops*(win?.26:.78))));m.troops-=attackerLost;
  const loot={wood:0,clay:0,iron:0,crop:0};
- if(win){let capacity=m.troops*15;for(const k of D.RES){const protectedStock=window.GSF_WAR.hide(target);const take=Math.min(capacity,Math.max(0,Math.floor(target.resources[k]*.20)-protectedStock));loot[k]=take;target.resources[k]-=take;capacity-=take;}}
+ if(win){let capacity=m.troops*15;for(const k of D.RES){const protectedStock=window.GSF_WAR.hide(target);const take=Math.min(capacity,Math.max(0,Math.floor(target.resources[k]*.20*defenseStyle.loot)-protectedStock));loot[k]=take;target.resources[k]-=take;capacity-=take;}}
  m.loot=loot;m.phase='returning';m.endsAt=at+m.duration;
- report(st,(win?'Ataque inimigo!':'Defesa vitoriosa!')+` — ${origin?.name||'Rival'}`,`A aldeia ${target.name} ${win?'foi saqueada':'repeliu os invasores'}. Baixas próprias: ${lost}. ${win?'Recursos saqueados: '+D.RES.map(k=>k+' '+loot[k]).join(', '):'Os inimigos recuaram.'}`,win?'defeat':'victory',{losses:deaths,loot});
+ report(st,(win?'Ataque inimigo!':'Defesa vitoriosa!')+` — ${origin?.name||'Rival'}`,`A aldeia ${target.name} ${win?'foi saqueada':'repeliu os invasores'}. Baixas próprias: ${lost}${saved?` (hospitalizados: ${saved})`:''}. ${win?'Recursos saqueados: '+D.RES.map(k=>k+' '+loot[k]).join(', '):'Os inimigos recuaram.'}`,win?'defeat':'victory',{losses:deaths,loot});
  log(st,`${origin?.icon||'⚔️'} ${origin?.name||'Inimigos'} ${win?'saquearam':'atacaram sem sucesso'} ${target.name}.`);
 }
 function nextEvents(st,cursor){if(!st.ai)return [];const times=[st.ai.nextTurnAt,...st.ai.movements.map(m=>m.endsAt)];return times.filter(t=>t>cursor);}
@@ -128,7 +132,8 @@ function turn(st,at){
    const recruits=Math.min(Math.max(0,affordable),Math.max(1,Math.round((3+Math.floor(c.level/2))*(window.GSF_CAMPAIGN?.difficulty(st).recruit||1))),Math.max(0,300-c.troops));
    c.troops+=recruits;c.stock.wood-=recruits*13;c.stock.iron-=recruits*12;c.stock.crop-=recruits*9;
   }
-  if(f.turns%12===0&&f.villages.length<3&&f.villages[0]?.level>=4){
+  const plan=PLANS[f.id]||PLANS.espinhos;
+  if(f.turns%(plan.strategy==='expand'?8:12)===0&&f.villages.length<3&&f.villages[0]?.level>=4){
    const base=f.villages[0];const direction=[[2,1],[-2,1],[-1,-2],[1,-2]][(ai.turn+index)%4];
    const p=findSite(st,base.x+direction[0],base.y+direction[1],4);
    if(p){f.villages.push({id:`${f.id}-v${f.turns}`,name:`Posto ${f.villages.length+1} de ${f.name}`,x:p.x,y:p.y,level:1,walls:0,troops:12,loyalty:100,stock:{wood:100,clay:120,iron:100,crop:160}});
@@ -136,15 +141,27 @@ function turn(st,at){
   }
   // Trégua inicial de cinco turnos para um novo comandante.
   if(attacksEnabled(st)&&!window.GSF_CAMPAIGN?.isAlly(st,f.id)&&!(f.treatyUntil>ai.turn)&&ai.turn>5&&ai.turn%(index+4)===0&&ai.movements.filter(m=>m.factionId===f.id).length<2){
-   const source=f.villages.filter(c=>c.troops>=36).sort((a,b)=>b.troops-a.troops)[0];
-   const target=st.villages.slice().sort((a,b)=>Math.hypot(source?.x-a.x||100,source?.y-a.y||100)-Math.hypot(source?.x-b.x||100,source?.y-b.y||100))[0];
+   const sources=f.villages.filter(c=>c.troops>=plan.threshold).sort((a,b)=>b.troops-a.troops);
+   const source=sources[0];
+   // Os Corvos escolhem aldeias ricas; a Aurora evita perdas inúteis; os Espinhos visam fronteiras.
+   const targets=st.villages.slice().sort((a,b)=>{
+    const score=v=>{const dist=Math.hypot(source?.x-v.x||20,source?.y-v.y||20);
+     if(plan.strategy==='raid')return -Object.values(v.resources).reduce((n,x)=>n+x,0)/1200+dist;
+     if(plan.strategy==='fortify')return (window.GSF_WAR.defense(v.troops,D.TROOPS[st.tribe],v)+20)/100+dist;
+     return dist+Math.max(0,3-(v.buildings.wall||0))*-1;};return score(a)-score(b);
+   });
+   const target=targets[0];
    if(source&&target&&rand(index+34,ai.turn)<Math.min(.98,f.aggression*(window.GSF_CAMPAIGN?.difficulty(st).aggression||1))){
-    const troops=Math.min(Math.floor(source.troops*.37),34+source.level*5);
-    if(troops>=12){source.troops-=troops;
-     const duration=Math.max(20000,Math.round(Math.hypot(source.x-target.x,source.y-target.y)*240000/(st.speed*1.5)));
-     ai.movements.push({id:'n'+st.nextId++,factionId:f.id,sourceId:source.id,targetVillageId:target.id,troops,phase:'outbound',startedAt:at,endsAt:at+duration,duration,loot:null});
-     log(st,`${f.icon} Batedores avistaram ${troops} soldados de ${f.name} marchando para ${target.name}!`,'army');
+    const waves=plan.waves===2&&sources.length>1&&f.villages.length>1?sources.slice(0,2):sources.slice(0,1);
+    const group='g'+st.nextId++;let launched=0;
+    for(const city of waves){
+     const troops=Math.min(Math.floor(city.troops*(plan.strategy==='raid'?.45:plan.strategy==='expand'?.40:.28)),34+city.level*5);
+     if(troops<12)continue;city.troops-=troops;
+     const duration=Math.max(20000,Math.round(Math.hypot(city.x-target.x,city.y-target.y)*240000/(st.speed*1.5)));
+     ai.movements.push({id:'n'+st.nextId++,groupId:group,factionId:f.id,sourceId:city.id,targetVillageId:target.id,troops,phase:'outbound',startedAt:at,endsAt:at+duration+launched*2500,duration:duration+launched*2500,loot:null});
+     launched++;
     }
+    if(launched)log(st,`${f.icon} ${f.name}: ${launched} marcha(s) ${launched>1?'coordenadas ':''}rumo a ${target.name}.`,'army');
    }
   }
  }

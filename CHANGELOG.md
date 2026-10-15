@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.3] — IA tática, Hospital e Rompimento de Alianças · 15/10/2026
+
+- Conselho diplomático com confirmação de rompimento, perda de reputação e espera para reatar.
+- IA de rivais com alvos e ritmos distintos por facção e possibilidade de ataques coordenados entre aldeias.
+- Hospital construível com leitos por nível, feridos de ataques recebidos e de expedições, tratamentos com custo e conclusão offline.
+- Posturas defensivas Normal, Vigilância e Fortificada, com bônus de proteção contra invasões e saques.
+- Compatibilidade com saves anteriores e novos testes automatizados de diplomacia, combate e interface.
+
+
 ## [1.2] — Inventário e Oásis Selvagens · 14/10/2026
 
 - Inventário com quatro espaços independentes de equipamento e compatibilidade com os artefatos antigos.

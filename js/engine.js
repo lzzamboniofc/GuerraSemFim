@@ -176,6 +176,37 @@ function startResearch(st,v,unitId){
  return {ok:true,seconds:c.seconds};
 }
 function population(v){let n=2;for(const [k,l] of Object.entries(v.buildings))n+=l*(D.BUILDINGS[k]?.pop||0);n+=v.fields.reduce((a,f)=>a+Math.ceil(f.level/3),0);return n;}
+const DEFENSE_MODES={normal:{label:'Normal',bonus:1,loot:1},watch:{label:'Vigilância',bonus:1.18,loot:.85},fortified:{label:'Fortificada',bonus:1.32,loot:.65}};
+function defenseMode(v){return DEFENSE_MODES[v?.defenseMode]?v.defenseMode:'normal';}
+function setDefenseMode(st,v,mode){
+ if(!v||!st.villages.includes(v)||!DEFENSE_MODES[mode])return {ok:false,error:'Postura de defesa inválida.'};
+ if(mode!=='normal'&&buildLevel(v,'rally')<1)return {ok:false,error:'Construa o Ponto de Reunião para preparar sua defesa.'};
+ if(mode==='fortified'&&buildLevel(v,'wall')<3)return {ok:false,error:'Defesa fortificada requer Muralha nível 3.'};
+ v.defenseMode=mode;save(st);return {ok:true};
+}
+function hospitalCapacity(v){return buildLevel(v,'hospital')*30;}
+function woundedTotal(v){return Object.values(v.wounded||{}).reduce((n,x)=>n+x,0);}
+function recordWounded(st,v,losses){
+ if(!v||!buildLevel(v,'hospital'))return 0;
+ v.wounded??={};let room=Math.max(0,hospitalCapacity(v)-woundedTotal(v)),received=0;
+ for(const u of troopDefs(st)){
+  const count=Math.min(room,Math.floor((losses[u.id]||0)*.35));
+  if(count){v.wounded[u.id]=(v.wounded[u.id]||0)+count;room-=count;received+=count;}
+ }
+ return received;
+}
+function healWounded(st,v,unitId,requested){
+ if(!v||!st.villages.includes(v)||!buildLevel(v,'hospital'))return {ok:false,error:'Construa um Hospital primeiro.'};
+ const u=troopDefs(st).find(x=>x.id===unitId),qty=Number(requested);
+ if(!u||!Number.isSafeInteger(qty)||qty<1||qty>(v.wounded?.[unitId]||0))return {ok:false,error:'Quantidade de feridos inválida.'};
+ if(v.hospitalQueue)return {ok:false,error:'O Hospital está tratando outro grupo.'};
+ const price=u.cost.map(c=>Math.max(1,Math.ceil(c*.25)));
+ if(!canPay(v,price,qty))return {ok:false,error:'Recursos insuficientes para tratar os feridos.'};
+ pay(v,price,qty);v.wounded[unitId]-=qty;
+ const seconds=Math.max(5,Math.ceil(qty*u.time*.4/(st.speed*(1+buildLevel(v,'hospital')*.12))));
+ const startedAt=now();v.hospitalQueue={unitId,qty,startedAt,endsAt:startedAt+seconds*1000};
+ log(st,`Hospital de ${v.name}: iniciada a recuperação de ${qty} ${u.name}.`,'army');save(st);return {ok:true,seconds};
+}
 function upkeep(st,v){return troopDefs(st).reduce((a,t)=>a+(v.troops[t.id]||0)*t.upkeep,0);}
 function production(st,v){const base={wood:0,clay:0,iron:0,crop:0};v.fields.forEach(f=>{base[f.type]+=f.level?Math.round(5*Math.pow(1.68,f.level-1)):0;});
  const out={};const bonus={wood:'sawmill',clay:'brickyard',iron:'ironworks',crop:'mill'};
@@ -337,7 +368,7 @@ function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
 function send(st,v,x,y,army,mode='raid'){
  const target=tileAt(st,x,y);
  if(!target||!['enemy','rival'].includes(target.kind))return {ok:false,error:'Escolha um acampamento ou reino rival no mapa.'};
- if(target.kind==='rival'&&window.GSF_CAMPAIGN?.isAlly(st,target.factionId))return {ok:false,error:'Esta facção é sua aliada. Rompa o pacto antes de atacar (ainda não disponível).'};
+ if(target.kind==='rival'&&window.GSF_CAMPAIGN?.isAlly(st,target.factionId))return {ok:false,error:'Esta facção é sua aliada. Rompa a aliança na tela Diplomacia antes de atacar.'};
  if(buildLevel(v,'rally')<1)return {ok:false,error:'Construa o Ponto de Reunião.'};
  if(!army||typeof army!=='object'||Array.isArray(army))return {ok:false,error:'Seleção de tropas inválida.'};
  if(!['raid','attack','scout'].includes(mode))return {ok:false,error:'Tipo de missão inválido.'};
@@ -427,13 +458,14 @@ function resolveBattle(st,m,arrivedAt){
  const survivors={};const losses={};defs.forEach(u=>{const n=m.army[u.id]||0;const killed=Math.min(n,Math.round(n*fraction));if(n){survivors[u.id]=n-killed;losses[u.id]=killed;}});
  let loot={wood:0,clay:0,iron:0,crop:0};if(win){const carry=sum(defs.map(u=>(survivors[u.id]||0)*u.carry));const per=Math.floor(carry/4);D.RES.forEach(k=>{loot[k]=Math.min(per,t.resources[k]);t.resources[k]-=loot[k];});
   t.power=Math.max(0,t.power-(m.mode==='attack'?Math.ceil(atk/50):Math.ceil(atk/100)));}
- m.army=survivors;m.loot=loot;m.phase='returning';m.endsAt=arrivedAt+Math.max(5000,arrivedAt-m.startedAt);
+ m.army=survivors;m.woundedLosses=losses;m.loot=loot;m.phase='returning';m.endsAt=arrivedAt+Math.max(5000,arrivedAt-m.startedAt);
  const lossText=Object.values(losses).reduce((a,b)=>a+b,0),total=Object.values(survivors).reduce((a,b)=>a+b,0);
  report(st,(win?'Vitória':'Derrota')+' em '+t.name,`As tropas ${win?'venceram o confronto':'foram repelidas'} em (${t.x}|${t.y}). Perdas: ${lossText}. Sobreviventes: ${total}. ${win?'O saque será recebido no retorno.':''}`,win?'victory':'defeat',{losses,loot,survivors});
  log(st,`Relatório de batalha: ${win?'vitória':'derrota'} em ${t.x}|${t.y}.`,'army');}
 function returnArmy(st,m){const v=st.villages.find(q=>q.id===m.villageId);if(!v)return;
  for(const [id,n] of Object.entries(m.army))v.troops[id]=(v.troops[id]||0)+n;
  if(m.loot)addResources(v,m.loot);
+ if(m.woundedLosses){const healed=recordWounded(st,v,m.woundedLosses);if(healed)log(st,`${healed} feridos da expedição foram encaminhados ao Hospital.`,'army');}
  if(m.administrators)v.administrators=(v.administrators||0)+m.administrators;
  log(st,`As tropas voltaram a ${v.name}${m.loot?' com recursos saqueados':''}.`,'army');}
 function startAdventure(st,kind='explore'){
@@ -739,6 +771,10 @@ function resolveDue(st,at){
   v.trainingQueue=v.trainingQueue.filter(q=>q.endsAt>at);
   if(v.administratorQueue&&v.administratorQueue.endsAt<=at){v.administrators=(v.administrators||0)+1;v.administratorQueue=null;log(st,`${administratorName(st)} pronto em ${v.name}.`,'army');resolved=true;}
   if(v.festivalQueue&&v.festivalQueue.endsAt<=at){v.festivalQueue=null;v.festivalPoints=(v.festivalPoints||0)+150;log(st,`Celebração em ${v.name}: +150 pontos de cultura!`,'quest');report(st,'Celebração encerrada',`A Prefeitura de ${v.name} gerou 150 pontos de cultura.`,'victory');resolved=true;}
+  if(v.hospitalQueue&&v.hospitalQueue.endsAt<=at){
+   const q=v.hospitalQueue;v.troops[q.unitId]=(v.troops[q.unitId]||0)+q.qty;
+   v.hospitalQueue=null;log(st,`Hospital de ${v.name}: ${q.qty} soldados voltaram ao serviço.`,'army');resolved=true;
+  }
   if(v.research?.queue&&v.research.queue.endsAt<=at){
    const unitId=v.research.queue.unitId,unit=troopDefs(st).find(u=>u.id===unitId);
    if(!v.research.unlocked.includes(unitId))v.research.unlocked.push(unitId);
@@ -787,7 +823,7 @@ function advance(st,time=now()){
  while(resolveDue(st,cursor)&&++steps<10000){}
  while(cursor<time&&steps++<10000){
   const next=[];
-  st.villages.forEach(v=>{v.buildQueue.forEach(q=>{if(q.endsAt>cursor)next.push(q.endsAt);});v.trainingQueue.forEach(q=>{if(q.endsAt>cursor)next.push(q.endsAt);});if(v.administratorQueue?.endsAt>cursor)next.push(v.administratorQueue.endsAt);if(v.research?.queue?.endsAt>cursor)next.push(v.research.queue.endsAt);if(v.festivalQueue?.endsAt>cursor)next.push(v.festivalQueue.endsAt);for(const r of routes(v))if(r.enabled&&r.nextAt>cursor)next.push(r.nextAt);});
+  st.villages.forEach(v=>{v.buildQueue.forEach(q=>{if(q.endsAt>cursor)next.push(q.endsAt);});v.trainingQueue.forEach(q=>{if(q.endsAt>cursor)next.push(q.endsAt);});if(v.administratorQueue?.endsAt>cursor)next.push(v.administratorQueue.endsAt);if(v.research?.queue?.endsAt>cursor)next.push(v.research.queue.endsAt);if(v.festivalQueue?.endsAt>cursor)next.push(v.festivalQueue.endsAt);if(v.hospitalQueue?.endsAt>cursor)next.push(v.hospitalQueue.endsAt);for(const r of routes(v))if(r.enabled&&r.nextAt>cursor)next.push(r.nextAt);});
   st.movements.forEach(m=>{if(m.endsAt>cursor)next.push(m.endsAt);});
   if(st.hero.adventure?.endsAt>cursor)next.push(st.hero.adventure.endsAt);
   if(window.GSF_AI)next.push(...window.GSF_AI.nextEvents(st,cursor));
@@ -840,6 +876,9 @@ function validateState(st){
    (v.tradeRoutes!==undefined&&(!validArray(v.tradeRoutes,5)||!v.tradeRoutes.every(r=>plain(r)&&typeof r.id==='string'&&typeof r.targetVillageId==='string'&&validRes(r.cargo)&&Number.isSafeInteger(r.interval)&&[15,30,60,180,360,720,1440].includes(r.interval)&&validNumber(r.nextAt)&&typeof r.enabled==='boolean')))||
    (v.festivalQueue!==undefined&&v.festivalQueue!==null&&(!plain(v.festivalQueue)||!validNumber(v.festivalQueue.startedAt)||!validNumber(v.festivalQueue.endsAt)||v.festivalQueue.endsAt<=v.festivalQueue.startedAt))||
    (v.festivalPoints!==undefined&&(!Number.isSafeInteger(v.festivalPoints)||v.festivalPoints<0||v.festivalPoints>1000000000))||
+   (v.defenseMode!==undefined&&!DEFENSE_MODES[v.defenseMode])||
+   (v.wounded!==undefined&&(!plain(v.wounded)||!Object.entries(v.wounded).every(([id,n])=>D.TROOPS[st.tribe].some(u=>u.id===id)&&Number.isSafeInteger(n)&&n>=0&&n<=1000000)))||
+   (v.hospitalQueue!==undefined&&v.hospitalQueue!==null&&(!plain(v.hospitalQueue)||!D.TROOPS[st.tribe].some(u=>u.id===v.hospitalQueue.unitId)||!Number.isSafeInteger(v.hospitalQueue.qty)||v.hospitalQueue.qty<1||v.hospitalQueue.qty>1000000||!validNumber(v.hospitalQueue.startedAt)||!validNumber(v.hospitalQueue.endsAt)||v.hospitalQueue.endsAt<=v.hospitalQueue.startedAt))||
    (v.famineLosses!==undefined&&(!Number.isSafeInteger(v.famineLosses)||v.famineLosses<0||v.famineLosses>1000000000))||
    (v.conqueredFrom!==undefined&&(!['corvos','aurora','espinhos'].includes(v.conqueredFrom)))||
    !plain(v.buildings)||!plain(v.buildingSlots)||!validArmy(v.troops,st.tribe)||
@@ -867,7 +906,7 @@ function validateState(st){
   (t.ownerVillageId===undefined||t.kind==='oasis'&&ids.has(t.ownerVillageId))))return false;
  if(!st.movements.every(m=>plain(m)&&ids.has(m.villageId)&&
   ['going','returning'].includes(m.phase)&&validNumber(m.endsAt)&&validNumber(m.startedAt)&&
-  validArmy(m.army,st.tribe)&&(!m.loot||validRes(m.loot))&&
+  validArmy(m.army,st.tribe)&&(!m.loot||validRes(m.loot))&&(m.woundedLosses===undefined||validArmy(m.woundedLosses,st.tribe))&&
   (m.administrators===undefined||(Number.isSafeInteger(m.administrators)&&m.administrators>=0&&m.administrators<=1))&&
   (m.mode!=='conquer'||m.administrators===0||m.administrators===1)&&
   (m.mode!=='merchant'||(ids.has(m.targetVillageId)&&m.targetVillageId!==m.villageId&&validRes(m.cargo)&&Number.isSafeInteger(m.merchants)&&m.merchants>=1&&m.merchants<=80))&&
@@ -920,5 +959,5 @@ function importSave(text){
  if(!save(st))return {ok:false,error:'Não foi possível salvar a partida neste navegador.'};
  return {ok:true,state:st};
 }
-window.GSF={HERO_SLOTS,heroEquipment,heroGearBonus,oasisWildlife,unequipHero,useHeroPotion,maxExchangeOffer,merchantCapacity,merchantsTotal,merchantsFree,sendMerchantCargo,addTradeRoute,removeTradeRoute,toggleTradeRoute,routes,canFestival,startFestival,maxTrainable,capital,isCapital,setCapital,fieldMax,administratorName,canTrainAdministrator,trainAdministrator,sendConquest,conquerRival,researchRule,researchPrice,canResearch,startResearch,unitUnlocked,initResearch,viewMode,setViewMode,fieldMix,tileProfile,oasisResource,oasisCount,oasisLimit,captureOasis,releaseOasis,heroFocus,heroTargets,heroBonus,setHeroFocus,setHeroTargets,plans,planBuild,removePlan,movePlan,runPlanned,KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
+window.GSF={DEFENSE_MODES,defenseMode,setDefenseMode,hospitalCapacity,woundedTotal,recordWounded,healWounded,HERO_SLOTS,heroEquipment,heroGearBonus,oasisWildlife,unequipHero,useHeroPotion,maxExchangeOffer,merchantCapacity,merchantsTotal,merchantsFree,sendMerchantCargo,addTradeRoute,removeTradeRoute,toggleTradeRoute,routes,canFestival,startFestival,maxTrainable,capital,isCapital,setCapital,fieldMax,administratorName,canTrainAdministrator,trainAdministrator,sendConquest,conquerRival,researchRule,researchPrice,canResearch,startResearch,unitUnlocked,initResearch,viewMode,setViewMode,fieldMix,tileProfile,oasisResource,oasisCount,oasisLimit,captureOasis,releaseOasis,heroFocus,heroTargets,heroBonus,setHeroFocus,setHeroTargets,plans,planBuild,removePlan,movePlan,runPlanned,KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
 })();

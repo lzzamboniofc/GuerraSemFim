@@ -1,8 +1,16 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 1.2, conquista territorial e recrutamento máximo: estratégia medieval totalmente offline.**
+**Impérios & Conquistas — versão 1.3, reinos rivais estratégicos, recuperação de feridos e diplomacia reversível. Tudo offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
+
+## 🛡️ v1.3 — Guerras, Hospital e Alianças Reversíveis
+
+- **Romper alianças:** abra **Diplomacia → Conselho diplomático → Romper aliança** ao lado do reino aliado. A ação pede confirmação, reduz sua reputação com esse reino em 25 pontos e bloqueia um novo pacto por três turnos. Depois disso, ambos os lados podem voltar a atacar. Capítulos e recompensas já conquistados continuam intactos.
+- **Estratégias dos rivais:** o Clã dos Corvos prioriza aldeias com muitos recursos; a Ordem da Aurora busca alvos menos defensáveis e envia ataques mais cautelosos; a Liga dos Espinhos expande territórios com maior frequência. Reinos com duas aldeias podem organizar ofensivas em ondas contra o mesmo alvo; marchas coordenadas aparecem no painel de ameaças.
+- **Postura defensiva da aldeia:** escolha em **Comando de Guerra → Postura defensiva** entre Normal (padrão), Vigilância (+18% defesa e -15% saque) e Fortificada (+32% defesa e -35% saque). A opção exige Ponto de Reunião; Fortificada exige também Muralha nível 3. Cada aldeia mantém sua preferência.
+- **Hospital:** novo edifício militar disponível após Edifício Principal 5 e Academia 1. São **30 leitos por nível**; até 35% das baixas de combates defensivos ou de expedições retornadas podem virar feridos, que não lutam nem consomem cereal. Em **Exército & Quartel → Hospital e feridos**, escolha o tipo e a quantidade de soldados para tratar; custa 25% dos recursos originais e leva tempo, inclusive durante o avanço offline.
+- **Sem ruptura de saves:** os campos de feridos, filas do Hospital e posturas são opcionais nos salvamentos anteriores. Os modos de visualização Original e Em grade, as pesquisas, o comércio e os recursos da v1.2 permanecem.
 
 ## v1.2 — Herói, aventuras e oásis selvagens
 
@@ -14,7 +22,7 @@ Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldei
 - **Salvamentos preservados:** campanhas anteriores são migradas para os quatro espaços de equipamentos sem perder os artefatos existentes. Os modos Original e Em grade permanecem disponíveis.
 
 
-## 🚚 v1.2 — Comércio Avançado e Economia Viva
+## 🚚 v1.1 — Comércio Avançado e Economia Viva
 
 - **Trocas locais mais rápidas:** botões de 100, 500, 1.000, 5.000, 10.000, 50.000 ou **Máximo possível**, com prévia de quanto você receberá. O máximo leva em conta a reserva oferecida e a capacidade restante do depósito de destino. Não é preciso repetir o preenchimento após atualizar a interface.
 - **Formulários que preservam os valores:** recrutamento, Mercado, Mapa e comandos militares mantêm campos já preenchidos quando obras, filas, chegada de tropas ou outros eventos exigem atualização. Trocar de tela e voltar também preserva as quantidades digitadas por aldeia durante a sessão.

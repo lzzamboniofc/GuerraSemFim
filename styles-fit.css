@@ -238,3 +238,12 @@ html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
 .hero-adventure-actions .form-field{flex:1 1 180px;min-width:0;margin:0}
 .hero-adventure-actions .btn{flex:0 1 auto}
 @media(max-width:450px){.hero-slot-grid{grid-template-columns:minmax(0,1fr)}.hero-adventure-actions .btn{width:100%}}
+
+/* v1.3 — comandos de defesa e recuperação militar. */
+.defense-options{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+.defense-options .btn{flex:1 1 165px;white-space:normal;min-width:0}
+.hospital-panel .troop-row{grid-template-columns:minmax(0,1.4fr) minmax(95px,.8fr) minmax(90px,.6fr);gap:8px;align-items:end}
+.hospital-panel .troop-info{min-width:0;overflow-wrap:anywhere}
+.hospital-panel .form-field{margin:0;min-width:0}
+.hospital-panel input{min-width:0;width:100%}
+@media(max-width:520px){.hospital-panel .troop-row{grid-template-columns:minmax(0,1fr) minmax(100px,1fr)}.hospital-panel .troop-row .btn{grid-column:1/-1}}
