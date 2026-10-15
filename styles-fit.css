@@ -259,3 +259,10 @@ html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
 .daily-points{white-space:nowrap;color:#6d7543;font-size:12px;font-weight:700}
 @media(max-width:900px){.daily-rewards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:580px){.daily-tasks{grid-template-columns:minmax(0,1fr)}.daily-rewards{gap:7px}.daily-reward{padding:10px}}
+
+/* v1.4.1: Demolição e balanço de cereal detalhado */
+.demolition-panel{margin-top:13px;padding:12px;border:1px solid #d7bba0;background:#fff6eb;border-radius:9px;display:grid;gap:8px}
+.demolition-panel h4{margin:0;font-size:14px}.demolition-panel p{margin:0;font-size:12px;line-height:1.5}
+.demolition-panel button{justify-self:start;max-width:100%;white-space:normal}
+.demolition-panel small{color:#876855}
+.crop-balance-strip{border:1px solid #ccdbb6;background:#f4f8e8;color:#536344;border-radius:8px;padding:10px 13px;font-size:12px;line-height:1.7;overflow-wrap:anywhere}

@@ -1,8 +1,15 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 1.4, missões diárias, eventos, edifícios por tribo e economia recalibrada. Tudo offline.**
+**Impérios & Conquistas — versão 1.4.1, missões diárias, eventos, edifícios por tribo e economia recalibrada. Tudo offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
+
+## 🧱 v1.4.1 — Demolição, cereal e troca sem taxa
+
+- **Demolição de edifícios** pelo modal da aldeia: exige Edifício Principal nível 10 e reduz **um nível por vez** após um tempo de trabalho. Sem devolução de recursos, com confirmação, opção de cancelar e liberação do terreno ao concluir o nível 1. Não afeta campos de recursos. A demolição e o progresso offline são preservados no save.
+- **Cereal**: o jogo separa a alimentação dos habitantes (população de edifícios e campos), das tropas estacionadas e do herói vivo na aldeia inicial (1/h). A tela **Recursos → Cereal** e os **Campos** mostram as parcelas e o saldo líquido correto. Se o celeiro ficar vazio com saldo negativo, tropas ainda podem morrer de fome; edifícios e habitantes não morrem.
+- **Troca interna gratuita**: trocar madeira, barro, ferro e cereal no Mercado ocorre em **proporção 1:1 e sem taxa**. O botão Máximo possível considera o saldo disponível e o espaço livre no depósito de destino. Mercadores entre aldeias e rotas comerciais continuam independentes.
+- Campanhas anteriores permanecem compatíveis. Faça backup antes de atualizar. Inspiração: https://support.travian.com/pt/articles/39-demolir-edificios e https://support.travian.com/pt/articles/214-guia-recursos-explicados (mecânicas próprias, sem conteúdo premium).
 
 ## 📅 v1.4 — Missões Diárias, Eventos e Equilíbrio de Produção
 

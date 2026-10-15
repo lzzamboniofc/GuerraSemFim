@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1] — Demolição, alimentação e mercado interno · 15/10/2026
+
+- Demolição agendada de um nível de edifício por ordem, exigindo Edifício Principal nível 10, cancelamento e remoção do espaço no nível zero.
+- Consumo de cereal discriminado em população, tropas e herói na aldeia inicial; modal recalibrado para a produção de campos da v1.4.
+- Trocas internas imediatas 1:1 sem taxa e Máximo limitado pelo depósito receptor.
+- Testes de construção, demolição offline, fome, salvamentos antigos e troca sem taxa.
+
 ## [1.4] — Missões Diárias e Equilíbrio Econômico · 15/10/2026
 
 - 10 objetivos diários renováveis, marcos de recompensa aos 25, 50, 75 e 100 pontos; eventos locais alternados com resgate único.

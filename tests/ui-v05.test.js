@@ -17,7 +17,7 @@ check('Recursos no topo são botões e cada recurso abre um modal de produção'
  assert(dom.innerHTML.includes('data-modal-current="wood"'));
  assert(dom.innerHTML.includes('Produção líquida'));
  click({openResource:'crop'});assert(dom.innerHTML.includes('Produção de Cereal'));
- assert(dom.innerHTML.includes('População e manutenção militar'));
+ assert(dom.innerHTML.includes('População (edifícios e campos)'));assert(dom.innerHTML.includes('Guerreiros estacionados'));
  click({closeModal:''});assert(!dom.innerHTML.includes('role="dialog"'));
 });
 check('Construções e campos abrem janela, não um painel lateral de melhoria',()=>{
