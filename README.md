@@ -1,8 +1,19 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 1.3, reinos rivais estratégicos, recuperação de feridos e diplomacia reversível. Tudo offline.**
+**Impérios & Conquistas — versão 1.4, missões diárias, eventos, edifícios por tribo e economia recalibrada. Tudo offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
+
+## 📅 v1.4 — Missões Diárias, Eventos e Equilíbrio de Produção
+
+- **10 objetivos diários**: construção, campos, recrutamento, pesquisas, aventura, missões, população, tropas, cereal e campos evoluídos. Cada objetivo vale 10 pontos. Prêmios aos **25/50/75/100** pontos; a cada 24 horas da fundação as metas reiniciam.
+- **Eventos rotativos**: feira regional, festival da colheita, caravana de curandeiros e reserva de inverno. Cada um oferece um benefício diário original, inteiramente offline.
+- **Exclusividades por tribo**: Romanos constroem Aqueduto Imperial (+4% cereal/nível); Gauleses, Bosque Sagrado (+4% madeira e barro/nível); Teutões, Forja dos Clãs (+5% ferro/nível), até nível 5.
+- **Economia balanceada**: campo nível 10 entrega 200 recursos/h em 1×; a curva clássica de níveis 1–10 é 5, 9, 15, 22, 33, 50, 70, 100, 145 e 200. Bônus existentes e velocidade ainda se aplicam.
+- **Pontuação**: população calculada por nível de edifícios e campos; indicador próprio de pontos de desenvolvimento valoriza edifícios avançados separadamente.
+- **Velocidade**: novas campanhas começam em 1×, com opções de 3×, 5×, 12× e 30×. Campanhas antigas preservam a velocidade selecionada. Se a produção continuar alta, configure 1× ou 3×.
+- **Compatibilidade**: saves anteriores sem propriedades diárias continuam aceitos; todos os sistemas da v1.3 e os visuais Original/Em grade são preservados.
+- **Fontes de pesquisa, sem utilizar arquivos do jogo**: https://support.travian.com/pt/articles/16-tarefas-diarias e https://support.travian.com/pt/articles/33-estatisticas-de-edificios-e-campos-de-recursos.
 
 ## 🛡️ v1.3 — Guerras, Hospital e Alianças Reversíveis
 

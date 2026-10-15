@@ -36,6 +36,10 @@ const BUILDINGS = {
  townhall: {name:'Prefeitura', icon:'🏟️', type:'civil', base:[1250,1110,1260,600], time:380, desc:'Celebrações e cultura da cidade.', max:20, req:{main:10,academy:10}, pop:4},
  workshop: {name:'Oficina', icon:'🎯', type:'military', base:[460,510,600,320], time:260, desc:'Preparação para unidades de cerco.', max:20, req:{academy:10,main:5}, pop:3}
 };
+// Edifícios exclusivos originais das três civilizações do Guerra Sem Fim.
+BUILDINGS.aqueduct={name:'Aqueduto Imperial',icon:'⛲',type:'economy',base:[340,400,310,220],time:195,desc:'Exclusivo romano: +4% de cereal por nível (máx. 20%).',max:5,req:{main:5,granary:3},pop:3,tribe:'romans'};
+BUILDINGS.grove={name:'Bosque Sagrado',icon:'🌿',type:'economy',base:[310,350,290,210],time:195,desc:'Exclusivo gaulês: +4% de madeira e barro por nível (máx. 20%).',max:5,req:{main:5,warehouse:3},pop:3,tribe:'gauls'};
+BUILDINGS.forgeHall={name:'Forja dos Clãs',icon:'🔥',type:'economy',base:[400,360,430,250],time:215,desc:'Exclusivo teutão: +5% de ferro por nível (máx. 25%).',max:5,req:{main:5,smithy:1},pop:3,tribe:'teutons'};
 const FIELDS = {
  wood: {name:'Bosque', icon:'🌲', base:[40,100,50,60], time:60, desc:'Extrai madeira por hora.'},
  clay: {name:'Poço de Barro', icon:'🪨', base:[80,40,80,50], time:60, desc:'Extrai barro por hora.'},

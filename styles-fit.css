@@ -247,3 +247,15 @@ html,body,#app,.game-shell{width:100%;min-width:0;overflow-x:clip}
 .hospital-panel .form-field{margin:0;min-width:0}
 .hospital-panel input{min-width:0;width:100%}
 @media(max-width:520px){.hospital-panel .troop-row{grid-template-columns:minmax(0,1fr) minmax(100px,1fr)}.hospital-panel .troop-row .btn{grid-column:1/-1}}
+
+/* v1.4 - tarefas diárias, eventos e indicadores em layouts fluidos */
+.daily-summary,.daily-event{min-width:0}
+.daily-rewards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.daily-reward{display:flex;min-width:0;flex-direction:column;align-items:start;gap:8px;border:1px solid #c9b994;border-radius:9px;padding:13px;background:#faf5e9}
+.daily-reward strong{font-size:14px}.daily-reward small{flex:1;overflow-wrap:anywhere}.daily-reward .btn{max-width:100%}
+.daily-tasks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.daily-task{display:flex;align-items:center;gap:10px;min-width:0;padding:11px;border:1px solid #d7cbb3;border-radius:7px;background:#fcf9f1}
+.daily-task.done{border-color:#9ab486;background:#eff4e7}.daily-task>div{min-width:0;flex:1}.daily-task strong{display:block;overflow-wrap:anywhere;font-size:13px}.daily-task small{color:#776950}
+.daily-points{white-space:nowrap;color:#6d7543;font-size:12px;font-weight:700}
+@media(max-width:900px){.daily-rewards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:580px){.daily-tasks{grid-template-columns:minmax(0,1fr)}.daily-rewards{gap:7px}.daily-reward{padding:10px}}

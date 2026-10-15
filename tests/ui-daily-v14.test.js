@@ -1,0 +1,15 @@
+'use strict';
+const assert=require('assert'),fs=require('fs'),path=require('path'),vm=require('vm');
+const root=path.resolve(__dirname,'..'),text=fs.readFileSync(path.join(root,'js/app.js'),'utf8'),style=fs.readFileSync(path.join(root,'styles-fit.css'),'utf8');
+assert(text.includes("['daily','📅','Diárias']"));
+assert(text.includes('function dailyView()'));
+assert(text.includes('data-daily-reward='));
+assert(text.includes('data-daily-event'));
+assert(text.includes("actionAndRender(E.claimDailyReward(state,d.dailyReward)"));
+assert(text.includes("actionAndRender(E.claimDailyEvent(state)"));
+assert(text.includes('E.developmentPoints(v)'));
+assert(text.includes("E.fieldProduction(lv)*state.speed"));
+assert(text.includes("(!b.tribe||b.tribe===state.tribe)"));
+assert(style.includes('.daily-rewards'));
+new vm.Script(text);
+console.log('✓ v1.4 interface diária, pontos e filtros por tribo');

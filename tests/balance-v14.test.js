@@ -1,0 +1,31 @@
+'use strict';
+const fs=require('fs'),vm=require('vm'),path=require('path'),assert=require('assert');
+const store=new Map(),ctx={window:{},console,Date,Math,JSON,localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,String(v)),removeItem:k=>store.delete(k)}};
+vm.createContext(ctx);
+for(const n of ['data','war','ai','campaign','expansion','engine'])vm.runInContext(fs.readFileSync(path.join(__dirname,'..','js',n+'.js'),'utf8'),ctx);
+const E=ctx.window.GSF,D=ctx.window.GSF_DATA;
+assert.strictEqual(E.fieldProduction(1),5);
+assert.strictEqual(E.fieldProduction(5),33);
+assert.strictEqual(E.fieldProduction(10),200);
+assert.strictEqual(E.fieldProduction(20),2450);
+const s=E.newGame(),v=E.active(s);assert.strictEqual(s.speed,1);
+v.fields.forEach(f=>f.level=0);v.fields[0].level=10;
+assert.strictEqual(E.production(s,v)[v.fields[0].type],200);
+const base=E.developmentPoints(v);
+v.buildings.main=10;
+assert(E.developmentPoints(v)>base+100);
+assert(E.buildingPopulation('main',20)>E.buildingPopulation('main',10)*2);
+for(const [tribe,exclusive,other] of [['romans','aqueduct','grove'],['gauls','grove','forgeHall'],['teutons','forgeHall','aqueduct']]){
+ const st=E.newGame({tribe}),city=E.active(st);city.buildings.main=12;city.buildings.warehouse=10;city.buildings.granary=10;city.buildings.academy=10;city.buildings.smithy=10;
+ for(const k of D.RES)city.resources[k]=1e6;
+ assert(E.canBuild(st,city,'building',exclusive,8).ok);
+ assert(!E.canBuild(st,city,'building',other,8).ok);
+ const x=E.production(st,city),pop=E.population(city);
+ city.buildings[exclusive]=3;const y=E.production(st,city),newPop=E.population(city);
+ const res={aqueduct:'crop',grove:'wood',forgeHall:'iron'}[exclusive];
+ assert(y[res]+(res==='crop'?newPop:0)>x[res]+(res==='crop'?pop:0));
+ assert(E.validateState(st));
+}
+const legacy=E.newGame({speed:12});delete legacy.daily;
+assert(E.validateState(legacy));assert(E.importSave(JSON.stringify(legacy)).ok);assert.strictEqual(E.load().speed,12);
+console.log('✓ v1.4 balanceamento e edificações exclusivas');

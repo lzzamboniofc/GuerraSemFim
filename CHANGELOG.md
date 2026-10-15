@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.4] — Missões Diárias e Equilíbrio Econômico · 15/10/2026
+
+- 10 objetivos diários renováveis, marcos de recompensa aos 25, 50, 75 e 100 pontos; eventos locais alternados com resgate único.
+- Exclusivos de tribo: Aqueduto Imperial, Bosque Sagrado e Forja dos Clãs.
+- Produção de campos calibrada na curva clássica: nível 10 = 200/h em 1×. Novas campanhas em 1×; velocidade das campanhas anteriores é preservada.
+- População cresce por níveis de construção e campos; pontos próprios de desenvolvimento mostrados na interface.
+- Compatibilidade com saves antigos; novos testes de equilíbrio, tarefas diárias, evento e UI.
+
+
 ## [1.3] — IA tática, Hospital e Rompimento de Alianças · 15/10/2026
 
 - Conselho diplomático com confirmação de rompimento, perda de reputação e espera para reatar.

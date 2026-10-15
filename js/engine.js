@@ -83,7 +83,7 @@ function village(st,name,x,y,starter=false,profile='balanced') {
 }
 function newGame(options={}) {
  const tribe = D.TRIBES[options.tribe]?options.tribe:'romans';
- const st={version:1,nextId:1,player:(options.player||'Comandante').trim().slice(0,25)||'Comandante',tribe,speed:clamp(Number(options.speed)||12,1,100),
+ const st={version:1,nextId:1,player:(options.player||'Comandante').trim().slice(0,25)||'Comandante',tribe,speed:clamp(Number(options.speed)||1,1,100),
   villages:[],activeVillageId:null,capitalVillageId:null,preferences:{enemyAttacks:options.enemyAttacks!==false,extraBuildSlots:1,viewMode:'original'},hero:{name:'Guardião',level:1,xp:0,hp:100,attack:4,resources:0,points:0,adventure:null,adventures:0,inventory:[],equipped:null,equipment:{weapon:null,armor:null,mount:null,charm:null},potions:0,productionFocus:'wood',productionTargets:['wood']},
   world:{seed:37,tiles:[]},movements:[],reports:[],events:[],questsClaimed:[],tutorialDismissed:false,createdAt:now(),lastTick:now()};
  const home=village(st,(options.village||'Nova Esperança').trim().slice(0,28)||'Nova Esperança',0,0,true);
@@ -172,10 +172,24 @@ function startResearch(st,v,unitId){
  const research=initResearch(st,v);
  pay(v,c.price);
  research.queue={unitId,startedAt:now(),endsAt:now()+c.seconds*1000};
- log(st,`Academia de ${v.name}: iniciada a pesquisa de ${c.unit.name}.`,'army');save(st);
+ recordDaily(st,'research',1);log(st,`Academia de ${v.name}: iniciada a pesquisa de ${c.unit.name}.`,'army');save(st);
  return {ok:true,seconds:c.seconds};
 }
-function population(v){let n=2;for(const [k,l] of Object.entries(v.buildings))n+=l*(D.BUILDINGS[k]?.pop||0);n+=v.fields.reduce((a,f)=>a+Math.ceil(f.level/3),0);return n;}
+// População: soma progressiva por nível dos edifícios, além dos trabalhadores de campo.
+function buildingPopulation(key,level){
+ const b=D.BUILDINGS[key];if(!b||level<=0)return 0;
+ let n=0;for(let lv=1;lv<=Math.min(level,b.max);lv++)n+=Math.ceil((b.pop||0)*Math.pow(1.13,lv-1));
+ return n;
+}
+function population(v){
+ let n=2;for(const [k,l] of Object.entries(v.buildings))n+=buildingPopulation(k,l);
+ for(const f of v.fields)if(f.level)n+=f.type==='crop'?Math.floor(f.level/6):Math.ceil(f.level/2);
+ return n;
+}
+function developmentPoints(v){
+ const structures=Object.entries(v.buildings).reduce((n,[k,l])=>n+l*l*(D.BUILDINGS[k]?.pop||1),0);
+ return population(v)+structures+v.fields.reduce((n,f)=>n+f.level*f.level,0);
+}
 const DEFENSE_MODES={normal:{label:'Normal',bonus:1,loot:1},watch:{label:'Vigilância',bonus:1.18,loot:.85},fortified:{label:'Fortificada',bonus:1.32,loot:.65}};
 function defenseMode(v){return DEFENSE_MODES[v?.defenseMode]?v.defenseMode:'normal';}
 function setDefenseMode(st,v,mode){
@@ -208,9 +222,15 @@ function healWounded(st,v,unitId,requested){
  log(st,`Hospital de ${v.name}: iniciada a recuperação de ${qty} ${u.name}.`,'army');save(st);return {ok:true,seconds};
 }
 function upkeep(st,v){return troopDefs(st).reduce((a,t)=>a+(v.troops[t.id]||0)*t.upkeep,0);}
-function production(st,v){const base={wood:0,clay:0,iron:0,crop:0};v.fields.forEach(f=>{base[f.type]+=f.level?Math.round(5*Math.pow(1.68,f.level-1)):0;});
+const FIELD_PRODUCTION=[0,5,9,15,22,33,50,70,100,145,200,280,375,495,635,800,1000,1300,1600,2000,2450,2900,3550,4250,5100,6100];
+function fieldProduction(level){return FIELD_PRODUCTION[Math.max(0,Math.min(25,Math.floor(level)||0))];}
+function production(st,v){const base={wood:0,clay:0,iron:0,crop:0};v.fields.forEach(f=>{base[f.type]+=fieldProduction(f.level);});
  const out={};const bonus={wood:'sawmill',clay:'brickyard',iron:'ironworks',crop:'mill'};
- D.RES.forEach(k=>{const item=HERO_ARTIFACTS[heroEquipment(st).charm];const gearBonus=st.villages[0].id===v.id&&(item?.type===k||item?.type==='all')?item.bonus:0;out[k]=Math.floor(base[k]*(1+0.05*buildLevel(v,bonus[k])+gearBonus)*st.speed);});
+ D.RES.forEach(k=>{
+ const item=HERO_ARTIFACTS[heroEquipment(st).charm],gearBonus=st.villages[0].id===v.id&&(item?.type===k||item?.type==='all')?item.bonus:0;
+ const tribeBonus=st.tribe==='romans'&&k==='crop'?.04*buildLevel(v,'aqueduct'):st.tribe==='gauls'&&['wood','clay'].includes(k)?.04*buildLevel(v,'grove'):st.tribe==='teutons'&&k==='iron'?.05*buildLevel(v,'forgeHall'):0;
+ out[k]=Math.floor(base[k]*(1+.05*buildLevel(v,bonus[k])+gearBonus+tribeBonus)*st.speed);
+});
  const oases=st.world.tiles.filter(t=>t.kind==='oasis'&&t.ownerVillageId===v.id);
  for(const t of oases){const key=oasisResource(t);out[key]+=Math.floor(base[key]*.25*st.speed);}
  for(const key of D.RES)out[key]+=heroBonus(st,key,v);
@@ -236,7 +256,7 @@ function setBuildSlots(st,value){const n=Number(value);if((typeof value!=='strin
 function canBuild(st,v,type,ref,slot) {
  let key,level;
  if(type==='field') {const f=v.fields[ref];if(!f)return {ok:false,error:'Campo inválido.'};key=f.type;level=f.level;if(level>=fieldMax(st,v))return {ok:false,error:'Nível máximo.'};}
- else {key=ref;if(!D.BUILDINGS[key])return {ok:false,error:'Edifício desconhecido.'};level=buildLevel(v,key);if(level>=D.BUILDINGS[key].max)return {ok:false,error:'Nível máximo.'};const req=unmet(v,key);if(req.length)return {ok:false,error:'Requer: '+req.join(', ')};
+ else {key=ref;if(!D.BUILDINGS[key])return {ok:false,error:'Edifício desconhecido.'};if(D.BUILDINGS[key].tribe&&D.BUILDINGS[key].tribe!==st.tribe)return {ok:false,error:'Edifício exclusivo de outra civilização.'};level=buildLevel(v,key);if(level>=D.BUILDINGS[key].max)return {ok:false,error:'Nível máximo.'};const req=unmet(v,key);if(req.length)return {ok:false,error:'Requer: '+req.join(', ')};
    if(level===0&&(slot===undefined||slot===null||v.buildingSlots[slot]))return {ok:false,error:'Escolha um terreno livre.'};
    if(level===0&&Object.values(v.buildingSlots).includes(key))return {ok:false,error:'Este edifício já foi construído.'};
    if(level===0&&key==='palace'&&st.villages.some(other=>other!==v&&(buildLevel(other,'palace')>0||other.buildQueue.some(q=>q.type==='building'&&q.ref==='palace'))))return {ok:false,error:'Seu império pode ter apenas um Palácio.'};
@@ -259,7 +279,7 @@ function canBuild(st,v,type,ref,slot) {
 function startBuild(st,v,type,ref,slot){const c=canBuild(st,v,type,ref,slot);if(!c.ok)return c;
  pay(v,c.price);if(type==='building'&&buildLevel(v,ref)===0)v.buildingSlots[slot]=ref;
  v.buildQueue.push({id:id(st),type,ref,slot,level:c.level,endsAt:now()+c.seconds*1000});
- log(st,`Obra iniciada: ${type==='field'?D.FIELDS[c.key].name:D.BUILDINGS[c.key].name} nível ${c.level}.`,'build');save(st);return {ok:true};
+ recordDaily(st,type==='field'?'fields':'build',1);log(st,`Obra iniciada: ${type==='field'?D.FIELDS[c.key].name:D.BUILDINGS[c.key].name} nível ${c.level}.`,'build');save(st);return {ok:true};
 }
 function cancelBuild(st,v,idValue){const i=v.buildQueue.findIndex(q=>q.id===idValue);if(i<0)return {ok:false,error:'Obra não encontrada.'};const q=v.buildQueue[i];const key=q.type==='field'?v.fields[q.ref].type:q.ref;const refund=cost(q.type,key,q.level);D.RES.forEach((k,j)=>v.resources[k]=Math.min(capacity(v,k),v.resources[k]+Math.floor(refund[j]*0.75)));
  if(q.type==='building'&&buildLevel(v,q.ref)===0)delete v.buildingSlots[q.slot];v.buildQueue.splice(i,1);log(st,'Construção cancelada. 75% dos recursos foram devolvidos.','build');save(st);return {ok:true};}
@@ -309,7 +329,7 @@ function canTrain(st,v,unitId,qty){const unit=troopDefs(st).find(t=>t.id===unitI
 function train(st,v,unitId,qty){const c=canTrain(st,v,unitId,qty);if(!c.ok)return c;pay(v,c.unit.cost,c.qty);
  const last=v.trainingQueue.filter(q=>q.building===c.unit.building).reduce((a,b)=>Math.max(a,b.endsAt),now());
  v.trainingQueue.push({id:id(st),unitId,qty:c.qty,building:c.unit.building,endsAt:last+c.seconds*1000});
- log(st,`Recrutamento de ${c.qty} ${c.unit.name}(s) iniciado.`,'army');save(st);return {ok:true};}
+ recordDaily(st,'train',c.qty);log(st,`Recrutamento de ${c.qty} ${c.unit.name}(s) iniciado.`,'army');save(st);return {ok:true};}
 const ADMIN_PRICE=[850,950,800,700];
 function administratorName(st){return st.tribe==='romans'?'Senador':st.tribe==='gauls'?'Chefe de Clã':'Ancião';}
 function canTrainAdministrator(st,v){
@@ -478,7 +498,7 @@ function startAdventure(st,kind='explore'){
  const bonus=Math.min(.4,heroGearBonus(st,'speed'));
  const seconds=Math.max(10,Math.round(base*(1-bonus)/st.speed));
  const at=now();st.hero.adventure={id:id(st),kind,startedAt:at,endsAt:at+seconds*1000};
- log(st,`O herói partiu para uma aventura (${kind==='hunt'?'caçada':kind==='supplies'?'suprimentos':'exploração'}).`,'hero');save(st);return {ok:true,seconds};
+ recordDaily(st,'adventure',1);log(st,`O herói partiu para uma aventura (${kind==='hunt'?'caçada':kind==='supplies'?'suprimentos':'exploração'}).`,'hero');save(st);return {ok:true,seconds};
 }
 function resolveAdventure(st){
  const h=st.hero,kind=h.adventure?.kind||'explore';initHeroGear(st);
@@ -747,7 +767,7 @@ function claim(st,questId){
   st.hero.xp-=st.hero.level*100;st.hero.level++;st.hero.points+=4;st.hero.hp=100;
   log(st,`Seu herói subiu para o nível ${st.hero.level}!`,'hero');
  }
- log(st,`Missão concluída: ${q.title} (+${q.reward} de cada recurso e +${q.xp||0} EXP).`,'quest');
+ recordDaily(st,'quest',1);log(st,`Missão concluída: ${q.title} (+${q.reward} de cada recurso e +${q.xp||0} EXP).`,'quest');
  save(st);return {ok:true};
 }
 // Processa eventos em ordem temporal antes de contabilizar a produção do próximo trecho.
@@ -849,6 +869,7 @@ function validateState(st){
   !validArray(st.villages,5)||st.villages.length===0||!plain(st.world)||!validArray(st.world.tiles,1000)||
   !validArray(st.movements,500)||!validArray(st.reports,100)||!validArray(st.events,100)||
   !validArray(st.questsClaimed,1000)||!st.questsClaimed.every(q=>typeof q==='string'&&q.length<=100)||new Set(st.questsClaimed).size!==st.questsClaimed.length||!plain(st.hero))return false;
+ if(st.daily!==undefined&&(!plain(st.daily)||!Number.isSafeInteger(st.daily.day)||st.daily.day<0||!plain(st.daily.counters)||!Object.entries(st.daily.counters).every(([k,n])=>DAILY_TASK_DEFS.some(d=>d.kind===k)&&Number.isSafeInteger(n)&&n>=0&&n<=1e7)||!validArray(st.daily.rewards,4)||!st.daily.rewards.every(n=>DAILY_THRESHOLDS.includes(n))||new Set(st.daily.rewards).size!==st.daily.rewards.length||typeof st.daily.eventClaimed!=='boolean'))return false;
  if(st.capitalVillageId!==undefined&&(!st.villages.some(v=>v.id===st.capitalVillageId)))return false;
  if(st.preferences!==undefined&&(!plain(st.preferences)||typeof st.preferences.enemyAttacks!=='boolean'||(st.preferences.extraBuildSlots!==undefined&&(!Number.isSafeInteger(st.preferences.extraBuildSlots)||st.preferences.extraBuildSlots<0||st.preferences.extraBuildSlots>MAX_EXTRA_BUILD_SLOTS))||(st.preferences.viewMode!==undefined&&!['original','compact'].includes(st.preferences.viewMode))))return false;
  if(window.GSF_EXPANSION&&!window.GSF_EXPANSION.validate(st.expansion))return false;
@@ -887,7 +908,7 @@ function validateState(st){
    !validArray(v.fields,18)||v.fields.length!==18||!validArray(v.buildQueue,50)||!validArray(v.trainingQueue,500))return false;
   ids.add(v.id);positions.add(v.x+':'+v.y);
   if(!v.fields.every(f=>plain(f)&&D.FIELDS[f.type]&&Number.isSafeInteger(f.level)&&f.level>=0&&f.level<=(v.id===(st.capitalVillageId||st.villages[0].id)?25:20)))return false;
-  if(!Object.entries(v.buildings).every(([k,l])=>D.BUILDINGS[k]&&Number.isSafeInteger(l)&&l>=0&&l<=D.BUILDINGS[k].max))return false;
+  if(!Object.entries(v.buildings).every(([k,l])=>D.BUILDINGS[k]&&(!D.BUILDINGS[k].tribe||D.BUILDINGS[k].tribe===st.tribe)&&Number.isSafeInteger(l)&&l>=0&&l<=D.BUILDINGS[k].max))return false;
   if(!Object.entries(v.buildingSlots).every(([slot,k])=>/^(?:[0-9]|1[0-9])$/.test(slot)&&!!D.BUILDINGS[k]))return false;
   if(!v.buildQueue.every(q=>plain(q)&&validNumber(q.endsAt)&&Number.isSafeInteger(q.level)&&q.level>=1&&q.level<=(q.type==='field'?fieldMax(st,v):20)&&
    (q.type==='field'?(Number.isSafeInteger(q.ref)&&q.ref>=0&&q.ref<18):(q.type==='building'&&!!D.BUILDINGS[q.ref]&&Number.isSafeInteger(q.slot)&&q.slot>=0&&q.slot<20))))return false;
@@ -915,6 +936,65 @@ function validateState(st){
  return st.reports.every(r=>plain(r)&&typeof r.title==='string'&&typeof r.body==='string'&&validNumber(r.at))&&
   st.events.every(e=>plain(e)&&typeof e.message==='string'&&validNumber(e.at));
 }
+
+const DAY_MS=86400000,DAILY_THRESHOLDS=[25,50,75,100];
+const DAILY_TASK_DEFS=[
+ {id:'build',name:'Erga ou melhore um edifício',need:1,kind:'build'},
+ {id:'fields',name:'Melhore um campo de recursos',need:1,kind:'fields'},
+ {id:'train',name:'Recrute 10 soldados',need:10,kind:'train'},
+ {id:'adventure',name:'Inicie uma aventura',need:1,kind:'adventure'},
+ {id:'research',name:'Inicie uma pesquisa na Academia',need:1,kind:'research'},
+ {id:'quest',name:'Resgate uma missão permanente',need:1,kind:'quest'},
+ {id:'population',name:'Alcance 25 habitantes',need:25,kind:'population'},
+ {id:'army',name:'Mantenha 15 soldados disponíveis',need:15,kind:'army'},
+ {id:'crop',name:'Armazene 250 unidades de cereal',need:250,kind:'crop'},
+ {id:'fieldsTotal',name:'Tenha 12 níveis de campos somados',need:12,kind:'fieldsTotal'}
+];
+const DAILY_EVENTS=[
+ {id:'fair',name:'Feira das Províncias',desc:'Uma feira regional entrega 150 unidades de cada recurso.',icon:'⚖️'},
+ {id:'festival',name:'Festival da Colheita',desc:'Celebração regional concede 100 pontos de cultura.',icon:'🎊'},
+ {id:'healers',name:'Caravana de Curandeiros',desc:'O herói recebe uma poção e recupera até 20 pontos de vida.',icon:'🧪'},
+ {id:'harvest',name:'Reserva de Inverno',desc:'Uma colheita extraordinária concede 400 unidades de cereal.',icon:'🌾'}
+];
+function dailyIndex(st,time=now()){return Math.max(0,Math.floor((time-st.createdAt)/DAY_MS));}
+function dailyState(st,time=now()){
+ const day=Math.max(dailyIndex(st,time),st.daily?.day||0);
+ if(!st.daily||st.daily.day!==day)st.daily={day,counters:{},rewards:[],eventClaimed:false};
+ return st.daily;
+}
+function recordDaily(st,kind,amount=1){const d=dailyState(st);d.counters[kind]=Math.min(1e7,(d.counters[kind]||0)+amount);}
+function dailyTasks(st,time=now()){
+ const d=dailyState(st,time);
+ return DAILY_TASK_DEFS.map(q=>{
+ const progress=q.kind==='population'?st.villages.reduce((n,v)=>n+population(v),0):
+  q.kind==='army'?st.villages.reduce((n,v)=>n+sum(Object.values(v.troops)),0):
+  q.kind==='crop'?Math.max(...st.villages.map(v=>v.resources.crop)):
+  q.kind==='fieldsTotal'?Math.max(...st.villages.map(v=>sum(v.fields.map(f=>f.level)))):d.counters[q.kind]||0;
+ return {...q,progress:Math.floor(progress),done:progress>=q.need};
+ });
+}
+function dailyPoints(st,time=now()){return dailyTasks(st,time).filter(t=>t.done).length*10;}
+function dailyEvent(st,time=now()){return DAILY_EVENTS[dailyState(st,time).day%DAILY_EVENTS.length];}
+function claimDailyReward(st,threshold){
+ const d=dailyState(st),n=Number(threshold);
+ if(!DAILY_THRESHOLDS.includes(n)||d.rewards.includes(n)||dailyPoints(st)<n)return {ok:false,error:'Recompensa indisponível ou já resgatada.'};
+ const v=active(st);d.rewards.push(n);
+ if(n===25)addResources(v,{wood:200,clay:200,iron:200,crop:200});
+ if(n===50)st.hero.xp+=60;
+ if(n===75)st.hero.potions=Math.min(99,(st.hero.potions||0)+2);
+ if(n===100)addResources(v,{wood:850,clay:850,iron:850,crop:850});
+ log(st,'Missões diárias: recompensa de '+n+' pontos resgatada.','quest');save(st);return {ok:true};
+}
+function claimDailyEvent(st){
+ const d=dailyState(st);if(d.eventClaimed)return {ok:false,error:'Evento de hoje já foi utilizado.'};
+ const v=active(st),event=dailyEvent(st);d.eventClaimed=true;
+ if(event.id==='fair')addResources(v,{wood:150,clay:150,iron:150,crop:150});
+ if(event.id==='festival')v.festivalPoints=(v.festivalPoints||0)+100;
+ if(event.id==='healers'){st.hero.potions=Math.min(99,(st.hero.potions||0)+1);st.hero.hp=Math.min(100,st.hero.hp+20);}
+ if(event.id==='harvest')addResources(v,{crop:400});
+ log(st,'Evento diário: '+event.name+'.','quest');save(st);return {ok:true};
+}
+
 function save(st){
  if(!validateState(st))return false;
  try{
@@ -959,5 +1039,5 @@ function importSave(text){
  if(!save(st))return {ok:false,error:'Não foi possível salvar a partida neste navegador.'};
  return {ok:true,state:st};
 }
-window.GSF={DEFENSE_MODES,defenseMode,setDefenseMode,hospitalCapacity,woundedTotal,recordWounded,healWounded,HERO_SLOTS,heroEquipment,heroGearBonus,oasisWildlife,unequipHero,useHeroPotion,maxExchangeOffer,merchantCapacity,merchantsTotal,merchantsFree,sendMerchantCargo,addTradeRoute,removeTradeRoute,toggleTradeRoute,routes,canFestival,startFestival,maxTrainable,capital,isCapital,setCapital,fieldMax,administratorName,canTrainAdministrator,trainAdministrator,sendConquest,conquerRival,researchRule,researchPrice,canResearch,startResearch,unitUnlocked,initResearch,viewMode,setViewMode,fieldMix,tileProfile,oasisResource,oasisCount,oasisLimit,captureOasis,releaseOasis,heroFocus,heroTargets,heroBonus,setHeroFocus,setHeroTargets,plans,planBuild,removePlan,movePlan,runPlanned,KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
+window.GSF={DAY_MS,DAILY_THRESHOLDS,FIELD_PRODUCTION,fieldProduction,buildingPopulation,developmentPoints,dailyIndex,dailyState,dailyTasks,dailyPoints,dailyEvent,claimDailyReward,claimDailyEvent,DEFENSE_MODES,defenseMode,setDefenseMode,hospitalCapacity,woundedTotal,recordWounded,healWounded,HERO_SLOTS,heroEquipment,heroGearBonus,oasisWildlife,unequipHero,useHeroPotion,maxExchangeOffer,merchantCapacity,merchantsTotal,merchantsFree,sendMerchantCargo,addTradeRoute,removeTradeRoute,toggleTradeRoute,routes,canFestival,startFestival,maxTrainable,capital,isCapital,setCapital,fieldMax,administratorName,canTrainAdministrator,trainAdministrator,sendConquest,conquerRival,researchRule,researchPrice,canResearch,startResearch,unitUnlocked,initResearch,viewMode,setViewMode,fieldMix,tileProfile,oasisResource,oasisCount,oasisLimit,captureOasis,releaseOasis,heroFocus,heroTargets,heroBonus,setHeroFocus,setHeroTargets,plans,planBuild,removePlan,movePlan,runPlanned,KEY,newGame,active,tileAt,cost,buildTime,capacity,production,population,upkeep,buildLevel,unmet,canPay,canBuild,startBuild,cancelBuild,canTrain,train,send,simulate,reinforce,upgradeMilitary,startAdventure,spendHero,healHero,trade,settle,questList,claim,advance,save,load,clear,exportSave,importSave,troopDefs,validateState,BACKUP_KEY,sendCaravan,HERO_ARTIFACTS,equipHero,extraBuildSlots,buildQueueCapacity,setBuildSlots,trainSettlers};
 })();
