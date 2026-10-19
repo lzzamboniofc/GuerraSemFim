@@ -218,5 +218,55 @@ function townGround(wallLevel=0,tribe='romans'){
 }
 
 function scenery(kind){if(kind==='tree')return `<svg class="art-tree" viewBox="-6 -11 12 13" aria-hidden="true"><rect x="-.7" y="-2" width="1.4" height="3.5" fill="#5d4027"/><circle cy="-5" r="4.4" fill="#3f6e3a"/><circle cx="-1.4" cy="-6.4" r="2" fill="#6f9a55"/></svg>`;return '';}
-window.GSF_ART={scenery,building,plot,field,townGround,stageOf,STAGE_LABELS:['Madeira','Enxaimel','Pedra','Fortificado']};
+
+/* ---------- Tiles do mapa-múndi ----------
+ * Terreno contínuo (a grama se encaixa entre tiles vizinhos) com decoração determinística por coordenada.
+ */
+function hash(x,y,k=0){let h=Math.imul(x*73856093^y*19349663^k*83492791,2654435761);h^=h>>>15;return (h>>>0)/4294967295;}
+const GRASS='#93b674';
+function tuftsAt(x,y){let s='';for(let i=0;i<4;i++){const a=hash(x,y,i)*36+2,b=hash(y,x,i+9)*36+2;s+=`<path d="M${a.toFixed(1)} ${b.toFixed(1)}l1 -2.2 1 2.2" stroke="#6f9a55" stroke-width=".6" fill="none" opacity=".7"/>`;}
+ if(hash(x,y,21)>.7){const a=hash(x,y,22)*30+5,b=hash(x,y,23)*30+5;s+=`<circle cx="${a.toFixed(1)}" cy="${b.toFixed(1)}" r=".9" fill="${hash(x,y,24)>.5?'#f2e27a':'#f4f1e6'}"/>`;}
+ return s;}
+function mtree(x,y,s=1,c='#3f6e3a'){return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-.7" y="-1" width="1.4" height="3" fill="#5d4027"/><circle cy="-3.5" r="3.6" fill="${c}"/><circle cx="-1.2" cy="-4.6" r="1.6" fill="#6f9a55"/></g>`;}
+function pine(x,y,s=1){return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-.5" y="-.5" width="1" height="2.5" fill="#5d4027"/><path d="M0 -9 L3.6 -1 L-3.6 -1Z" fill="#2f5d37"/><path d="M0 -9 L3.6 -1 L0 -1Z" fill="#3c7044"/></g>`;}
+function hut(x,y,roof,s=1){return `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-4 0 V-3.5 L0 -5.6 L4 -3.5 V0Z" fill="#e3d4b0"/><path d="M-4 0 V-3.5 L0 -5.6 V0Z" fill="#cbbb94"/><path d="M-5 -3.2 L0 -7.4 L5 -3.2 L4 -3.5 L0 -6 L-4 -3.5Z" fill="${roof}"/><rect x="-.8" y="-2.2" width="1.6" height="2.2" fill="#4a3826"/></g>`;}
+function mflag(x,y,c,h=10){return `<line x1="${x}" y1="${y}" x2="${x}" y2="${y-h}" stroke="#4a3a28" stroke-width=".8"/><path class="art-flag" d="M${x} ${y-h} q3 -.8 6 .6 q-3 1.4 -6 3.2z" fill="${c}" style="transform-origin:${x}px ${y-h}px"/>`;}
+function tile(t,x,y,opts={}){
+ const kind=t?.kind||'unmapped';let s=`<rect width="40" height="40" fill="${GRASS}"/>`;
+ if(kind==='unmapped')return `<svg class="art-tile" viewBox="0 0 40 40" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="40" height="40" fill="#7d8f74"/><path d="M0 28 q10 -6 20 0 t20 0 V40 H0Z" fill="#8c9c83" opacity=".7"/></svg>`;
+ s+=tuftsAt(x,y);
+ const n=Math.abs(x*17+y*23)%11; // mesmo sorteio de antes: o terreno de cada coordenada não muda
+ if(kind==='empty'){
+  if(n===0)s+=`<path d="M4 33 L15 12 L21 22 L26 15 L37 33Z" fill="#8a877d"/><path d="M15 12 L18.5 18.5 L13 18Z" fill="#f2f0ea"/><path d="M15 12 L4 33 H13Z" fill="#76736a"/>`;
+  else if(n===1){[[10,24],[19,18],[28,25],[16,31],[25,33]].forEach(([a,b],i)=>s+=pine(a,b,.9+hash(x,y,i)*.3));}
+  else if(n===2){s+=`<path d="M6 30 L20 21 L34 30 L20 39Z" fill="#d9bf5c"/>`;for(let i=0;i<5;i++)s+=`<path d="M${9+i*2.8} ${28.5+i*1.8-1.8*0} l11 -7" stroke="#b99a3f" stroke-width=".6"/>`;}
+  else if(n===3){[[12,22],[26,20],[19,30]].forEach(([a,b],i)=>s+=mtree(a,b,1+hash(x,y,i)*.25,i%2?'#3f6e3a':'#4f7d3f'));}
+  else if(hash(x,y,5)>.82)s+=`<ellipse cx="${12+hash(x,y,6)*16}" cy="${14+hash(x,y,7)*14}" rx="2.2" ry="1.3" fill="#a9a59a"/>`;
+  if(opts.profile==='crop15'||opts.profile==='crop9')s+=`<path d="M8 33 L20 26 L32 33 L20 40Z" fill="#e3c766" opacity=".85"/>`;
+ }
+ if(kind==='oasis'){
+  s+=`<ellipse cx="20" cy="25" rx="13" ry="7.5" fill="#d8c48e"/><ellipse cx="20" cy="25" rx="10.5" ry="5.6" fill="#5f9bb5"/><path d="M13 24 q7 -2.5 14 0" stroke="#bfe0ea" stroke-width=".7" fill="none"/>`;
+  [[9,22],[31,21]].forEach(([a,b])=>s+=`<path d="M${a} ${b} q1 -6 0 -11" stroke="#7a5532" stroke-width="1.2" fill="none"/><path d="M${a} ${b-11} q-5 -1 -7 3 M${a} ${b-11} q5 -1 7 3 M${a} ${b-11} q-3 -4 -6 -3 M${a} ${b-11} q3 -4 6 -3" stroke="#3f7a3a" stroke-width="1.6" fill="none" stroke-linecap="round"/>`);
+  if(opts.owned)s+=mflag(20,21,opts.ownerColor||'#e2b64c',9);
+ }
+ if(kind==='enemy'){
+  s+=`<ellipse cx="20" cy="27" rx="15" ry="8" fill="#b79b6a"/>`;
+  for(let i=0;i<9;i++){const a=i/9*Math.PI*2,px=20+Math.cos(a)*14,py=27+Math.sin(a)*7.5;s+=`<rect x="${(px-.7).toFixed(1)}" y="${(py-4).toFixed(1)}" width="1.4" height="4.5" fill="#6b4a2c"/>`;}
+  s+=`<path d="M11 30 L16 21 L21 30Z" fill="#8c7a5e"/><path d="M16 21 L21 30 H18Z" fill="#6e5f48"/><path d="M21 31 L26 23 L31 31Z" fill="#9b8869"/>`+mflag(17,24,'#2b2b2b',12);
+  s+=`<circle cx="22" cy="31" r="1" fill="#e2672c"/>`;
+ }
+ if(kind==='player'){
+  const roof=opts.roof||'#b0503a';s+=`<ellipse cx="20" cy="27" rx="16" ry="9" fill="#d6c08e"/>`;
+  s+=hut(12,27,roof,.95)+hut(27,26,roof,.95)+hut(20,33,roof,1.05)+`<rect x="17" y="12" width="6" height="11" fill="#e8dcc0"/><rect x="17" y="12" width="2.4" height="11" fill="#cdbf9e"/><path d="M16 12 L20 6.5 L24 12Z" fill="${roof}"/>`+mflag(23,7,opts.banner||'#9f2f25',7);
+ }
+ if(kind==='rival'){
+  const c=t.color||'#7a3433';s+=`<ellipse cx="20" cy="28" rx="16" ry="9" fill="#c2b08a"/>`;
+  s+=`<path d="M7 31 V22 H33 V31Z" fill="#a9a091"/><path d="M7 22 h2v-2h2v2h2v-2h2v2h2v-2h2v2h2v-2h2v2h2v-2h2v2h2v-2h2v2" fill="#a9a091"/><rect x="16" y="14" width="8" height="17" fill="#bcb4a4"/><path d="M15 14 L20 7.5 L25 14Z" fill="${c}"/><rect x="18.5" y="25" width="3" height="6" fill="#3b2c1c"/>`+mflag(20,8,c,6);
+  if((t.walls||0)>=3)s+=`<path d="M5 31 V24 L7 22 L9 24 V31Z M31 31 V24 L33 22 L35 24 V31Z" fill="#8f877a"/>`;
+ }
+ return `<svg class="art-tile" viewBox="0 0 40 40" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">${s}</svg>`;
+}
+const TRIBE_COLORS=TRIBE;
+
+window.GSF_ART={tile,tribeColors:t=>TRIBE_COLORS[t]||TRIBE_COLORS.romans,scenery,building,plot,field,townGround,stageOf,STAGE_LABELS:['Madeira','Enxaimel','Pedra','Fortificado']};
 })();

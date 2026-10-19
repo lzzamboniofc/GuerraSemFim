@@ -89,3 +89,21 @@
 .map-viewport .map-grid{width:min(100%,max(300px,calc(100vh - 230px)))!important;max-width:100%;margin:0 auto}
 .map-viewport .map-tile .glyph{font-size:clamp(11px,calc(36vmin / var(--map-columns,9)),30px)}
 .map-viewport .map-tile .coord{font-size:clamp(6px,calc(9vmin / var(--map-columns,9)),9px)}
+
+/* ---------- Tiles do mapa em SVG e territórios ---------- */
+.map-viewport .map-grid:has(.map-tile.has-art){gap:0;background:#93b674}
+.map-tile.has-art{background:#93b674!important;border:0!important;border-radius:0;padding:0;overflow:hidden;box-shadow:none}
+.map-tile.has-art .glyph{position:absolute;inset:0;display:block;font-size:0;line-height:0}
+.map-tile.has-art .art-tile{width:100%;height:100%;display:block}
+.map-tile.has-art:not(:disabled):hover{filter:brightness(1.08)}
+.map-tile.has-art.selected{outline:3px solid #ffd76a;outline-offset:-3px;z-index:3}
+.map-tile.has-art.center:after{content:"";position:absolute;inset:3px;border:1.5px dashed #fff8;pointer-events:none;z-index:2}
+.map-tile.has-art .coord{z-index:2;color:#2d3b28;text-shadow:0 0 2px #fff9}
+.map-tile.has-art .tile-mark{z-index:2}
+.map-tile.terr:before{content:"";position:absolute;inset:0;background:var(--terr);opacity:.16;pointer-events:none;z-index:1}
+.map-tile.terr .glyph:after{content:"";position:absolute;inset:0;border:0 solid var(--terr);pointer-events:none}
+.map-tile.terr-n .glyph:after{border-top-width:3px}
+.map-tile.terr-s .glyph:after{border-bottom-width:3px}
+.map-tile.terr-w .glyph:after{border-left-width:3px}
+.map-tile.terr-e .glyph:after{border-right-width:3px}
+.map-dot.terr-dot{background:var(--terr);border:2px solid color-mix(in srgb,var(--terr) 60%,#000)}

@@ -55,4 +55,15 @@ check('Mapa: zoom altera a região visível e o minimapa é renderizado',()=>{
  click({mapZoom:'in'});click({mapZoom:'in'});assert.strictEqual(cols(),before-2);
  for(let i=0;i<10;i++)click({mapZoom:'out'});assert.strictEqual(cols(),17,'zoom máximo mostra o mundo inteiro (17×17)');
 });
+
+check('Mapa em SVG: tiles ilustrados e territórios com borda',()=>{
+ const {context,dom,callbacks}=boot();context.window.GSF.newGame({speed:1});
+ vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),context,{filename:'app'});
+ const click=dataset=>callbacks.click({target:{closest:()=>({dataset})}});
+ click({nav:'map'});for(let i=0;i<10;i++)click({mapZoom:'out'});
+ const html=dom.innerHTML;assert(html.includes('art-tile'));assert(!/NaN|undefined/.test(html.match(/<svg class="art-tile"[\s\S]*?<\/svg>/)[0]));
+ assert(html.includes('terr-n')&&html.includes('--terr:#f4d35e'),'território do jogador');
+ const colors=new Set([...html.matchAll(/--terr:(#[0-9a-f]{6})/g)].map(m=>m[1]));
+ assert(colors.size>=4,'jogador + 3 reinos rivais com território');
+});
 console.log(`✓ v1.5 visual: ${n} verificações`);
