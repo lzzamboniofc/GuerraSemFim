@@ -66,4 +66,16 @@ check('Mapa em SVG: tiles ilustrados e territórios com borda',()=>{
  const colors=new Set([...html.matchAll(/--terr:(#[0-9a-f]{6})/g)].map(m=>m[1]));
  assert(colors.size>=4,'jogador + 3 reinos rivais com território');
 });
+
+check('Menu agrupado, barra inferior e seções recolhíveis',()=>{
+ const {context,dom,callbacks}=boot();context.window.GSF.newGame({speed:1});
+ vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),context,{filename:'app'});
+ const html=dom.innerHTML;
+ for(const g of ['Economia','Militar','Império','Progresso'])assert(html.includes(`aria-label="${g}"`),g);
+ for(const k of ['village','fields','map','rivals','army','war','hero','quests','daily','campaign','reports','market','expansion','empire','settings'])assert(html.includes(`data-nav="${k}"`),k);
+ assert(html.includes('class="nav-dock"'));
+ assert(html.includes('data-fold="plans"')&&html.includes('data-fold="news"'));
+ assert(/data-fold="stats" open/.test(html),'resumo começa aberto');
+ assert(!/data-fold="plans" open/.test(html),'planejador começa recolhido');
+});
 console.log(`✓ v1.5 visual: ${n} verificações`);

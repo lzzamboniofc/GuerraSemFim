@@ -9,6 +9,9 @@
 - **Mapa arrastável** com mouse ou dedo, **zoom** por botões, roda do mouse, pinça ou teclas +/−, navegação pelas setas do teclado e **minimapa** clicável. O zoom máximo mostra o mundo inteiro (17×17) sem a página crescer além da tela.
 - **Mapa ilustrado:** tiles em SVG formam um terreno contínuo (bosques, montanhas, plantações, oásis com palmeiras, acampamentos com paliçada, sua aldeia e os castelos rivais com as cores de cada reino).
 - **Territórios:** cada aldeia projeta influência (raio 3 para capitais, 2 para as demais). O mapa pinta e contorna o seu território e o de cada reino rival, com legenda e nome do território no tooltip.
+- **Menu reorganizado** em quatro grupos: Economia, Militar, Império e Progresso. No celular, uma **barra fixa no rodapé** dá acesso a Aldeia, Recursos, Mapa e Exército, e o botão Mais abre os demais itens agrupados. Pontos vermelhos avisam relatórios não lidos e missões prontas para resgate.
+- **Tela da aldeia mais curta:** obras em andamento e o Conselho do Reino ficam logo abaixo da cena; Resumo, Planejador e Notícias viram seções recolhíveis que lembram se foram abertas.
+- Avisos (toasts) no celular aparecem acima da barra inferior, sem cobrir o conteúdo.
 - **Equilíbrio:** a aldeia inicial começava com cereal −8/h; os campos de cereal iniciais agora começam no nível 2 (+16/h).
 - Modo *Em grade* e saves anteriores continuam compatíveis; sem `art.js` a interface volta automaticamente aos emojis.
 - Nova suíte `tests/visual-v15.test.js`.

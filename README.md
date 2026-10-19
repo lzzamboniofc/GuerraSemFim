@@ -10,6 +10,7 @@ Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldei
 - **Muralha visível** ao redor da aldeia, crescendo com o nível; campos de recursos ilustrados que ficam mais ricos conforme evoluem.
 - **Mapa**: arraste com mouse ou dedo, zoom por botões, roda, pinça ou +/−, setas do teclado e minimapa clicável.
 - **Mapa ilustrado e territórios**: terreno contínuo em SVG e fronteiras coloridas do seu império e de cada reino rival.
+- **Interface reorganizada**: menu em grupos (Economia, Militar, Império, Progresso), barra inferior no celular e seções recolhíveis na aldeia.
 - **Cereal inicial positivo** (+16/h): os campos de cereal da primeira aldeia começam no nível 2.
 - Saves anteriores e o modo *Em grade* continuam compatíveis.
 
