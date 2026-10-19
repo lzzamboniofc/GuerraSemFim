@@ -18,9 +18,7 @@ jobs:
           node-version: '22'
       - name: Validar JavaScript
         run: |
-          node --check js/app.js
-          node --check js/engine.js
-          node --check js/art.js
+          for f in js/*.js js/ui/*.js; do node --check "$f"; done
       - name: Executar todas as suites
         shell: bash
         run: |

@@ -7,7 +7,7 @@ const doc={querySelector:s=>s==='#app'?dom:null,querySelectorAll:()=>[],addEvent
 const ctx={window:win,document:doc,Date,Math,JSON,console,setInterval:()=>{},setTimeout:()=>{},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,String(v)),removeItem:k=>store.delete(k)}};vm.createContext(ctx);
 for(const f of ['data','war','ai','campaign','expansion','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',`${f}.js`),'utf8'),ctx,{filename:f});
 const E=win.GSF,C=win.GSF_CAMPAIGN,st=E.newGame({enemyAttacks:false}),v=E.active(st);v.buildings.embassy=3;v.buildings.wall=3;v.buildings.hospital=1;st.campaign.reputation.corvos=100;for(const k of ['wood','clay','iron','crop'])v.resources[k]=5000;assert(C.ally(st,'corvos').ok);E.recordWounded(st,v,{legionary:20});E.save(st);
-vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),ctx,{filename:'app'});
+require('./_load-ui')(ctx);
 const click=d=>events.click({target:{closest:()=>({dataset:d}),matches:()=>false}});
 click({nav:'rivals'});assert(dom.innerHTML.includes('data-break-ally="corvos"'));click({breakAlly:'corvos'});assert(!C.isAlly(E.load(),'corvos'));
 click({nav:'army'});assert(dom.innerHTML.includes('Hospital e feridos'));assert(dom.innerHTML.includes('data-heal-unit="legionary"'));

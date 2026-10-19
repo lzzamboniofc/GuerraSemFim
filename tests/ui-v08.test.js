@@ -4,7 +4,7 @@ const root=path.resolve(__dirname,'..'),db=new Map(),events={},dom={innerHTML:''
 const document={querySelector:s=>s==='#app'?dom:null,querySelectorAll:()=>[],addEventListener:(t,fn)=>events[t]=fn,body:{appendChild:()=>{}},createElement:()=>({setAttribute:()=>{},remove:()=>{}})};
 const context={window,document,localStorage:{getItem:k=>db.get(k)||null,setItem:(k,v)=>db.set(k,v),removeItem:k=>db.delete(k)},Date,Math,JSON,console,setInterval:()=>0,setTimeout:()=>0};vm.createContext(context);
 for(const f of ['data','war','ai','campaign','expansion','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',f+'.js'),'utf8'),context,{filename:f});
-const s=window.GSF.newGame();vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),context,{filename:'app.js'});
+const s=window.GSF.newGame();require('./_load-ui')(context);
 const click=dataset=>events.click({target:{closest:()=>({dataset})}});
 click({nav:'village'});assert(dom.innerHTML.includes('Edifício Principal'));assert(!dom.innerHTML.includes('assets/buildings/'));assert(dom.innerHTML.includes('Planejador de obras'));
 click({slot:'1'});assert(dom.innerHTML.includes('data-plan-building="warehouse"'));

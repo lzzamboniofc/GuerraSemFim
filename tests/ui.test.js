@@ -6,7 +6,7 @@ const document={querySelector:s=>s==='#app'?dom:null,addEventListener:(ev,fn)=>{
 const context={window,document,localStorage:{getItem:k=>memory.get(k)||null,setItem:(k,v)=>memory.set(k,v),removeItem:k=>memory.delete(k)},Date,Math,JSON,console,setInterval:()=>0,setTimeout:()=>0};
 vm.createContext(context);
 for(const f of ['data','war','ai','campaign','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',f+'.js'),'utf8'),context,{filename:f});
-context.window.GSF.newGame({speed:12});vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),context,{filename:'app'});
+context.window.GSF.newGame({speed:12});require('./_load-ui')(context);
 assert(dom.innerHTML.includes('Comando de Guerra'));
 const click=dataset=>callbacks.click({target:{closest:()=>({dataset})}});
 click({nav:'war'});assert(dom.innerHTML.includes('Simulador de batalha'));

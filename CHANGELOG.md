@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.5.1] — Código em módulos e atualização incremental da tela · 19/10/2026
+
+- **Interface dividida em módulos**: o antigo `js/app.js` (108 KB, um único arquivo) virou `js/ui/` com um módulo por área. São eles: `core`, `village`, `map`, `military`, `progress`, `economy`, `panels`, `render` e `dom`. O `js/app.js` ficou só com a inicialização e os eventos. Continua sem etapa de build e funcionando direto em `file://`.
+- **Atualização incremental do DOM** (`js/ui/dom.js`): em vez de recriar a página inteira a cada ação, o jogo compara o HTML novo com a tela e altera só o que mudou.
+  - Animações não reiniciam a cada clique.
+  - O campo em que você está digitando mantém foco e valor.
+  - A rolagem dos painéis é preservada.
+- O foco vai para a janela modal só quando ela abre, e não a cada atualização.
+- Testes passam a carregar a interface por `tests/_load-ui.js`, que lê a ordem dos scripts do `index.html`. Nova suíte `tests/modules-v15.test.js`. O CI verifica a sintaxe de todos os arquivos em `js/` e `js/ui/`.
+- Sem mudanças de jogabilidade nem de saves.
+
 ## [1.5] — Arte isométrica, mapa arrastável e cereal inicial · 19/10/2026
 
 - **Edifícios desenhados em SVG isométrico** (`js/art.js`), sem imagens externas, substituindo os emojis na aldeia. Cada edifício evolui em 4 estágios visuais: madeira e palha (nv. 1–4), enxaimel com telhas da tribo (5–9), pedra com ala extra (10–14) e fortificado com torre e estandarte (15+).

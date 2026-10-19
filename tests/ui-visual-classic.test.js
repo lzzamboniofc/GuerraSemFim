@@ -2,7 +2,7 @@
 'use strict';
 const fs=require('fs'),path=require('path'),assert=require('assert');
 const root=path.resolve(__dirname,'..');
-const app=fs.readFileSync(path.join(root,'js/app.js'),'utf8');
+const app=require('./_load-ui').source();
 const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
 assert(!app.includes('assets/buildings/'),'A aldeia deve usar ícones clássicos, não sprites ilustrados');
 assert(!app.includes('map-axis'),'O mapa deve manter o enquadramento original sem réguas');

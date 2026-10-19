@@ -38,7 +38,7 @@ check('Campos, terreno vazio e cenário com muralha geram SVG válido',()=>{
 check('Interface usa a arte quando disponível e mantém emojis sem ela',()=>{
  for(const withArt of [true,false]){
   const {context,dom}=boot(withArt);context.window.GSF.newGame({speed:1});
-  vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),context,{filename:'app'});
+  require('./_load-ui')(context);
   assert.strictEqual(dom.innerHTML.includes('art-building'),withArt);
   assert.strictEqual(dom.innerHTML.includes('town-ground'),withArt);
   assert(dom.innerHTML.includes('data-slot="0"'));
@@ -47,7 +47,7 @@ check('Interface usa a arte quando disponível e mantém emojis sem ela',()=>{
 
 check('Mapa: zoom altera a região visível e o minimapa é renderizado',()=>{
  const {context,dom,callbacks}=boot();context.window.GSF.newGame({speed:1});
- vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),context,{filename:'app'});
+ require('./_load-ui')(context);
  const click=dataset=>callbacks.click({target:{closest:()=>({dataset})}});
  click({nav:'map'});const cols=()=>Number(/data-map-columns="(\d+)"/.exec(dom.innerHTML)[1]);
  const before=cols();assert(dom.innerHTML.includes('data-minimap'));assert(dom.innerHTML.includes('data-map-viewport'));
@@ -58,7 +58,7 @@ check('Mapa: zoom altera a região visível e o minimapa é renderizado',()=>{
 
 check('Mapa em SVG: tiles ilustrados e territórios com borda',()=>{
  const {context,dom,callbacks}=boot();context.window.GSF.newGame({speed:1});
- vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),context,{filename:'app'});
+ require('./_load-ui')(context);
  const click=dataset=>callbacks.click({target:{closest:()=>({dataset})}});
  click({nav:'map'});for(let i=0;i<10;i++)click({mapZoom:'out'});
  const html=dom.innerHTML;assert(html.includes('art-tile'));assert(!/NaN|undefined/.test(html.match(/<svg class="art-tile"[\s\S]*?<\/svg>/)[0]));
@@ -69,7 +69,7 @@ check('Mapa em SVG: tiles ilustrados e territórios com borda',()=>{
 
 check('Menu agrupado, barra inferior e seções recolhíveis',()=>{
  const {context,dom,callbacks}=boot();context.window.GSF.newGame({speed:1});
- vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),context,{filename:'app'});
+ require('./_load-ui')(context);
  const html=dom.innerHTML;
  for(const g of ['Economia','Militar','Império','Progresso'])assert(html.includes(`aria-label="${g}"`),g);
  for(const k of ['village','fields','map','rivals','army','war','hero','quests','daily','campaign','reports','market','expansion','empire','settings'])assert(html.includes(`data-nav="${k}"`),k);

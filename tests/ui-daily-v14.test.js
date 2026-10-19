@@ -1,6 +1,6 @@
 'use strict';
 const assert=require('assert'),fs=require('fs'),path=require('path'),vm=require('vm');
-const root=path.resolve(__dirname,'..'),text=fs.readFileSync(path.join(root,'js/app.js'),'utf8'),style=fs.readFileSync(path.join(root,'styles-fit.css'),'utf8');
+const root=path.resolve(__dirname,'..'),text=require('./_load-ui').source(),style=fs.readFileSync(path.join(root,'styles-fit.css'),'utf8');
 assert(text.includes("['daily','📅','Diárias']"));
 assert(text.includes('function dailyView()'));
 assert(text.includes('data-daily-reward='));

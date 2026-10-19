@@ -7,7 +7,7 @@ const document={querySelector:s=>s==='#app'?dom:null,querySelectorAll:()=>[],add
 const context={window,document,localStorage:{getItem:k=>db.get(k)||null,setItem:(k,v)=>db.set(k,v),removeItem:k=>db.delete(k)},Date,Math,JSON,console,setInterval:()=>0,setTimeout:()=>0};
 vm.createContext(context);
 for(const f of ['data','war','ai','campaign','expansion','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',f+'.js'),'utf8'),context,{filename:f});
-const game=window.GSF.newGame();vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),context,{filename:'app'});
+const game=window.GSF.newGame();require('./_load-ui')(context);
 const click=dataset=>callbacks.click({target:{closest:()=>({dataset})}});
 click({nav:'village'});assert(dom.innerHTML.includes('town-board'));
 assert(!dom.innerHTML.includes('scene-scroll'),'Aldeia inicial sem rolagem horizontal forçada');

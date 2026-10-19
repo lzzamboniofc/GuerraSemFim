@@ -6,7 +6,7 @@ const document={querySelector:s=>s==='#app'?dom:null,addEventListener:(type,fn)=
 const ctx={window,document,localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},Date,Math,JSON,console,setInterval:()=>0,setTimeout:()=>0};
 vm.createContext(ctx);
 for(const f of ['data','war','ai','campaign','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',f+'.js'),'utf8'),ctx,{filename:f});
-window.GSF.newGame({enemyAttacks:false});vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),ctx,{filename:'app'});
+window.GSF.newGame({enemyAttacks:false});require('./_load-ui')(ctx);
 const click=dataset=>callbacks.click({target:{closest:()=>({dataset})}});
 click({nav:'campaign'});assert(dom.innerHTML.includes('Crônicas do Império'));assert(dom.innerHTML.includes('data-claim-chapter="fundacao"'));assert(dom.innerHTML.includes('Vitória diplomática'));assert(dom.innerHTML.includes('Vitória militar'));
 click({nav:'rivals'});assert(dom.innerHTML.includes('data-envoy="corvos"'));assert(dom.innerHTML.includes('data-ally="aurora"'));

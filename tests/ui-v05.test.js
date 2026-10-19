@@ -7,7 +7,7 @@ const ctx={window,document,localStorage:{getItem:k=>store.get(k)||null,setItem:(
 vm.createContext(ctx);
 for(const f of ['data','war','ai','campaign','engine'])vm.runInContext(fs.readFileSync(path.join(dir,'js',f+'.js'),'utf8'),ctx,{filename:f});
 const game=window.GSF.newGame();
-vm.runInContext(fs.readFileSync(path.join(dir,'js/app.js'),'utf8'),ctx,{filename:'app.js'});
+require('./_load-ui')(ctx);
 const click=dataset=>events.click({target:{closest:()=>({dataset})}});
 const check=(label,fn)=>{fn();console.log('✓ '+label);};
 check('Recursos no topo são botões e cada recurso abre um modal de produção',()=>{
@@ -50,7 +50,7 @@ check('Tela de reinos exibe diplomacia e a de herói mostra inventário',()=>{
 });
 check('Mercado mostra rotas de caravanas com duas aldeias',()=>{
  const v=JSON.parse(JSON.stringify(game.villages[0]));v.id='e999';v.x=1;v.y=1;v.name='Colônia';game.villages.push(v);
- const script=fs.readFileSync(path.join(dir,'js/app.js'),'utf8');
+ const script=require('./_load-ui').source();
  assert(script.includes('Caravanas entre aldeias'));assert(script.includes('data-send-caravan'));
  // A UI cria a seção somente depois de o motor registrar a segunda aldeia.
  assert(game.villages.length===2);

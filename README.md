@@ -1,8 +1,25 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 1.5, arte isométrica que evolui por nível, mapa arrastável com zoom e economia recalibrada. Tudo offline.**
+**Impérios & Conquistas — versão 1.5.1, arte isométrica que evolui por nível, mapa arrastável com zoom e economia recalibrada. Tudo offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
+
+## 🧩 Estrutura do código
+
+O jogo é estático e funciona offline, inclusive abrindo o `index.html` direto do disco. Não há etapa de build.
+
+| Pasta / arquivo | Conteúdo |
+|---|---|
+| `js/data.js`, `js/engine.js` | Dados e regras do jogo (produção, construção, combate, saves) |
+| `js/ai.js`, `js/war.js`, `js/campaign.js`, `js/expansion.js` | Reinos rivais, cálculo de batalha, campanha e expansão |
+| `js/art.js` | Arte isométrica em SVG (edifícios, campos, cenário e mapa) |
+| `js/ui/dom.js` | Atualização incremental do DOM ("morph") |
+| `js/ui/core.js` | Estado da interface, utilitários, menu e moldura da página |
+| `js/ui/village.js`, `map.js`, `military.js`, `progress.js`, `economy.js` | Uma tela ou grupo de telas por arquivo |
+| `js/ui/panels.js`, `js/ui/render.js` | Inspetor, janelas modais e renderização |
+| `js/app.js` | Inicialização, eventos globais e relógio de 1 s |
+
+Os módulos de `js/ui/` compartilham o escopo global de scripts clássicos, e a ordem de carga está no `index.html`. Para rodar os testes, use `for t in tests/*.test.js; do node "$t"; done`.
 
 ## 🎨 v1.5 — Arte isométrica e mapa arrastável
 

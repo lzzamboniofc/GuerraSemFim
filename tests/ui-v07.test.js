@@ -6,7 +6,7 @@ const document={querySelector:s=>s==='#app'?dom:s==='#settlers-count'?{value:'1'
 const context={window,document,localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},Date,Math,JSON,console,setInterval:()=>0,setTimeout:()=>0};
 vm.createContext(context);
 for(const f of ['data','war','ai','campaign','expansion','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',f+'.js'),'utf8'),context,{filename:f});
-const s=window.GSF.newGame();vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),context,{filename:'app'});
+const s=window.GSF.newGame();require('./_load-ui')(context);
 const click=dataset=>events.click({target:{closest:()=>({dataset})}});
 click({nav:'settings'});assert(dom.innerHTML.includes('id="extra-build-slots"'));
 assert(dom.innerHTML.includes('Filas extras de construção'));

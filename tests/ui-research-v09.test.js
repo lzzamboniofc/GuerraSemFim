@@ -9,7 +9,7 @@ for(const f of ['data','war','ai','campaign','expansion','engine'])vm.runInConte
 const st=window.GSF.newGame(),v=window.GSF.active(st);v.buildings.barracks=3;v.buildings.academy=1;
 for(const k of ['wood','clay','iron','crop'])v.resources[k]=10000;
 window.GSF.save(st);
-vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),ctx,{filename:'app'});
+require('./_load-ui')(ctx);
 const click=x=>callbacks.click({target:{closest:()=>({dataset:x})}});
 click({nav:'war'});assert(dom.innerHTML.includes('Academia · Pesquisas de unidades'));assert(dom.innerHTML.includes('data-research-unit="praetorian"'));
 click({researchUnit:'praetorian'});assert(window.GSF.load().villages[0].research.queue.unitId==='praetorian');

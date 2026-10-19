@@ -18,7 +18,7 @@ assert.equal(E.setViewMode(st,'original').ok,true);
 assert.equal(E.setViewMode(st,'invalid').ok,false);
 st.preferences.viewMode='invalid';assert(!E.validateState(st));
 st.preferences.viewMode='original';assert(E.save(st));
-vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),ctx,{filename:'app'});
+require('./_load-ui')(ctx);
 const click=data=>callbacks.click({target:{closest:()=>({dataset:data})}});
 assert.equal(dom.className,'view-original');
 click({visualMode:'compact'});assert.equal(dom.className,'view-compact');

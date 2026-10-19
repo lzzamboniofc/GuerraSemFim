@@ -10,7 +10,7 @@ const context={window,document,localStorage:{getItem:key=>storage.get(key)||null
 vm.createContext(context);
 for(const file of ['data','war','ai','campaign','expansion','engine'])vm.runInContext(fs.readFileSync(path.join(root,'js',file+'.js'),'utf8'),context,{filename:file});
 window.GSF.newGame();
-vm.runInContext(fs.readFileSync(path.join(root,'js/app.js'),'utf8'),context,{filename:'app'});
+require('./_load-ui')(context);
 const click=data=>callbacks.click({target:{closest:()=>({dataset:data})}});
 assert(html.includes('styles-fit.css'),'Nova folha adaptativa ausente');
 assert(css.includes('grid-template-columns:repeat(2,minmax(0,1fr))'),'Cartões não suportam duas colunas no celular');
