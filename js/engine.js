@@ -75,7 +75,8 @@ function setHeroTargets(st,targets){
 }
 function setHeroFocus(st,focus){if(![...D.RES,'all'].includes(focus))return {ok:false,error:'Escolha um recurso válido ou todos.'};return setHeroTargets(st,focus==='all'?[...D.RES]:[focus]);}
 function village(st,name,x,y,starter=false,profile='balanced') {
- const fields = fieldMix(profile).map((type,i)=>({type,level:starter?1:0,id:i}));
+ // Campos de cereal iniciais em nível 2: a aldeia inicial começa com saldo positivo de cereal.
+ const fields = fieldMix(profile).map((type,i)=>({type,level:starter?(type==='crop'?2:1):0,id:i}));
  const buildings = {main:starter?3:1,warehouse:1,granary:1,rally:1};
  const troops = {};
  if(starter) troops[D.TROOPS[st.tribe][0].id]=12;

@@ -1,0 +1,91 @@
+/* Guerra Sem Fim — camada visual com arte isométrica (js/art.js) e mapa arrastável.
+   Carregada por último: só afeta elementos marcados com .has-art / .map-viewport. */
+
+/* ---------- Aldeia ---------- */
+.town-board.has-art{background:#86ab6c;overflow:hidden}
+.town-board.has-art:after{display:none}
+.town-board.has-art:before{opacity:.25}
+.town-board .town-ground{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+.town-slot.has-art{min-width:0;max-width:none;width:clamp(64px,11.5%,124px);padding:0;gap:0}
+.town-slot.has-art .building-art{width:100%;height:auto;aspect-ratio:100/76;background:none!important;border:0!important;border-radius:0;filter:drop-shadow(0 3px 2px #1a301833);font-size:0;transition:transform .18s,filter .18s;transform-origin:50% 85%}
+.town-slot.has-art .building-art svg{width:100%;height:100%;display:block;overflow:visible}
+.town-slot.has-art:hover .building-art,.town-slot.has-art.selected .building-art{transform:translateY(-3px) scale(1.08)!important;filter:drop-shadow(0 0 3px #fff6c8) drop-shadow(0 5px 3px #1a301844)}
+.town-slot.has-art.empty{width:clamp(44px,7.5%,80px);opacity:.75}
+.town-slot.has-art.empty:hover,.town-slot.has-art.empty.selected{opacity:1}
+.town-slot.has-art .slot-level{top:auto!important;bottom:22px!important;right:8%!important;left:auto!important;transform:none!important;z-index:2}
+.town-slot.has-art .slot-name{margin-top:-6px;font-size:10px;opacity:.92}
+/* Terrenos vazios não poluem a cena: só mostram rótulo quando selecionados */
+.town-slot.has-art.empty .slot-name{display:none}
+.town-slot.has-art.empty.selected .slot-name{display:block}
+.town-slot.has-art.building .building-art{animation:none}
+
+/* Animações leves */
+.art-flag{animation:artFlag 2.4s ease-in-out infinite}
+.art-spin{animation:artSpin 9s linear infinite}
+.art-smoke circle{animation:artSmoke 3.2s ease-out infinite;opacity:.0}
+.art-smoke circle:nth-child(2){animation-delay:1s}
+.art-smoke circle:nth-child(3){animation-delay:2s}
+.art-glow{animation:artGlow 1.6s ease-in-out infinite alternate}
+.art-sparkle{animation:artGlow 2.2s ease-in-out infinite alternate}
+.art-scaffold{animation:artBuild 1.2s ease-in-out infinite alternate}
+@keyframes artFlag{0%,100%{transform:skewY(0) scaleX(1)}50%{transform:skewY(-8deg) scaleX(.86)}}
+@keyframes artSpin{to{transform:rotate(360deg)}}
+@keyframes artSmoke{0%{opacity:0;transform:translateY(2px)}25%{opacity:.75}100%{opacity:0;transform:translateY(-6px) translateX(2px)}}
+@keyframes artGlow{from{opacity:.55}to{opacity:1}}
+@keyframes artBuild{from{opacity:.55}to{opacity:1}}
+
+/* Visual em grade usa a mesma arte, em tamanho fixo */
+.view-compact .town-slot.has-art,.view-compact .town-slot.has-art.empty{width:auto;opacity:1}
+.view-compact .town-slot.has-art .building-art{width:76px;height:58px}
+.view-compact .town-slot.has-art.empty .building-art{width:60px;height:46px;border:0!important;background:none!important}
+.view-compact .town-slot.has-art.empty .slot-name{display:block}
+.view-compact .town-slot.has-art .slot-name{margin-top:2px}
+.view-compact .town-board .town-ground{display:none}
+
+/* ---------- Campos ---------- */
+.field-slot.has-art{background:transparent!important;border:0!important;box-shadow:none!important;padding:0;min-width:0;width:clamp(58px,10%,108px);backdrop-filter:none}
+.field-slot.has-art .icon{display:block;width:100%;aspect-ratio:100/60;font-size:0;line-height:0}
+.field-slot.has-art .icon svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 3px 2px #1a301833)}
+.field-slot.has-art small{background:#fff9e9e8;border:1px solid #cdbb8f;border-radius:8px;padding:0 6px;font:700 10px Arial,sans-serif;color:#594831;margin-top:-4px}
+.field-slot.has-art:hover,.field-slot.has-art.selected{transform:translate(-50%,-54%) scale(1.1)}
+.field-slot.has-art.selected .icon svg,.field-slot.has-art:hover .icon svg{filter:drop-shadow(0 0 3px #fff6c8) drop-shadow(0 5px 3px #1a301844)}
+.view-compact .field-slot.has-art{background:#f5ecd2!important;border:1px solid #d3c49c!important;width:auto;padding:8px 4px}
+.view-compact .field-slot.has-art .icon{width:84px}
+
+@media (max-width:580px){
+ .town-slot.has-art{width:23%}
+ .town-slot.has-art.empty{width:12%}
+ .view-original .town-slot.has-art .slot-name{display:none}
+ .view-original .town-slot.has-art.selected .slot-name{display:block}
+ .field-slot.has-art{width:15%}
+}
+
+/* ---------- Mapa arrastável ---------- */
+.map-viewport{position:relative;overflow:hidden;touch-action:none;cursor:grab;border-radius:12px;user-select:none;-webkit-user-select:none}
+.map-viewport.dragging{cursor:grabbing}
+.map-viewport .map-grid{transform-origin:50% 50%;transition:transform .12s ease-out;will-change:transform}
+.map-viewport.dragging .map-grid{transition:none}
+.map-zoom{position:absolute;right:10px;top:10px;z-index:6;display:flex;flex-direction:column;gap:4px}
+.map-zoom button{width:34px;height:34px;border-radius:8px;border:1px solid #b9a77a;background:#fff9e9ee;font:700 18px Arial,sans-serif;color:#3b4f33;box-shadow:0 2px 4px #0002}
+.map-zoom button:hover{background:#fff}
+.map-minimap{position:absolute;left:10px;bottom:10px;z-index:6;width:86px;height:86px;border-radius:8px;border:2px solid #fff9e9;box-shadow:0 2px 6px #0004;background:#7fa36b;overflow:hidden}
+.map-minimap svg{width:100%;height:100%;display:block}
+@media (max-width:580px){.map-minimap{width:64px;height:64px}.map-zoom button{width:30px;height:30px}}
+
+@media (prefers-reduced-motion:reduce){
+ .art-flag,.art-spin,.art-smoke circle,.art-glow,.art-sparkle,.art-scaffold{animation:none!important}
+ .art-smoke circle{opacity:.6}
+ .map-viewport .map-grid{transition:none}
+}
+
+.town-tree.has-art{width:clamp(22px,3vw,36px);font-size:0;line-height:0}
+.town-tree.has-art svg{width:100%;height:auto;display:block;overflow:visible}
+.field-hamlet.has-art{width:clamp(80px,13%,140px);font-size:0;line-height:0;background:none;border:0;box-shadow:none}
+.field-hamlet.has-art svg{width:100%;height:auto;display:block;overflow:visible}
+
+/* O mapa cabe na tela: mais colunas = tiles menores, não um mapa mais alto */
+.map-viewport{background:#849c77;display:flex;justify-content:center}
+.map-viewport .map-grid{width:min(100%,max(300px,calc(100vh - 230px)))!important;max-width:100%;margin:0 auto}
+.map-viewport .map-tile .glyph{font-size:clamp(11px,calc(36vmin / var(--map-columns,9)),30px)}
+.map-viewport .map-tile .coord{font-size:clamp(6px,calc(9vmin / var(--map-columns,9)),9px)}

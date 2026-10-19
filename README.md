@@ -1,8 +1,16 @@
 # ⚔️ Guerra Sem Fim
 
-**Impérios & Conquistas — versão 1.4.1, missões diárias, eventos, edifícios por tribo e economia recalibrada. Tudo offline.**
+**Impérios & Conquistas — versão 1.5, arte isométrica que evolui por nível, mapa arrastável com zoom e economia recalibrada. Tudo offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
+
+## 🎨 v1.5 — Arte isométrica e mapa arrastável
+
+- **Edifícios em SVG isométrico** que evoluem em 4 estágios (madeira → enxaimel → pedra → fortificado), com cores da tribo e animações leves. Obras mostram andaimes.
+- **Muralha visível** ao redor da aldeia, crescendo com o nível; campos de recursos ilustrados que ficam mais ricos conforme evoluem.
+- **Mapa**: arraste com mouse ou dedo, zoom por botões, roda, pinça ou +/−, setas do teclado e minimapa clicável.
+- **Cereal inicial positivo** (+16/h): os campos de cereal da primeira aldeia começam no nível 2.
+- Saves anteriores e o modo *Em grade* continuam compatíveis.
 
 ## 🧱 v1.4.1 — Demolição, cereal e troca sem taxa
 

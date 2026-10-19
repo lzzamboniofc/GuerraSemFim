@@ -20,6 +20,7 @@ jobs:
         run: |
           node --check js/app.js
           node --check js/engine.js
+          node --check js/art.js
       - name: Executar todas as suites
         shell: bash
         run: |

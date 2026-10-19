@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.5] — Arte isométrica, mapa arrastável e cereal inicial · 19/10/2026
+
+- **Edifícios desenhados em SVG isométrico** (`js/art.js`), sem imagens externas, substituindo os emojis na aldeia. Cada edifício evolui em 4 estágios visuais: madeira e palha (nv. 1–4), enxaimel com telhas da tribo (5–9), pedra com ala extra (10–14) e fortificado com torre e estandarte (15+).
+- Cores de telhado e estandarte por tribo; animações leves (bandeiras, moinho, fumaça de forjas, brasas) que respeitam *reduzir movimento*. Obras em andamento mostram andaimes.
+- **Cenário da aldeia** com praça, estradas, rio e árvores vetoriais; a **Muralha aparece ao redor da aldeia** e cresce com o nível (madeira → pedra com torres). Terrenos livres viram marcações discretas.
+- **Campos de recursos ilustrados**: bosques ficam mais densos, minas ganham carrinhos, barreiras ganham olaria e campos de cereal ganham celeiros conforme sobem de nível.
+- **Mapa arrastável** com mouse ou dedo, **zoom** por botões, roda do mouse, pinça ou teclas +/−, navegação pelas setas do teclado e **minimapa** clicável. O zoom máximo mostra o mundo inteiro (17×17) sem a página crescer além da tela.
+- **Equilíbrio:** a aldeia inicial começava com cereal −8/h; os campos de cereal iniciais agora começam no nível 2 (+16/h).
+- Modo *Em grade* e saves anteriores continuam compatíveis; sem `art.js` a interface volta automaticamente aos emojis.
+- Nova suíte `tests/visual-v15.test.js`.
+
 ## [1.4.1] — Demolição, alimentação e mercado interno · 15/10/2026
 
 - Demolição agendada de um nível de edifício por ordem, exigindo Edifício Principal nível 10, cancelamento e remoção do espaço no nível zero.
