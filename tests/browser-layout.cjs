@@ -76,6 +76,28 @@ async function run(){
    if(!modal.visible||!modal.top)failures.push(width+': modal encoberto '+JSON.stringify(modal));
    await page.keyboard.press('Escape');
    if(await page.evaluate(()=>ui.modal!==null))failures.push(width+': Escape não fecha modal');
+   // Exercita o fluxo que antes perdia a quantidade digitada ao renderizar.
+   await page.evaluate(()=>{ui.page='market';ui.modal=null;E.active(state).buildings.marketplace=1;render();});
+   await page.locator('#trade-from').selectOption('wood');
+   await page.locator('#trade-to').selectOption('clay');
+   await page.locator('#trade-amount').fill('150');
+   const previous=await page.evaluate(()=>({...E.active(state).resources}));
+   await page.locator('[data-trade]').click();
+   const tradeResult=await page.evaluate(()=>({
+    resources:E.active(state).resources,
+    amount:document.querySelector('#trade-amount')?.value,
+    from:document.querySelector('#trade-from')?.value,
+    to:document.querySelector('#trade-to')?.value
+   }));
+   if(tradeResult.resources.wood!==previous.wood-150||tradeResult.resources.clay!==previous.clay+150||
+      tradeResult.amount!=='150'||tradeResult.from!=='wood'||tradeResult.to!=='clay')
+    failures.push(width+': troca ou formulário não preservado '+JSON.stringify(tradeResult));
+   // Valida abertura de modal de construção e foco para teclado.
+   await page.evaluate(()=>{ui.page='village';render();});
+   await page.locator('[data-slot="0"]').first().click();
+   const buildingModal=await page.evaluate(()=>({modal:ui.modal,focus:document.activeElement?.classList?.contains('dialog-close')}));
+   if(buildingModal.modal!=='building'||!buildingModal.focus)failures.push(width+': modal de construção inacessível '+JSON.stringify(buildingModal));
+   await page.keyboard.press('Escape');
    if(width===390||width===960||width===1366){
     await page.evaluate(()=>{ui.page='worldEvents';render();});
     fs.mkdirSync(path.join(root,'artifacts'),{recursive:true});
