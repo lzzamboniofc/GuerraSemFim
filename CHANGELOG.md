@@ -1,3 +1,9 @@
+## v1.6 — Eventos da temporada e Maravilha do Mundo
+
+- Eventos sazonais de produção, marcos Natares, relíquia, Tesouraria e expedições de plano.
+- Sítio da Maravilha até o nível 100, segundo plano de facção aliada, disputa com IA e vitória de temporada.
+- Novo painel de eventos, persistência compatível e testes dedicados. Mecânica final adaptada para jogar sozinho e offline.
+
 # Changelog
 
 ## [1.5.1] — Código em módulos e atualização incremental da tela · 19/10/2026
