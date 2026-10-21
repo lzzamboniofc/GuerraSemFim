@@ -1,0 +1,36 @@
+name: Importar ilustrações de aldeias por estágio
+on:
+  push:
+    branches: [feat/aldeias-ilustradas-v18]
+    paths: [.github/workflows/importar-arte-aldeias.yml]
+permissions:
+  contents: write
+jobs:
+  importar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/aldeias-ilustradas-v18
+          persist-credentials: true
+      - name: Copiar as ilustrações do projeto de referência e otimizar para WebP
+        run: |
+          set -euo pipefail
+          mkdir -p assets/village-stages
+          ffmpeg -version | head -n 1
+          for stage in outpost hamlet small medium town large; do
+            src="https://raw.githubusercontent.com/LucasRZamboni/ReinosDeGuerra/main/assets/village-${stage}.png"
+            curl -fLSs --retry 4 --retry-all-errors --connect-timeout 15 --max-time 120 "$src" -o "/tmp/village-${stage}.png"
+            ffmpeg -nostdin -y -hide_banner -loglevel error -i "/tmp/village-${stage}.png" \
+              -vf 'scale=960:-2:flags=lanczos' -frames:v 1 -c:v libwebp -quality 74 \
+              -compression_level 6 "assets/village-stages/${stage}.webp"
+            test -s "assets/village-stages/${stage}.webp"
+            ls -lh "assets/village-stages/${stage}.webp"
+          done
+      - name: Incorporar ilustrações otimizadas na branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/village-stages/*.webp
+          git commit -m "assets: adicionar seis ilustrações de estágio em WebP otimizado"
+          git push origin HEAD:feat/aldeias-ilustradas-v18
