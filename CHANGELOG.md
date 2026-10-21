@@ -1,3 +1,11 @@
+## v1.8 — Ilustrações completas de aldeia em seis estágios
+
+- Substituído o cenário animado da v1.7 por **seis ilustrações estáticas otimizadas**, reaproveitadas do projeto de referência ReinosDeGuerra: Posto, Povoado, Aldeia, Vila, Cidade e Fortaleza.
+- Estágios mudam com a pontuação de desenvolvimento, com barra de progresso; os marcadores mostram edifícios construídos e níveis, com os terrenos vazios clicáveis.
+- Retirados os scripts `js/art-life.js` e `styles-life.css`, sem moradores, carroças, água ou fumaça animados.
+- Imagens WebP de até 960 px, cerca de 661 KB somadas, carregamento de uma única imagem por aldeia. Teste de desempenho e compatibilidade mobile/desktop.
+- Modo Em grade, saves, unidades, economia, construção, campos e funções existentes preservados.
+
 ## v1.7 — Aldeia viva e cenário detalhado
 
 - Cenários próprios em SVG: vielas, pomares, pequenas casas, cercas, poços, pontes e lavouras.

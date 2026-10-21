@@ -4,7 +4,7 @@
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
 const {chromium}=require('playwright-core');
 const root=path.resolve(__dirname,'..');
-const mime={'.html':'text/html; charset=utf-8','.js':'application/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml'};
+const mime={'.html':'text/html; charset=utf-8','.js':'application/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.webp':'image/webp'};
 function serve(req,res){
  const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
  const file=path.resolve(root,'.'+pathname);
@@ -101,11 +101,13 @@ async function run(){
    if(width===390||width===960||width===1366){
     fs.mkdirSync(path.join(root,'artifacts'),{recursive:true});
     await page.evaluate(()=>{ui.page='village';ui.modal=null;render();});
-    if(!await page.locator('.town-ground .life-walker').count())failures.push(width+': aldeia sem habitantes visuais');
-    await page.screenshot({path:path.join(root,'artifacts','aldeia-viva-'+width+'.png'),fullPage:true,animations:'disabled'});
+    const pic=await page.locator('.stage-illustration').evaluate(el=>({ok:el.complete&&el.naturalWidth>0,src:el.getAttribute('src'),width:el.naturalWidth}));
+    if(!pic.ok||!pic.src.includes('village-stages/'))failures.push(width+': ilustração da aldeia ausente '+JSON.stringify(pic));
+    if(await page.locator('.life-walker,.scene-vitality').count())failures.push(width+': animações antigas ainda presentes');
+    await page.screenshot({path:path.join(root,'artifacts','aldeia-estagios-'+width+'.png'),fullPage:true,animations:'disabled'});
     await page.evaluate(()=>{ui.page='fields';render();});
-    if(!await page.locator('.field-ground').count())failures.push(width+': campos sem paisagem');
-    await page.screenshot({path:path.join(root,'artifacts','campos-vivos-'+width+'.png'),fullPage:true,animations:'disabled'});
+    if(await page.locator('.life-ground,.field-ground').count())failures.push(width+': cenário animado antigo persistiu');
+    await page.screenshot({path:path.join(root,'artifacts','campos-estaticos-'+width+'.png'),fullPage:true,animations:'disabled'});
     await page.evaluate(()=>{ui.page='worldEvents';render();});
     await page.screenshot({path:path.join(root,'artifacts','revisao-'+width+'.png'),fullPage:true,animations:'disabled'});
    }

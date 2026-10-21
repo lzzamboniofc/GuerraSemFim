@@ -1,0 +1,110 @@
+/* v1.8 — ilustrações estáticas de aldeias, leves como no ReinosDeGuerra.
+   O modo grade continua exibindo os edifícios individuais.
+*/
+.view-original .town-board.stage-illustrated{
+ position:relative;
+ width:min(100%,690px);
+ max-width:100%;
+ height:auto;
+ aspect-ratio:1/1;
+ margin:0 auto;
+ overflow:hidden;
+ isolation:isolate;
+ background:#141713 radial-gradient(ellipse at center,#232821,#0f1512 84%);
+ border:5px solid #b6a070;
+ border-radius:12px;
+ box-shadow:0 9px 22px #172b214b,inset 0 0 0 2px #ecd69d;
+}
+.view-original .town-board.stage-illustrated::before,
+.view-original .town-board.stage-illustrated::after{display:none!important}
+.town-board.stage-illustrated .stage-illustration{
+ position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;
+ pointer-events:none;user-select:none;-webkit-user-drag:none;z-index:0;
+}
+.stage-progress{width:min(100%,690px);margin:0 auto 11px;padding:11px 13px 10px;
+ background:linear-gradient(115deg,#eff0d9,#e7ddbe);border:1px solid #cbb68d;border-radius:8px;
+ display:grid;grid-template-columns:1fr auto;gap:5px 12px;align-items:center;
+ font:12px Arial,sans-serif;color:#5b543f}
+.stage-progress strong{color:#344d37;font:700 15px Georgia,serif}
+.stage-progress small{color:#72664f;white-space:nowrap;font:700 11px Arial,sans-serif}
+.stage-progress-track{grid-column:1/-1;height:8px;background:#cabb9a;border-radius:7px;overflow:hidden;box-shadow:inset 0 1px 2px #7663444f}
+.stage-progress-track>span{display:block;height:100%;background:#4d784f;border-radius:7px}
+.view-original .town-board.stage-illustrated .town-slot.stage-pin{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ width:38px!important;min-width:0;max-width:none;height:38px;min-height:0;padding:0!important;
+ margin:0;border:0;background:transparent;
+ transform:translate(-50%,-50%)!important;filter:none!important;
+ transition:none!important;animation:none!important;z-index:4;
+}
+.view-original .town-board.stage-illustrated .town-slot.stage-pin .building-art{
+ display:grid;place-items:center;flex:none;width:30px!important;height:30px!important;
+ aspect-ratio:auto!important;border-radius:8px!important;
+ background:linear-gradient(#faf1d8f2,#d8c7a3f0)!important;
+ border:1px solid #755d39!important;
+ color:#3a5233;font-size:17px!important;line-height:1!important;
+ box-shadow:0 2px 0 #745a3ec4,0 3px 5px #1c2b2382;
+ filter:none!important;transform:none!important;animation:none!important;
+}
+.view-original .town-board.stage-illustrated .town-slot.stage-pin.empty{
+ width:28px!important;height:28px;opacity:.55;
+}
+.view-original .town-board.stage-illustrated .town-slot.stage-pin.empty .building-art{
+ width:19px!important;height:19px!important;border:1px dashed #edd28d!important;
+ background:#233d2bb8!important;color:#fff2c6;font-size:15px!important;
+ box-shadow:0 1px 3px #162b219b;
+}
+.view-original .town-board.stage-illustrated .town-slot.stage-pin.selected,
+.view-original .town-board.stage-illustrated .town-slot.stage-pin:hover,
+.view-original .town-board.stage-illustrated .town-slot.stage-pin:focus-visible{opacity:1;outline:0}
+.view-original .town-board.stage-illustrated .town-slot.stage-pin.selected .building-art,
+.view-original .town-board.stage-illustrated .town-slot.stage-pin:hover .building-art,
+.view-original .town-board.stage-illustrated .town-slot.stage-pin:focus-visible .building-art{
+ border:2px solid #ffd46f!important;background:#fff0bb!important;
+ box-shadow:0 0 0 3px #294531b9,0 3px 7px #203222e6;
+}
+.view-original .town-board.stage-illustrated .town-slot.stage-pin .slot-level{
+ position:absolute;top:auto!important;right:-9px!important;bottom:-5px!important;left:auto!important;
+ transform:none!important;display:grid;place-items:center;
+ padding:2px 3px;min-width:18px;height:16px;
+ background:#35563b;color:#fff6df;border:1px solid #d6bd7d;
+ border-radius:5px;box-shadow:0 1px 2px #1b2a1d95;font:700 10px Arial,sans-serif;z-index:2;
+}
+.view-original .town-board.stage-illustrated .town-slot.stage-pin .slot-name{
+ display:none;position:absolute;bottom:calc(100% + 5px);left:50%;right:auto;top:auto;
+ transform:translateX(-50%);margin:0;max-width:130px;min-width:max-content;
+ padding:4px 6px;border-radius:5px;white-space:nowrap;
+ border:1px solid #e0c180;background:#283c30f4;color:#fff5d5;
+ font:700 10px Arial,sans-serif;text-align:center;text-shadow:none;
+ box-shadow:0 3px 6px #17302166;pointer-events:none;z-index:12;
+}
+.view-original .town-board.stage-illustrated .town-slot.stage-pin:hover .slot-name,
+.view-original .town-board.stage-illustrated .town-slot.stage-pin:focus-visible .slot-name,
+.view-original .town-board.stage-illustrated .town-slot.stage-pin.selected .slot-name{display:block}
+.view-original .town-board.stage-illustrated .town-slot.stage-pin.empty .slot-name{display:none}
+.view-original .town-board.stage-illustrated .town-slot.stage-pin.empty:hover .slot-name,
+.view-original .town-board.stage-illustrated .town-slot.stage-pin.empty:focus-visible .slot-name,
+.view-original .town-board.stage-illustrated .town-slot.stage-pin.empty.selected .slot-name{display:block}
+.view-original .town-board.stage-illustrated .town-slot.stage-pin.building .building-art{
+ background:#fbe0a2!important;border-color:#9e6e24!important
+}
+/* A aldeia é uma ilustração estática; também parar movimentos legados nos campos. */
+.town-board *, .field-board *{animation:none!important;transition:none!important}
+@media(max-width:600px){
+ .stage-progress{padding:8px 9px}
+ .stage-progress strong{font-size:13px}
+ .stage-progress small{font-size:10px}
+ .view-original .town-board.stage-illustrated .town-slot.stage-pin{width:29px!important;height:29px}
+ .view-original .town-board.stage-illustrated .town-slot.stage-pin .building-art{
+  width:22px!important;height:22px!important;font-size:12px!important;border-radius:5px!important;
+ }
+ .view-original .town-board.stage-illustrated .town-slot.stage-pin.empty{
+  width:20px!important;height:20px
+ }
+ .view-original .town-board.stage-illustrated .town-slot.stage-pin.empty .building-art{
+  width:15px!important;height:15px!important;font-size:11px!important
+ }
+ .view-original .town-board.stage-illustrated .town-slot.stage-pin .slot-level{
+  min-width:15px;height:14px;bottom:-5px!important;right:-5px!important;font-size:9px
+ }
+ .view-original .town-board.stage-illustrated .town-slot.stage-pin .slot-name{font-size:9px}
+}
