@@ -1,8 +1,8 @@
-## 🌿 Aldeias vivas — v1.7
+## 🏰 Aldeias ilustradas por estágio — v1.8
 
-O centro da aldeia e os campos agora têm **cenários SVG detalhados**, ruas sinuosas, água, ponte, horta, feira, carroça, poço, animais e aldeões animados. A paisagem cresce conforme a população aumenta; muralhas e edifícios continuam evoluindo pelos níveis. Os 20 terrenos e os 18 campos permanecem clicáveis. O modo **Em grade** continua disponível.
+A tela da aldeia agora usa **seis ilustrações completas**, da fase Posto à Fortaleza, seguindo o modelo de evolução visual do projeto [ReinosDeGuerra](https://github.com/LucasRZamboni/ReinosDeGuerra). A ilustração muda com a **pontuação de desenvolvimento** da aldeia (80, 180, 350, 700, 1.400 pontos), com barra de avanço para a próxima fase. Os edifícios continuam clicáveis pelos marcadores com nível, e terrenos vazios continuam disponíveis para construção.
 
-Arte vetorial criada no projeto, sem downloads ou bibliotecas, com opção de movimento reduzido respeitada pelo navegador. Inspirado na evolução gráfica por estágios do ReinosDeGuerra, sem copiar os PNGs.
+**Sem animações no centro da aldeia ou nos campos** e sem os cenários SVG procedurais da v1.7. As seis imagens originais do projeto de referência foram redimensionadas e convertidas para **WebP local (~661 KB no total)**, sem dependências de rede. O modo **Em grade**, as regras e os saves permanecem disponíveis. Veja [detalhes e atribuição](docs/ALDEIA_POR_ESTAGIOS.md).
 
 # ⚔️ Guerra Sem Fim
 
@@ -11,7 +11,7 @@ Arte vetorial criada no projeto, sem downloads ou bibliotecas, com opção de mo
 A campanha possui agora eventos sazonais temporários, chegada dos Natares, relíquia da Tesouraria, planos de construção e disputa da Maravilha até o nível 100 contra a IA. Acompanhe na nova página **Eventos & Maravilha**. A construção exige recursos e planos, e a fase final é uma **adaptação offline**, não uma reprodução literal dos servidores do Travian. Veja [regras e diferenças](docs/EVENTOS_E_MARAVILHA.md).
 
 
-**Impérios & Conquistas — versão 1.6.1, arte isométrica, mapa arrastável, temporada Natar, Maravilha do Mundo e interface revisada. Tudo offline.**
+**Impérios & Conquistas — versão 1.8, aldeias ilustradas por estágios e arte isométrica, mapa arrastável, temporada Natar, Maravilha do Mundo e interface revisada. Tudo offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
 
@@ -23,7 +23,7 @@ O jogo é estático e funciona offline, inclusive abrindo o `index.html` direto 
 |---|---|
 | `js/data.js`, `js/engine.js` | Dados e regras do jogo (produção, construção, combate, saves) |
 | `js/ai.js`, `js/war.js`, `js/campaign.js`, `js/expansion.js` | Reinos rivais, cálculo de batalha, campanha e expansão |
-| `js/art.js` | Arte isométrica em SVG (edifícios, campos, cenário e mapa) |
+| `js/art.js`, `js/art-stage.js` | Arte SVG de edifícios/campos/mapa e progresso da aldeia em seis imagens WebP |
 | `js/ui/dom.js` | Atualização incremental do DOM ("morph") |
 | `js/ui/core.js` | Estado da interface, utilitários, menu e moldura da página |
 | `js/ui/village.js`, `map.js`, `military.js`, `progress.js`, `economy.js` | Uma tela ou grupo de telas por arquivo |
