@@ -25,6 +25,8 @@ assert(!W.allyPlan(st).ok);
 assert(W.upgrade(st,v).ok);assert(!W.upgrade(st,v).ok);
 assert(E.save(st));const q=w.queue;st.lastTick=q.startedAt;E.advance(st,q.endsAt+1);
 assert.strictEqual(w.level,1);assert.strictEqual(w.queue,null);
+// A produção respeita a capacidade; restabelecer os recursos para testar os níveis altos.
+v.resources={wood:500000,clay:500000,iron:500000,crop:500000};
 w.level=49;
 assert(!W.canUpgrade(st,v).ok);
 st.campaign.allies.push('corvos');assert(W.allyPlan(st).ok);assert(W.hasCoalition(st));
