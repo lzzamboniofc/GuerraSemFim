@@ -5,7 +5,7 @@
 A campanha possui agora eventos sazonais temporários, chegada dos Natares, relíquia da Tesouraria, planos de construção e disputa da Maravilha até o nível 100 contra a IA. Acompanhe na nova página **Eventos & Maravilha**. A construção exige recursos e planos, e a fase final é uma **adaptação offline**, não uma reprodução literal dos servidores do Travian. Veja [regras e diferenças](docs/EVENTOS_E_MARAVILHA.md).
 
 
-**Impérios & Conquistas — versão 1.5.1, arte isométrica que evolui por nível, mapa arrastável com zoom e economia recalibrada. Tudo offline.**
+**Impérios & Conquistas — versão 1.6.1, arte isométrica, mapa arrastável, temporada Natar, Maravilha do Mundo e interface revisada. Tudo offline.**
 
 Um jogo **independente**, inspirado nas mecânicas clássicas dos jogos de aldeias e impérios (como Travian). Não utiliza imagens, código, textos do jogo original, marcas ou APIs da Travian Games.
 

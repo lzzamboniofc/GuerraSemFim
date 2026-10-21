@@ -1,0 +1,29 @@
+name: Auditoria de layout em navegador
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  chrome:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Preparar Chrome e Playwright Core
+        run: |
+          which google-chrome
+          npm install --no-save --no-audit --no-fund playwright-core@1.55.1
+      - name: Percorrer telas e verificar sobreposição
+        run: node tests/browser-layout.cjs
+      - name: Anexar capturas para revisão
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capturas-de-layout
+          path: artifacts/*.png
+          if-no-files-found: ignore
