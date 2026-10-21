@@ -99,8 +99,14 @@ async function run(){
    if(buildingModal.modal!=='building'||!buildingModal.focus)failures.push(width+': modal de construção inacessível '+JSON.stringify(buildingModal));
    await page.keyboard.press('Escape');
    if(width===390||width===960||width===1366){
-    await page.evaluate(()=>{ui.page='worldEvents';render();});
     fs.mkdirSync(path.join(root,'artifacts'),{recursive:true});
+    await page.evaluate(()=>{ui.page='village';ui.modal=null;render();});
+    if(!await page.locator('.town-ground .life-walker').count())failures.push(width+': aldeia sem habitantes visuais');
+    await page.screenshot({path:path.join(root,'artifacts','aldeia-viva-'+width+'.png'),fullPage:true,animations:'disabled'});
+    await page.evaluate(()=>{ui.page='fields';render();});
+    if(!await page.locator('.field-ground').count())failures.push(width+': campos sem paisagem');
+    await page.screenshot({path:path.join(root,'artifacts','campos-vivos-'+width+'.png'),fullPage:true,animations:'disabled'});
+    await page.evaluate(()=>{ui.page='worldEvents';render();});
     await page.screenshot({path:path.join(root,'artifacts','revisao-'+width+'.png'),fullPage:true,animations:'disabled'});
    }
    await context.close();

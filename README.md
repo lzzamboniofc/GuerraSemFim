@@ -1,3 +1,9 @@
+## 🌿 Aldeias vivas — v1.7
+
+O centro da aldeia e os campos agora têm **cenários SVG detalhados**, ruas sinuosas, água, ponte, horta, feira, carroça, poço, animais e aldeões animados. A paisagem cresce conforme a população aumenta; muralhas e edifícios continuam evoluindo pelos níveis. Os 20 terrenos e os 18 campos permanecem clicáveis. O modo **Em grade** continua disponível.
+
+Arte vetorial criada no projeto, sem downloads ou bibliotecas, com opção de movimento reduzido respeitada pelo navegador. Inspirado na evolução gráfica por estágios do ReinosDeGuerra, sem copiar os PNGs.
+
 # ⚔️ Guerra Sem Fim
 
 ## Temporada offline e Maravilha do Mundo (v1.6)
