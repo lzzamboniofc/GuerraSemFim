@@ -47,3 +47,11 @@
 @keyframes sheetUp{from{transform:translateY(18px);opacity:0}to{transform:none;opacity:1}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.sidebar.nav-expanded,.nav-sheet-backdrop{animation:none}.fold-panel>summary:before{transition:none}}
+
+/* Temporada offline e Grande Obra */
+.world-milestones{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.world-progress{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}
+.world-progress>div{min-width:0}
+.world-progress strong{display:block;margin-bottom:8px}
+.world-progress .progress-track{width:100%}
+@media(max-width:600px){.world-progress{grid-template-columns:1fr}}

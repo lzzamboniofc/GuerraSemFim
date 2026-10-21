@@ -118,6 +118,7 @@ function nextEvents(st,cursor){if(!st.ai)return [];const times=[st.ai.nextTurnAt
 function turn(st,at){
  const ai=st.ai;ai.turn++;
  window.GSF_EXPANSION?.onTurn(st,ai.turn,at);
+ window.GSF_WORLD?.onTurn(st,ai.turn,at);
  for(const [index,f] of ai.factions.entries()){
   if(f.defeated)continue;
   f.turns++;
