@@ -68,7 +68,7 @@ function dailyView(){
 
 /* Painel da temporada offline: eventos, artefatos e final de jogo. */
 function worldEventsView(){
- const W=window.GSF_WORLD,w=W.init(state),v=E.active(state),turn=state.ai?.turn||0,season=W.SEASONS.find(e=>e.id===w.active?.id),active=season&&w.active.until>=turn;
+ const W=window.GSF_WORLD,w=W.init(state),v=E.active(state),turn=state.ai?.turn||0,season=W.SEASONS.find(e=>e.id===w.active?.id),active=season&&w.active.until>turn;
  const owner=state.villages.find(x=>x.id===w.wonderVillageId),price=w.level<100?W.wonderCost(w.level+1):null;
  const costs=price?D.RES.map((key,i)=>iconRes(key)+' '+fmt(price[i])).join(' · '):'Concluída';
  let html=head('Eventos & Maravilha do Mundo','Uma temporada offline inspirada no ritmo estratégico de Travian: artefatos, Natares, planos e um objetivo final.',villageSelect());
