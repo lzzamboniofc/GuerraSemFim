@@ -17,13 +17,23 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p assets/village-stages
-          ffmpeg -version | head -n 1
+          if command -v magick >/dev/null 2>&1; then
+            export CONVERTER=magick
+          elif command -v convert >/dev/null 2>&1; then
+            export CONVERTER=convert
+          else
+            export CONVERTER=python
+            python3 -c 'from PIL import Image' || (python3 -m pip install --user --break-system-packages Pillow)
+          fi
+          echo "Conversor: $CONVERTER"
           for stage in outpost hamlet small medium town large; do
             src="https://raw.githubusercontent.com/LucasRZamboni/ReinosDeGuerra/main/assets/village-${stage}.png"
             curl -fLSs --retry 4 --retry-all-errors --connect-timeout 15 --max-time 120 "$src" -o "/tmp/village-${stage}.png"
-            ffmpeg -nostdin -y -hide_banner -loglevel error -i "/tmp/village-${stage}.png" \
-              -vf 'scale=960:-2:flags=lanczos' -frames:v 1 -c:v libwebp -quality 74 \
-              -compression_level 6 "assets/village-stages/${stage}.webp"
+            if [ "$CONVERTER" = python ]; then
+              python3 -c 'from PIL import Image; import sys; im=Image.open(sys.argv[1]).convert("RGB"); im.thumbnail((960,960),Image.Resampling.LANCZOS); im.save(sys.argv[2], "WEBP",quality=74, method=6)' "/tmp/village-${stage}.png" "assets/village-stages/${stage}.webp"
+            else
+              "$CONVERTER" "/tmp/village-${stage}.png" -resize 960x960\\> -quality 74 "assets/village-stages/${stage}.webp"
+            fi
             test -s "assets/village-stages/${stage}.webp"
             ls -lh "assets/village-stages/${stage}.webp"
           done
