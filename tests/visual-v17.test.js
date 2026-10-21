@@ -32,7 +32,7 @@ for(const fn of ['index.html','preview-local.html']){
 }
 const ui=fs.readFileSync(path.join(root,'js/ui/village.js'),'utf8');
 assert(ui.includes('ART?.fieldGround?.()'),'Campos não possuem cenário próprio');
-assert(ui.includes('ART.townGround(E.buildLevel(v,\\'wall\\'),state.tribe,E.population(v))'),'Aldeia não usa população real');
+assert(ui.includes("ART.townGround(E.buildLevel(v,'wall'),state.tribe,E.population(v))"),'Aldeia não usa população real');
 const css=fs.readFileSync(path.join(root,'styles-life.css'),'utf8');
 assert(css.includes('prefers-reduced-motion:reduce'));
 console.log('✓ v1.7: aldeia viva, crescimento, campos, compatibilidade e movimento reduzido');
