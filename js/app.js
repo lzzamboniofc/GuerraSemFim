@@ -17,7 +17,7 @@ document.addEventListener('click',e=>{if(e.target.matches?.('[data-backdrop]')&&
   actionAndRender(r,'Ação da temporada concluída!');return;
  }
  if(d.questFilter){ui.questFilter=d.questFilter;render();return;}
- if(d.toggleMenu!==undefined){ui.menuOpen=!ui.menuOpen;render();return;}if(d.nav){ui.page=d.nav;ui.modal=null;ui.menuOpen=false;render();window.scrollTo?.(0,0);return;}
+ if(d.toggleMenu!==undefined){ui.menuOpen=!ui.menuOpen;render();if(ui.menuOpen)document.querySelector('.sidebar.nav-expanded .nav-item')?.focus?.({preventScroll:true});return;}if(d.nav){ui.page=d.nav;ui.modal=null;ui.menuOpen=false;render();window.scrollTo?.(0,0);return;}
  if(d.heroSelectAll!==undefined){document.querySelectorAll('[data-hero-target]').forEach(el=>el.checked=true);return;}
  if(d.heroApply!==undefined){const selected=[...document.querySelectorAll('[data-hero-target]:checked')].map(el=>el.dataset.heroTarget);const r=E.setHeroTargets(state,selected);if(flagResult(r,'Distribuição produtiva do herói atualizada!'))saveAndRender();return;}
  if(d.trainAdministrator!==undefined){actionAndRender(E.trainAdministrator(state,v),'Administrador em preparação!');return;}
@@ -94,7 +94,8 @@ document.addEventListener('click',e=>{if(e.target.matches?.('[data-backdrop]')&&
  if(d.closeModal!==undefined){ui.modal=null;render();return;}
  if(d.confirmReset!==undefined){E.clear();state=null;ui.modal=null;ui.page='village';render();return;}
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ui.modal){ui.modal=null;render();}});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(ui.modal){ui.modal=null;render();return;}if(ui.menuOpen){ui.menuOpen=false;render();document.querySelector('[data-toggle-menu]')?.focus?.({preventScroll:true});}});
+window.addEventListener('resize',()=>{if(window.innerWidth>=960&&ui.menuOpen){ui.menuOpen=false;render();}});
 window.addEventListener('beforeunload',()=>{if(state)E.save(state);});
 setInterval(()=>{if(!state)return;const n=Date.now(),before=state.events[0]?.id,queues=state.movements.length;E.advance(state,n);const v=E.active(state),prod=E.production(state,v);for(const k of D.RES){const val=$(`[data-resource="${k}"]`),p=$(`[data-prod="${k}"]`);if(val)val.textContent=fmt(v.resources[k]);if(p)p.textContent=(prod[k]>=0?'+':'')+fmt(prod[k]);const fill=$(`[data-fill="${k}"]`);if(fill)fill.style.width=Math.min(100,Math.max(0,100*v.resources[k]/E.capacity(v,k)))+'%';const m=$(`[data-modal-current="${k}"]`),mp=$(`[data-modal-prod="${k}"]`);if(m)m.textContent=fmt(v.resources[k]);if(mp)mp.textContent=(prod[k]>=0?'+':'')+fmt(prod[k])+'/h';}
  document.querySelectorAll('[data-countdown]').forEach(el=>{el.textContent=duration((Number(el.dataset.countdown)-n)/1000);});document.querySelectorAll('[data-progress]').forEach(el=>{el.style.width=percent(Number(el.dataset.start),Number(el.dataset.progress))+'%';});

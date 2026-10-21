@@ -48,7 +48,7 @@ function modifier(st,resource){
  const w=st.worldEvents;
  if(!w)return 1;
  let mod=1;
- if(w.active&&w.active.until>=(st.ai?.turn||0)){
+ if(w.active&&w.active.until>(st.ai?.turn||0)){
   const e=SEASONS.find(e=>e.id===w.active.id);
   if(e&&e.resource===resource)mod+=e.bonus;
  }
