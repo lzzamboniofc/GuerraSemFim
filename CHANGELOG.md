@@ -1,3 +1,12 @@
+## v1.6.1 — Auditoria de layout e regressão
+
+- Corrigidos o menu em tablets (901–959 px), a rolagem do menu lateral alto e textos longos que invadiam a área do jogo.
+- Barra inferior e menu “Mais” com camadas, foco por teclado, Escape e bloqueio de rolagem de fundo melhorados.
+- Modais de ajuda e reinício acessíveis; detalhamento de produção mostra bônus tribais e efeitos temporários/relíquias.
+- Eventos sazonais terminam exatamente após quatro turnos.
+- Adicionada execução real em Chrome de 16 telas por 10 resoluções, com validação dos menus, modais, formulários e capturas de tela.
+- Mantidos os saves locais e o funcionamento offline; testes de motor e interface preservados.
+
 ## v1.6 — Eventos da temporada e Maravilha do Mundo
 
 - Eventos sazonais de produção, marcos Natares, relíquia, Tesouraria e expedições de plano.

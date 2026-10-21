@@ -11,6 +11,8 @@ assert(E.validateState(st));assert.strictEqual(w.level,0);assert.strictEqual(W.p
 assert(!W.captureRelic(st,v).ok);assert(!W.conquerWonder(st,v).ok);
 for(let t=1;t<=6;t++){st.ai.turn=t;W.onTurn(st,t,Date.now());}
 assert.strictEqual(w.history.length,1);assert(W.modifier(st,'crop')>1);
+st.ai.turn=9;assert(W.modifier(st,'crop')>1,'o bônus sazonal deve durar quatro turnos');
+st.ai.turn=10;assert.strictEqual(W.modifier(st,'crop'),1,'o bônus sazonal não pode permanecer no quinto turno');
 st.ai.turn=11;st.ai.nextTurnAt=Date.now()-1;AI.resolveDue(st,st.ai.nextTurnAt);
 assert.strictEqual(st.ai.turn,12);assert.strictEqual(w.lastTurn,12);assert(st.reports.some(r=>r.title.includes('rumores')));
 st.ai.turn=56;W.onTurn(st,56,Date.now());
