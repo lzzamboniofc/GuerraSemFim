@@ -80,7 +80,7 @@ function townGround(level=0,tribe='romans',population=0){
  s+=fence(12,106,30)+fence(147,42,24)+fence(7,41,17);
  [[35,105],[41,106],[177,49]].forEach(([x,y],i)=>s+=cow(x,y,i));
  // Bairro residencial fora das casas construíveis: cresce com a população.
- s+=hut(12,53,.61,t.roof)+hut(188,59,.7,t.roof);
+ s+=hut(12,53,.61,t.roof)+hut(188,59,.7,t.roof)+hut(12,26,.56,t.roof)+hut(190,22,.58,t.roof);
  if(pop>=25)s+=hut(181,96,.63,t.roof);
  if(pop>=65)s+=hut(37,8,.64,t.roof)+hut(154,12,.59,t.roof);
  if(pop>=130)s+=hut(12,97,.6,t.roof)+hut(188,106,.58,t.roof);
@@ -90,7 +90,7 @@ function townGround(level=0,tribe='romans',population=0){
  s+='<g class="life-water"><path d="M163 111q12-10 24-8 M168 105q10-8 19-6 M184 88q8-3 12-8" stroke="#d2edf1" stroke-width=".65" fill="none" opacity=".75"/><ellipse cx="183" cy="108" rx="7" ry="1.1" fill="none" stroke="#c7edf0" stroke-width=".55" class="life-ripple"/><ellipse cx="187" cy="92" rx="4" ry=".8" fill="none" stroke="#c7edf0" stroke-width=".5" class="life-ripple"/></g>';
  s+='<g transform="translate(161 99)"><path d="M-5 3L9-8L13-7L-1 5Z" fill="#8d6747" stroke="#624936" stroke-width=".65"/><path d="M-3 0L10-8M0 3L13-6" stroke="#d9b07a" stroke-width=".7"/><path d="M-4 1L-3-4M11-7L10-11" stroke="#765437" stroke-width=".7"/></g>';
  // 3–12 moradores desenhados em SVG; velocidade baixa e diversidade de posição.
- const count=Math.min(12,3+Math.floor(pop/15));
+ const count=Math.min(16,6+Math.floor(pop/13));
  for(let i=0;i<count;i++){const x=48+rand(i,54)*105,y=42+rand(i,55)*59;s+=resident(x,y,i,t.banner);}
  if(wall>=1)s+='<g class="life-gate"><path d="M93 109q7 -9 14 0v8H93Z" fill="#554b39" opacity=".54"/><path d="M91 111q9 -12 18 0" fill="none" stroke="#a08e6e" stroke-width="3"/><path d="M96 112h9" stroke="#b7a18c" stroke-width=".8" stroke-dasharray="2 1"/></g>';
  if(wall>=10)s+='<path d="M15 56Q14 33 29 21M171 18Q190 32 191 56" stroke="#e6d6ad" stroke-width=".65" stroke-dasharray="3 2" fill="none" opacity=".6"/>';
