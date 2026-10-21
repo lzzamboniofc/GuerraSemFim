@@ -1,7 +1,7 @@
 /* Guerra Sem Fim v1.7 — arte da aldeia viva.
    Apenas apresentação: nenhuma interação ou dado persistido é alterado. */
 .view-original .town-board.has-art,
-.view-original .field-board:has(.field-ground){
+.view-original .field-board{
  border:5px solid #9e8654;
  border-radius:16px;
  background:#7ba26b;
@@ -9,15 +9,15 @@
  isolation:isolate;
 }
 .view-original .town-board.has-art{height:clamp(505px,51vw,630px)}
-.view-original .field-board:has(.field-ground){height:clamp(465px,48vw,610px)}
-.view-original .town-board.has-art:after,.view-original .field-board:has(.field-ground):after{
+.view-original .field-board{height:clamp(465px,48vw,610px)}
+.view-original .town-board.has-art:after,.view-original .field-board:after{
  content:"";display:block;pointer-events:none;position:absolute;inset:0;
  border:1px solid #f7e3b77d;border-radius:10px;
  background:linear-gradient(125deg,#fff7d40e 0%,transparent 42%,#13291e27 100%);
  z-index:2;
 }
 .view-original .town-board.has-art:before,
-.view-original .field-board:has(.field-ground):before{display:none}
+.view-original .field-board:before{display:none}
 .scene .town-ground{filter:saturate(1.08) contrast(1.04)}
 .scene .town-ground .life-ground{opacity:1}
 .town-board .town-ground,.field-board .town-ground{pointer-events:none;user-select:none;z-index:0}
@@ -88,14 +88,14 @@
 .view-compact .town-ground{display:none}
 @media(max-width:959px){
  .view-original .town-board.has-art{height:clamp(400px,70vw,540px)}
- .view-original .field-board:has(.field-ground){height:clamp(390px,67vw,515px)}
+ .view-original .field-board{height:clamp(390px,67vw,515px)}
  .scene-vitality{top:8px;right:8px;padding:6px 8px;max-width:60%}
  .scene-vitality strong{font-size:11px}
  .scene-vitality small{font-size:9px}
 }
 @media(max-width:580px){
  .view-original .town-board.has-art{height:385px}
- .view-original .field-board:has(.field-ground){height:390px}
+ .view-original .field-board{height:390px}
  .view-original .town-slot.has-art{width:clamp(43px,16%,68px)}
  .view-original .town-slot.has-art.empty{width:clamp(28px,11%,44px)}
  .view-original .town-slot.has-art .slot-name{display:none}

@@ -1,3 +1,12 @@
+## v1.7 — Aldeia viva e cenário detalhado
+
+- Cenários próprios em SVG: vielas, pomares, pequenas casas, cercas, poços, pontes e lavouras.
+- Habitantes, feira, carroça, pássaros, animais e animações sutis, com movimento reduzido.
+- Crescimento visual por população e evolução de muralhas por nível.
+- Aldeia original com moldura, etiquetas em foco/seleção e HUD de população/edifícios.
+- Campos com paisagem rural, hortas e riacho, mantendo 18 recursos clicáveis.
+- Save e regras preservados, modo em grade mantido, sem imagens externas.
+
 ## v1.6.1 — Auditoria de layout e regressão
 
 - Corrigidos o menu em tablets (901–959 px), a rolagem do menu lateral alto e textos longos que invadiam a área do jogo.
