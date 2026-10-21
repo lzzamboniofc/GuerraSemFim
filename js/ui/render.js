@@ -14,4 +14,4 @@ function actionAndRender(r,message){if(flagResult(r,message))render();}
 function saveAndRender(){E.save(state);render();}
 let mapViewportBand=()=>{const w=Number(window.innerWidth)||1280;return w<=500?0:w<=900?1:w<=1450?2:3;};
 let lastMapViewportBand=mapViewportBand();
-window.addEventListener?.('resize',()=>{const current=mapViewportBand();if(current!==lastMapViewportBand){lastMapViewportBand=current;if(state&&ui.page==='map'&&!ui.modal)render();}});
+window.addEventListener?.('resize',()=>{if(window.innerWidth>=960&&ui.menuOpen){ui.menuOpen=false;render();}const current=mapViewportBand();if(current!==lastMapViewportBand){lastMapViewportBand=current;if(state&&ui.page==='map'&&!ui.modal)render();}});
