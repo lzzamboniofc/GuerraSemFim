@@ -10,7 +10,7 @@
  margin:0 auto;
  overflow:hidden;
  isolation:isolate;
- background:#769269 url('assets/aldeia-cenario.svg') center/cover no-repeat;
+ background:#141713 radial-gradient(ellipse at center,#232821,#0f1512 84%);
  border:5px solid #b6a070;
  border-radius:12px;
  box-shadow:0 9px 22px #172b214b,inset 0 0 0 2px #ecd69d;
@@ -18,7 +18,7 @@
 .view-original .town-board.stage-illustrated::before,
 .view-original .town-board.stage-illustrated::after{display:none!important}
 .town-board.stage-illustrated .stage-illustration{
- position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;object-position:center;
+ position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;
  pointer-events:none;user-select:none;-webkit-user-drag:none;z-index:0;
 }
 .stage-progress{width:min(100%,690px);margin:0 auto 11px;padding:11px 13px 10px;
