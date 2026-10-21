@@ -10,6 +10,12 @@ document.addEventListener('input',e=>{if(['trade-amount','merchant-wood','mercha
 document.addEventListener('click',e=>{if(e.target.matches?.('[data-backdrop]')&&ui.modal){ui.modal=null;render();return;}const target=e.target.closest('button');if(!target)return;const d=target.dataset;if(d.tribe){ui.tribe=d.tribe;render();return;}if(!state)return;const v=E.active(state);
  if(d.visualMode){const r=E.setViewMode(state,d.visualMode);if(flagResult(r,'Visualização atualizada!'))saveAndRender();return;}if(d.dailyReward!==undefined){actionAndRender(E.claimDailyReward(state,d.dailyReward),'Recompensa diária recebida!');return;}
  if(d.dailyEvent!==undefined){actionAndRender(E.claimDailyEvent(state),'Evento diário concluído!');return;}
+ if(d.captureRelic!==undefined||d.conquerWonder!==undefined||d.capturePlan!==undefined||d.allyPlan!==undefined||d.upgradeWonder!==undefined){
+  const W=window.GSF_WORLD;
+  const r=d.captureRelic!==undefined?W.captureRelic(state,v):d.conquerWonder!==undefined?W.conquerWonder(state,v):d.capturePlan!==undefined?W.capturePlan(state,v):d.allyPlan!==undefined?W.allyPlan(state):W.upgrade(state,v);
+  if(r.ok)E.save(state);
+  actionAndRender(r,'Ação da temporada concluída!');return;
+ }
  if(d.questFilter){ui.questFilter=d.questFilter;render();return;}
  if(d.toggleMenu!==undefined){ui.menuOpen=!ui.menuOpen;render();return;}if(d.nav){ui.page=d.nav;ui.modal=null;ui.menuOpen=false;render();window.scrollTo?.(0,0);return;}
  if(d.heroSelectAll!==undefined){document.querySelectorAll('[data-hero-target]').forEach(el=>el.checked=true);return;}

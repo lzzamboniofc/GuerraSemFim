@@ -102,6 +102,7 @@ function newGame(options={}) {
  if(window.GSF_AI)window.GSF_AI.init(st,now());
  window.GSF_CAMPAIGN?.init(st,options.difficulty);
  window.GSF_EXPANSION?.init(st);
+ window.GSF_WORLD?.init(st);
  log(st,'Bem-vindo ao Guerra Sem Fim! Sua aldeia está pronta para crescer.','welcome');
  report(st,'O início de um império','Seu povo ergueu os primeiros edifícios e aguarda suas ordens. Expanda os campos, crie um exército e descubra o mapa.', 'info');
  save(st);return st;
@@ -234,7 +235,7 @@ function production(st,v){const base={wood:0,clay:0,iron:0,crop:0};v.fields.forE
  D.RES.forEach(k=>{
  const item=HERO_ARTIFACTS[heroEquipment(st).charm],gearBonus=st.villages[0].id===v.id&&(item?.type===k||item?.type==='all')?item.bonus:0;
  const tribeBonus=st.tribe==='romans'&&k==='crop'?.04*buildLevel(v,'aqueduct'):st.tribe==='gauls'&&['wood','clay'].includes(k)?.04*buildLevel(v,'grove'):st.tribe==='teutons'&&k==='iron'?.05*buildLevel(v,'forgeHall'):0;
- out[k]=Math.floor(base[k]*(1+.05*buildLevel(v,bonus[k])+gearBonus+tribeBonus)*st.speed);
+ out[k]=Math.floor(base[k]*(1+.05*buildLevel(v,bonus[k])+gearBonus+tribeBonus)*st.speed*(window.GSF_WORLD?.modifier(st,k)||1));
 });
  const oases=st.world.tiles.filter(t=>t.kind==='oasis'&&t.ownerVillageId===v.id);
  for(const t of oases){const key=oasisResource(t);out[key]+=Math.floor(base[key]*.25*st.speed);}
@@ -868,6 +869,7 @@ function resolveDue(st,at){
  if(st.hero.adventure&&st.hero.adventure.endsAt<=at){resolveAdventure(st);resolved=true;}
  if(processTradeRoutes(st,at))resolved=true;
  if(window.GSF_AI?.resolveDue(st,at))resolved=true;
+ if(window.GSF_WORLD?.resolveDue(st,at))resolved=true;
  return resolved;
 }
 function advance(st,time=now()){
@@ -886,6 +888,7 @@ function advance(st,time=now()){
   st.movements.forEach(m=>{if(m.endsAt>cursor)next.push(m.endsAt);});
   if(st.hero.adventure?.endsAt>cursor)next.push(st.hero.adventure.endsAt);
   if(window.GSF_AI)next.push(...window.GSF_AI.nextEvents(st,cursor));
+  if(window.GSF_WORLD)next.push(...window.GSF_WORLD.nextEvents(st,cursor));
   const end=Math.min(time,...next),hours=Math.max(0,end-cursor)/3600000;
   st.villages.forEach(v=>produceSegment(st,v,hours,end));
   cursor=end;
@@ -912,6 +915,7 @@ function validateState(st){
  if(st.capitalVillageId!==undefined&&(!st.villages.some(v=>v.id===st.capitalVillageId)))return false;
  if(st.preferences!==undefined&&(!plain(st.preferences)||typeof st.preferences.enemyAttacks!=='boolean'||(st.preferences.extraBuildSlots!==undefined&&(!Number.isSafeInteger(st.preferences.extraBuildSlots)||st.preferences.extraBuildSlots<0||st.preferences.extraBuildSlots>MAX_EXTRA_BUILD_SLOTS))||(st.preferences.viewMode!==undefined&&!['original','compact'].includes(st.preferences.viewMode))))return false;
  if(window.GSF_EXPANSION&&!window.GSF_EXPANSION.validate(st.expansion))return false;
+ if(window.GSF_WORLD&&!window.GSF_WORLD.validate(st.worldEvents,st))return false;
  if(st.hero.productionFocus!==undefined&&!['wood','clay','iron','crop','all','custom'].includes(st.hero.productionFocus))return false;
  if(st.hero.productionTargets!==undefined&&(!validArray(st.hero.productionTargets,4)||!st.hero.productionTargets.length||new Set(st.hero.productionTargets).size!==st.hero.productionTargets.length||!st.hero.productionTargets.every(k=>D.RES.includes(k))))return false;
  if(st.hero.inventory!==undefined&&(!validArray(st.hero.inventory,20)||new Set(st.hero.inventory).size!==st.hero.inventory.length||!st.hero.inventory.every(id=>!!HERO_ARTIFACTS[id])))return false;
@@ -1055,6 +1059,7 @@ function load(){
    window.GSF_RECOVERED_BACKUP=key===BACKUP_KEY;
    window.GSF_CAMPAIGN?.init(st);
    window.GSF_EXPANSION?.init(st);
+ window.GSF_WORLD?.init(st);
    st.capitalVillageId ||= st.villages[0].id;
    initHeroGear(st);
    st.villages.forEach(v=>initResearch(st,v));
@@ -1073,6 +1078,7 @@ function importSave(text){
  st.lastTick=now();
  window.GSF_CAMPAIGN?.init(st);
  window.GSF_EXPANSION?.init(st);
+ window.GSF_WORLD?.init(st);
  st.capitalVillageId ||= st.villages[0].id;
  initHeroGear(st);
  st.villages.forEach(v=>initResearch(st,v));

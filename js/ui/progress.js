@@ -64,3 +64,36 @@ function dailyView(){
  '<div class="panel daily-event"><div class="panel-title"><h3>'+ev.icon+' Evento de hoje: '+esc(ev.name)+'</h3><span class="section-note">Uma participação por ciclo</span></div><p>'+esc(ev.desc)+'</p><button type="button" class="btn" data-daily-event '+(d.eventClaimed?'disabled':'')+'>'+(d.eventClaimed?'Benefício recebido':'Participar do evento')+'</button></div>'+
  '<div class="panel"><h3>⚖️ Equilíbrio econômico</h3><p>Na velocidade 1×, um campo nível 10 produz 200 recursos/h antes dos bônus. Velocidades antigas permanecem nas campanhas já criadas.</p><p>População determina o consumo de cereal, enquanto pontos de desenvolvimento valorizam suas construções.</p></div>';
 }
+
+
+/* Painel da temporada offline: eventos, artefatos e final de jogo. */
+function worldEventsView(){
+ const W=window.GSF_WORLD,w=W.init(state),v=E.active(state),turn=state.ai?.turn||0,season=W.SEASONS.find(e=>e.id===w.active?.id),active=season&&w.active.until>=turn;
+ const owner=state.villages.find(x=>x.id===w.wonderVillageId),price=w.level<100?W.wonderCost(w.level+1):null;
+ const costs=price?D.RES.map((key,i)=>iconRes(key)+' '+fmt(price[i])).join(' · '):'Concluída';
+ let html=head('Eventos & Maravilha do Mundo','Uma temporada offline inspirada no ritmo estratégico de Travian: artefatos, Natares, planos e um objetivo final.',villageSelect());
+ html+='<div class="panel"><div class="panel-title"><h3>📯 Crônica da temporada</h3><span class="section-note">Turno '+turn+' · '+esc(W.phase(state))+'</span></div>';
+ html+='<p>As etapas são aceleradas para o modo solo. Uma virada da IA ocorre aproximadamente a cada 15 minutos na velocidade 1×, divididos pela velocidade do mundo. O tempo avança também durante sua ausência.</p>';
+ html+='<div class="world-milestones">'+W.MILESTONES.map(m=>'<span class="pill">'+(turn>=m.turn?'✅':'🔒')+' Turno '+m.turn+' · '+esc(m.title)+'</span>').join(' ')+'</div>';
+ html+='<p><strong>'+ (active?season.icon+' '+esc(season.title):'☀️ Sem evento sazonal ativo')+'</strong> — '+(active?esc(season.description)+' Restam '+Math.max(0,w.active.until-turn)+' turnos.':'A próxima mudança de estação pode afetar a produção de recursos.')+'</p>';
+ html+='</div>';
+ html+='<div class="panel"><div class="panel-title"><h3>🏺 Tesouraria e relíquias</h3><span class="section-note">Tesouraria da aldeia: nível '+E.buildLevel(v,'treasury')+'</span></div>';
+ html+='<p>Após o turno 24, envie o herói com uma tropa capaz de enfrentar os guardiões para obter o <strong>Chifre da Terra</strong> (+8% de cereal no império). Exige Tesouraria nível 10 e pelo menos 750 de ataque. A missão causa baixas.</p>';
+ html+='<p>Relíquia do império: <strong>'+(w.relic?'✅ Chifre da Terra':'Ainda não conquistada')+'</strong> · Poder ofensivo disponível na aldeia: '+fmt(W.power(state,v))+'</p>';
+ html+='<button class="btn small" data-capture-relic '+(w.relic||turn<24||w.winner?'disabled':'')+'>🏺 Recuperar relíquia</button></div>';
+ html+='<div class="panel"><div class="panel-title"><h3>🏛️ A Grande Obra</h3><span class="section-note">Sua Maravilha: '+w.level+'/100 · Natars: '+w.natarLevel+'/100</span></div>';
+ html+='<div class="world-progress"><div><strong>Seu império</strong><div class="progress-track"><div class="progress-bar" style="width:'+w.level+'%"></div></div></div><div><strong>Natares</strong><div class="progress-track"><div class="progress-bar" style="width:'+w.natarLevel+'%"></div></div></div></div>';
+ html+='<p><strong>Controle:</strong> '+(owner?esc(owner.name):'Fortaleza Natar não conquistada')+'. Para assumir o sítio a partir do turno 40, é preciso um administrador, Residência/Palácio nível 10 e 2.000 de poder ofensivo. A construção usa os recursos da aldeia que assumiu o sítio.</p>';
+ html+='<p><strong>Plano principal:</strong> '+(w.planVillageId?esc(state.villages.find(x=>x.id===w.planVillageId)?.name||'Aldeia desconhecida'):'não conquistado')+'. <strong>Plano aliado:</strong> '+(W.hasCoalition(state)?'✅ confirmado':w.coalitionPlanId?'⚠️ aliança rompida ou derrotada':'não obtido')+'. O primeiro libera níveis 1 a 49; para 50 a 100 é preciso um plano guardado por um aliado.</p>';
+ html+='<div class="btn-row"><button class="btn secondary small" data-conquer-wonder '+(turn<40||w.wonderVillageId||w.winner?'disabled':'')+'>⚔️ Conquistar reduto</button><button class="btn secondary small" data-capture-plan '+(turn<56||w.planVillageId||w.winner?'disabled':'')+'>📜 Capturar plano</button><button class="btn secondary small" data-ally-plan '+(turn<56||!w.planVillageId||W.hasCoalition(state)||w.winner?'disabled':'')+'>🤝 Garantir plano aliado</button></div>';
+ html+='<div class="panel-title"><h3>Próximo nível: '+Math.min(100,w.level+1)+'</h3><span class="section-note">Custo: '+costs+'</span></div>';
+ html+=w.queue?'<p>⏳ Construção do nível '+w.queue.level+' em andamento. <span data-countdown="'+w.queue.endsAt+'">'+duration((w.queue.endsAt-Date.now())/1000)+'</span></p>':'<p>As melhorias têm fila própria, são pagas antecipadamente e exigem armazéns e celeiros capazes de sustentar seus custos crescentes.</p>';
+ const can=W.canUpgrade(state,v);
+ html+='<button class="btn" data-upgrade-wonder '+(!can.ok?'disabled':'')+'>🏛️ Construir próximo nível</button>';
+ if(!can.ok&&!w.winner)html+='<p class="section-note">'+esc(can.error)+'</p>';
+ if(w.winner)html+='<p class="warning">🏆 Resultado desta temporada: '+(w.winner==='player'?'Seu império venceu!':'Os Natares venceram.')+'</p>';
+ html+='<p class="section-note">Adaptação offline: a Grande Obra fica vinculada a uma aldeia do jogador, sem criar uma sexta aldeia; os ataques aos redutos são expedições simplificadas e o segundo plano pertence a uma facção aliada da IA.</p></div>';
+ html+='<div class="panel"><div class="panel-title"><h3>🗓️ Histórico dos eventos sazonais</h3><span class="section-note">A cada 6 turnos</span></div>';
+ html+=w.history.length?w.history.map(h=>'<div class="event"><span class="time">Turno '+h.turn+'</span><span>'+esc(h.icon+' '+h.title)+' — '+esc(h.description)+'</span></div>').join(''):'<p class="empty-state">Os eventos começarão no turno 6.</p>';
+ return html+'</div>';
+}
