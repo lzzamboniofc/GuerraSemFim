@@ -95,7 +95,6 @@ document.addEventListener('click',e=>{if(e.target.matches?.('[data-backdrop]')&&
  if(d.confirmReset!==undefined){E.clear();state=null;ui.modal=null;ui.page='village';render();return;}
 });
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(ui.modal){ui.modal=null;render();return;}if(ui.menuOpen){ui.menuOpen=false;render();document.querySelector('[data-toggle-menu]')?.focus?.({preventScroll:true});}});
-window.addEventListener('resize',()=>{if(window.innerWidth>=960&&ui.menuOpen){ui.menuOpen=false;render();}});
 window.addEventListener('beforeunload',()=>{if(state)E.save(state);});
 setInterval(()=>{if(!state)return;const n=Date.now(),before=state.events[0]?.id,queues=state.movements.length;E.advance(state,n);const v=E.active(state),prod=E.production(state,v);for(const k of D.RES){const val=$(`[data-resource="${k}"]`),p=$(`[data-prod="${k}"]`);if(val)val.textContent=fmt(v.resources[k]);if(p)p.textContent=(prod[k]>=0?'+':'')+fmt(prod[k]);const fill=$(`[data-fill="${k}"]`);if(fill)fill.style.width=Math.min(100,Math.max(0,100*v.resources[k]/E.capacity(v,k)))+'%';const m=$(`[data-modal-current="${k}"]`),mp=$(`[data-modal-prod="${k}"]`);if(m)m.textContent=fmt(v.resources[k]);if(mp)mp.textContent=(prod[k]>=0?'+':'')+fmt(prod[k])+'/h';}
  document.querySelectorAll('[data-countdown]').forEach(el=>{el.textContent=duration((Number(el.dataset.countdown)-n)/1000);});document.querySelectorAll('[data-progress]').forEach(el=>{el.style.width=percent(Number(el.dataset.start),Number(el.dataset.progress))+'%';});
